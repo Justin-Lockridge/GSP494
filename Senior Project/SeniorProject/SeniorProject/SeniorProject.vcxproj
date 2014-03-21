@@ -78,11 +78,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BoardSpace.cpp" />
     <ClCompile Include="Character.cpp" />
     <ClCompile Include="GameEngine.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BoardSpace.h" />
     <ClInclude Include="Character.h" />
     <ClInclude Include="DefinesAndEnums.h" />
     <ClInclude Include="GameEngine.h" />

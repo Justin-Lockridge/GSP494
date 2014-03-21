@@ -20,6 +20,7 @@
 //  INFO:  Game Includes
 #include "DefinesAndEnums.h"
 #include "Character.h"
+#include "BoardSpace.h"
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //  Direct3D headers && includes
 #include <d3d9.h>
@@ -72,8 +73,10 @@ class GameEngine{
 	// Sprite Variables
 	//////////////////////////////////////////////////////////////////////////
 	ID3DXSprite*		m_pD3DSprite;	// Sprite Object
-	IDirect3DTexture9*	m_battleBackgroundOne, *m_gamePiece, *m_archerCharacter, *m_blackMageCharacter, *m_playerUIBackground;		// Texture Object for a sprite
-	D3DXIMAGE_INFO		m_battleBackgroundOneInfo, m_gamePieceInfo, m_archerCharacterInfo, m_blackMageCharacterInfo, m_playerUIBackgroundInfo;	// File details of a texture
+	IDirect3DTexture9*	m_battleBackgroundOne, *m_gamePiece, *m_archerCharacter, *m_blackMageCharacter, *m_playerUIBackground,
+						*m_goldMine;		// Texture Object for a sprite
+	D3DXIMAGE_INFO		m_battleBackgroundOneInfo, m_gamePieceInfo, m_archerCharacterInfo, m_blackMageCharacterInfo, m_playerUIBackgroundInfo,
+						m_goldMineInfo;	// File details of a texture
 
 	//////////////////////////////////////////////////////////////////////////
 	// DirectInput
@@ -101,6 +104,7 @@ class GameEngine{
 	//  INFO:  Game Data
 	int m_gameState;
 	Character m_player[2];
+	BoardSpace m_gameBoard[MAXBOARDHEIGHT][MAXBOARDWIDTH];
 
 	public:
 	//////////////////////////////////////////////////////////////////////////
@@ -120,7 +124,7 @@ class GameEngine{
 	//				variables to control the application.  
 	//////////////////////////////////////////////////////////////////////////
 	void Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed);
-
+	void InitGameBoard();
 	//////////////////////////////////////////////////////////////////////////
 	// Name:		Update
 	// Parameters:	float elapsedTime - Time that has elapsed since the last

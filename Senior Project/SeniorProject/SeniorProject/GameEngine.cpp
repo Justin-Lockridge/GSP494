@@ -126,6 +126,9 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
 		D3DCOLOR_XRGB(255, 0, 255), &m_playerUIBackgroundInfo, 0, &m_playerUIBackground);
 
+	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"GoldMine.png", 0, 0, 0, 0, 
+		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
+		D3DCOLOR_XRGB(255, 0, 255), &m_goldMineInfo, 0, &m_goldMine);
 	// Seed rand() with time
 	srand(timeGetTime());
 
@@ -183,10 +186,28 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	m_player[0].setCharacterType(ARCHER);
 	m_player[1].setCharacterType(BLACKMAGE);
 
+	///////////////////////////////////////////////////
+	//  INFO:  Initializes gameboard and gold mines
+	InitGameBoard();
 	////////////////////////////////////////////////////////
 	//  INFO:  Changed the gamestate manually for testing
 	m_gameState = BATTLE;
 }
+
+void GameEngine::InitGameBoard(){
+	for(int i = 0; i < MAXBOARDHEIGHT; ++i){
+		for(int j = 0; j < MAXBOARDWIDTH; ++j){
+			m_gameBoard[i][j].setPosX(75 + j * 43);
+			m_gameBoard[i][j].setPosY(190 + i * 50);
+			m_gameBoard[i][j].setSpaceNumber( i + j );
+			//////////////////////////////////////////////
+			//  INFO:  Sets the end game spaces to be occupied by gold mines
+			if(j == 0 || j == MAXBOARDWIDTH-1){
+				m_gameBoard[i][j].setOccupiedBy(GOLDMINES);
+			}
+		}
+	}
+};
 
 void GameEngine::Update(float dt)
 {
@@ -365,6 +386,7 @@ void GameEngine::Render()
 void GameEngine::Shutdown()
 {
 	// Release COM objects in the opposite order they were created in
+	SAFE_RELEASE(m_goldMine);
 	SAFE_RELEASE(m_playerUIBackground);
 	SAFE_RELEASE(m_blackMageCharacter);
 	SAFE_RELEASE(m_archerCharacter);
@@ -380,6 +402,7 @@ void GameEngine::Shutdown()
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//  Releases Audio
 	fmodSystem->release();
+
 }
 
 void GameEngine::drawBackground(){
@@ -424,7 +447,7 @@ void GameEngine::drawGameBoard(){
 
 			D3DXMatrixScaling(&scaleMat, 0.7f, 0.80f, 0.0f);			// Scaling
 			//D3DXMatrixRotationZ(&rotMat, D3DXToRadian(90.0f));		// Rotation on Z axis, value in radians, converting from degrees
-			D3DXMatrixTranslation(&transMat, 75 + (j * 43), 190 + i * 50, 0.0f);			// Translation
+			D3DXMatrixTranslation(&transMat, m_gameBoard[i][j].getPosX(), m_gameBoard[i][j].getPosY(), 0.0f);			// Translation
 			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
 			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
 
@@ -434,6 +457,59 @@ void GameEngine::drawGameBoard(){
 
 			m_pD3DSprite->Draw(m_gamePiece, 0, &D3DXVECTOR3(m_gamePieceInfo.Width * 0.5f, m_gamePieceInfo.Height * 0.5f, 0.0f),
 				0, D3DCOLOR_ARGB(255, 255, 255, 255));
+
+
+			//////////////////////////////////////////////////////////////////////////////////
+			//  INFO:  If the gamespace is occupied by a unit, draw that unit.  
+			switch(m_gameBoard[i][j].getOccupiedBy()){
+				D3DXMatrixIdentity(&scaleMat);
+				D3DXMatrixIdentity(&rotMat);
+				D3DXMatrixIdentity(&worldMat);
+			case NOUNIT:
+				break;
+			case GOLDMINES:
+				D3DXMatrixScaling(&scaleMat, 0.33f, 0.35f, 0.0f);			// Scaling
+				D3DXMatrixTranslation(&transMat, m_gameBoard[i][j].getPosX()+4, m_gameBoard[i][j].getPosY(), 0.0f);			// Translation
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+				// Set Transform
+				m_pD3DSprite->SetTransform(&worldMat);
+				m_pD3DSprite->Draw(m_goldMine, 0, &D3DXVECTOR3(m_goldMineInfo.Width * 0.5f, m_goldMineInfo.Height * 0.5f, 0.0f),
+					0, D3DCOLOR_ARGB(255, 255, 255, 255));
+				break;
+			case WALL:
+				break;
+			case WARRIORUNIT:
+				break;
+			case MARKSMAN:
+				break;
+			case CAVALRY:
+				break;
+			case WOLF:
+				break;
+			case ARCHERUNIT:
+				break;
+			case THIEF:
+				break;
+			case GOLEM:
+				break;
+			case BLACKMAGEUNIT:
+				break;
+			case WARLOCK:
+				break;
+			}
+			//D3DXMatrixScaling(&scaleMat, 0.7f, 0.80f, 0.0f);			// Scaling
+			////D3DXMatrixRotationZ(&rotMat, D3DXToRadian(90.0f));		// Rotation on Z axis, value in radians, converting from degrees
+			//D3DXMatrixTranslation(&transMat, 75 + (j * 43), 190 + i * 50, 0.0f);			// Translation
+			//D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+			//D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+
+			//// Set Transform
+			//m_pD3DSprite->SetTransform(&worldMat);
+
+
+			//m_pD3DSprite->Draw(m_gamePiece, 0, &D3DXVECTOR3(m_gamePieceInfo.Width * 0.5f, m_gamePieceInfo.Height * 0.5f, 0.0f),
+			//	0, D3DCOLOR_ARGB(255, 255, 255, 255));
 		}
 	}
 };
