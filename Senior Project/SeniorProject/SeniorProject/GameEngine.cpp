@@ -133,6 +133,10 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"ArcherAnimations.png", 0, 0, 0, 0, 
 		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
 		D3DCOLOR_XRGB(255, 0, 255), &m_archerUnitInfo, 0, &m_archerUnit);
+
+	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"BlackMageSheet.png", 0, 0, 0, 0, 
+		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
+		D3DCOLOR_XRGB(255, 0, 255), &m_blackMageUnitInfo, 0, &m_blackMageUnit);
 	// Seed rand() with time
 	srand(timeGetTime());
 
@@ -208,11 +212,11 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	m_gameBoard[3][9].setAnimationRect(15, 10, 70, 70);
 	m_gameBoard[3][9].setAnimationTimer(0.10);
 
-	m_gameBoard[0][1].setOccupiedBy(ARCHERUNIT);
-	m_gameBoard[0][1].setAnimationRect(15, 10, 70, 70);
+	m_gameBoard[0][1].setOccupiedBy(BLACKMAGEUNIT);
+	m_gameBoard[0][1].setAnimationRect(75, 5, 70, 145);
 
-	m_gameBoard[4][14].setOccupiedBy(ARCHERUNIT);
-	m_gameBoard[4][14].setAnimationRect(15, 10, 70, 70);
+	m_gameBoard[2][6].setOccupiedBy(BLACKMAGEUNIT);
+	m_gameBoard[2][6].setAnimationRect(75, 5, 70, 145);
 }
 
 void GameEngine::InitGameBoard(){
@@ -347,7 +351,7 @@ void GameEngine::Update(float dt)
 		if(buffer[DIK_RIGHT] & 0x80){
 			if(!keyIsDown[DIK_RIGHT]){
 				keyIsDown[DIK_RIGHT] = true;
-			m_gameBoard[0][4].setAnimationRect(m_gameBoard[0][4].getAnimationRect().top, m_gameBoard[0][4].getAnimationRect().left + 62, m_gameBoard[0][4].getAnimationRect().right + 62, m_gameBoard[0][4].getAnimationRect().bottom);
+			m_gameBoard[4][14].setAnimationRect(m_gameBoard[4][14].getAnimationRect().top, m_gameBoard[4][14].getAnimationRect().left + 70, m_gameBoard[4][14].getAnimationRect().right + 70, m_gameBoard[4][14].getAnimationRect().bottom);
 			}
 		}
 		else
@@ -355,7 +359,7 @@ void GameEngine::Update(float dt)
 		if(buffer[DIK_LEFT] & 0x80){
 			if(!keyIsDown[DIK_LEFT]){
 				keyIsDown[DIK_LEFT] = true;
-			m_gameBoard[0][4].setAnimationRect(m_gameBoard[0][4].getAnimationRect().top, m_gameBoard[0][4].getAnimationRect().left - 62, m_gameBoard[0][4].getAnimationRect().right - 62, m_gameBoard[0][4].getAnimationRect().bottom);
+			m_gameBoard[4][14].setAnimationRect(m_gameBoard[4][14].getAnimationRect().top, m_gameBoard[4][14].getAnimationRect().left - 70, m_gameBoard[4][14].getAnimationRect().right - 70, m_gameBoard[4][14].getAnimationRect().bottom);
 			}
 		}
 		else
@@ -403,6 +407,25 @@ void GameEngine::updateAnimations(float dt){
 			case GOLEM:
 				break;
 			case BLACKMAGEUNIT:
+				m_gameBoard[i][j].adjustAnimationTimer(dt);
+				if(m_gameBoard[i][j].getAnimationTimer() > 0.15f){
+					m_gameBoard[i][j].adjustAnimationTimer(-0.15f);
+					switch(m_gameBoard[i][j].getAnimationRect().left){
+					case 5:
+						m_gameBoard[i][j].setAnimationRect(m_gameBoard[i][j].getAnimationRect().top, m_gameBoard[i][j].getAnimationRect().left + 70, m_gameBoard[i][j].getAnimationRect().right + 70, m_gameBoard[i][j].getAnimationRect().bottom);
+						break;
+					case 75:
+						m_gameBoard[i][j].setAnimationRect(m_gameBoard[i][j].getAnimationRect().top, m_gameBoard[i][j].getAnimationRect().left + 65, m_gameBoard[i][j].getAnimationRect().right + 65, m_gameBoard[i][j].getAnimationRect().bottom);
+						break;
+					case 140:
+						m_gameBoard[i][j].setAnimationRect(m_gameBoard[i][j].getAnimationRect().top, m_gameBoard[i][j].getAnimationRect().left + 65, m_gameBoard[i][j].getAnimationRect().right + 65, m_gameBoard[i][j].getAnimationRect().bottom);
+						break;
+					case 205:
+						m_gameBoard[i][j].setAnimationRect(75, 5, 70, 145);
+						break;
+					}
+					
+				}
 				break;
 			case WARLOCK:
 				break;
@@ -489,6 +512,7 @@ void GameEngine::Render()
 void GameEngine::Shutdown()
 {
 	// Release COM objects in the opposite order they were created in
+	SAFE_RELEASE(m_blackMageUnit);
 	SAFE_RELEASE(m_archerUnit);
 	SAFE_RELEASE(m_goldMine);
 	SAFE_RELEASE(m_playerUIBackground);
@@ -610,6 +634,14 @@ void GameEngine::drawGameBoard(){
 			case GOLEM:
 				break;
 			case BLACKMAGEUNIT:
+				D3DXMatrixScaling(&scaleMat, 0.75f, 0.74f, 0.0f);			// Scaling
+				D3DXMatrixTranslation(&transMat, m_gameBoard[i][j].getPosX()+35, m_gameBoard[i][j].getPosY()+35, 0.0f);			// Translation
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+				// Set Transform
+				m_pD3DSprite->SetTransform(&worldMat);
+				m_pD3DSprite->Draw(m_blackMageUnit, &m_gameBoard[i][j].getAnimationRect(), &D3DXVECTOR3(m_gameBoard[i][j].getAnimationRect().right - m_gameBoard[i][j].getAnimationRect().left, m_gameBoard[i][j].getAnimationRect().bottom - m_gameBoard[i][j].getAnimationRect().top, 0.0f),
+					0, D3DCOLOR_ARGB(255, 255, 255, 255));
 				break;
 			case WARLOCK:
 				break;

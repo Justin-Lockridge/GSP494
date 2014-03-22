@@ -74,9 +74,9 @@ class GameEngine{
 	//////////////////////////////////////////////////////////////////////////
 	ID3DXSprite*		m_pD3DSprite;	// Sprite Object
 	IDirect3DTexture9*	m_battleBackgroundOne, *m_gamePiece, *m_archerCharacter, *m_blackMageCharacter, *m_playerUIBackground,
-						*m_goldMine, *m_archerUnit;		// Texture Object for a sprite
+						*m_goldMine, *m_archerUnit, *m_blackMageUnit;		// Texture Object for a sprite
 	D3DXIMAGE_INFO		m_battleBackgroundOneInfo, m_gamePieceInfo, m_archerCharacterInfo, m_blackMageCharacterInfo, m_playerUIBackgroundInfo,
-						m_goldMineInfo, m_archerUnitInfo;	// File details of a texture
+						m_goldMineInfo, m_archerUnitInfo, m_blackMageUnitInfo;	// File details of a texture
 
 	//////////////////////////////////////////////////////////////////////////
 	// DirectInput
