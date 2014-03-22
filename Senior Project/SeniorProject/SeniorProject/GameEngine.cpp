@@ -590,7 +590,7 @@ void GameEngine::drawGameBoard(){
 				D3DXMatrixIdentity(&scaleMat);
 				D3DXMatrixIdentity(&rotMat);
 				D3DXMatrixIdentity(&worldMat);
-				int testX, testY;
+				//int testX, testY;
 			//////////////////////////////////////////////////////////////////////////////////
 			//  INFO:  If the gamespace is occupied by a unit, draw that unit.  
 			switch(m_gameBoard[i][j].getOccupiedBy()){

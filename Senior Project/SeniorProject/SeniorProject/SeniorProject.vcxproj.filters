@@ -27,6 +27,9 @@
     <ClCompile Include="BoardSpace.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Buttons.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameEngine.h">
@@ -39,6 +42,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BoardSpace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Buttons.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
