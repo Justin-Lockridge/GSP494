@@ -129,6 +129,10 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"GoldMine.png", 0, 0, 0, 0, 
 		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
 		D3DCOLOR_XRGB(255, 0, 255), &m_goldMineInfo, 0, &m_goldMine);
+
+	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"ArcherAnimations.png", 0, 0, 0, 0, 
+		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
+		D3DCOLOR_XRGB(255, 0, 255), &m_archerUnitInfo, 0, &m_archerUnit);
 	// Seed rand() with time
 	srand(timeGetTime());
 
@@ -192,6 +196,23 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	////////////////////////////////////////////////////////
 	//  INFO:  Changed the gamestate manually for testing
 	m_gameState = BATTLE;
+	m_gameBoard[1][4].setOccupiedBy(ARCHERUNIT);
+	m_gameBoard[1][4].setAnimationRect(15, 10, 70, 70);
+	m_gameBoard[1][4].setAnimationTimer(1.34);
+
+	m_gameBoard[1][14].setOccupiedBy(ARCHERUNIT);
+	m_gameBoard[1][14].setAnimationRect(15, 10, 70, 70);
+	m_gameBoard[1][14].setAnimationTimer(0.25);
+
+	m_gameBoard[3][9].setOccupiedBy(ARCHERUNIT);
+	m_gameBoard[3][9].setAnimationRect(15, 10, 70, 70);
+	m_gameBoard[3][9].setAnimationTimer(0.10);
+
+	m_gameBoard[0][1].setOccupiedBy(ARCHERUNIT);
+	m_gameBoard[0][1].setAnimationRect(15, 10, 70, 70);
+
+	m_gameBoard[4][14].setOccupiedBy(ARCHERUNIT);
+	m_gameBoard[4][14].setAnimationRect(15, 10, 70, 70);
 }
 
 void GameEngine::InitGameBoard(){
@@ -199,11 +220,17 @@ void GameEngine::InitGameBoard(){
 		for(int j = 0; j < MAXBOARDWIDTH; ++j){
 			m_gameBoard[i][j].setPosX(75 + j * 43);
 			m_gameBoard[i][j].setPosY(190 + i * 50);
-			m_gameBoard[i][j].setSpaceNumber( i + j );
+			m_gameBoard[i][j].setSpaceNumber( i * MAXBOARDWIDTH + j );
 			//////////////////////////////////////////////
 			//  INFO:  Sets the end game spaces to be occupied by gold mines
 			if(j == 0 || j == MAXBOARDWIDTH-1){
 				m_gameBoard[i][j].setOccupiedBy(GOLDMINES);
+			}
+			int testerX, testerY;
+			if(i == 0 && j == 14){
+				testerX = m_gameBoard[i][j].getPosX();
+				testerY = m_gameBoard[i][j].getPosY();
+				testerX += 0;
 			}
 		}
 	}
@@ -306,7 +333,83 @@ void GameEngine::Update(float dt)
 
 
 	fmodSystem->update();
+
+	switch(m_gameState){
+	case MENUMAIN:
+		break;
+	case MENUCHARACTERSELECT:
+		break;
+	case MENUCREDITS:
+		break;
+	case OVERWORLD:
+		break;
+	case BATTLE:
+		if(buffer[DIK_RIGHT] & 0x80){
+			if(!keyIsDown[DIK_RIGHT]){
+				keyIsDown[DIK_RIGHT] = true;
+			m_gameBoard[0][4].setAnimationRect(m_gameBoard[0][4].getAnimationRect().top, m_gameBoard[0][4].getAnimationRect().left + 62, m_gameBoard[0][4].getAnimationRect().right + 62, m_gameBoard[0][4].getAnimationRect().bottom);
+			}
+		}
+		else
+			keyIsDown[DIK_RIGHT] = false;
+		if(buffer[DIK_LEFT] & 0x80){
+			if(!keyIsDown[DIK_LEFT]){
+				keyIsDown[DIK_LEFT] = true;
+			m_gameBoard[0][4].setAnimationRect(m_gameBoard[0][4].getAnimationRect().top, m_gameBoard[0][4].getAnimationRect().left - 62, m_gameBoard[0][4].getAnimationRect().right - 62, m_gameBoard[0][4].getAnimationRect().bottom);
+			}
+		}
+		else
+			keyIsDown[DIK_LEFT] = false;
+		updateAnimations(dt);
+		break;
+	}
 }
+
+void GameEngine::updateAnimations(float dt){
+
+	for(int i = 0; i < MAXBOARDHEIGHT; ++i){
+		for(int j = 0; j < MAXBOARDWIDTH; ++j){
+
+
+			//////////////////////////////////////////////////////////////////////////////////
+			//  INFO:  If the gamespace is occupied by a unit, draw that unit.  
+			//  DETAIL:  Each gamespace will have
+			switch(m_gameBoard[i][j].getOccupiedBy()){
+			case NOUNIT:
+				break;
+			case GOLDMINES:
+				break;
+			case WALL:
+				break;
+			case WARRIORUNIT:
+				break;
+			case MARKSMAN:
+				break;
+			case CAVALRY:
+				break;
+			case WOLF:
+				break;
+			case ARCHERUNIT:
+				m_gameBoard[i][j].adjustAnimationTimer(dt);
+				if(m_gameBoard[i][j].getAnimationTimer() > 0.15f){
+					m_gameBoard[i][j].setAnimationRect(m_gameBoard[i][j].getAnimationRect().top, m_gameBoard[i][j].getAnimationRect().left + 64, m_gameBoard[i][j].getAnimationRect().right + 64, m_gameBoard[i][j].getAnimationRect().bottom);
+					m_gameBoard[i][j].adjustAnimationTimer(-0.15f);
+					if(m_gameBoard[i][j].getAnimationRect().right > 250)
+						m_gameBoard[i][j].setAnimationRect(15, 10, 70, 70);
+				}
+				break;
+			case THIEF:
+				break;
+			case GOLEM:
+				break;
+			case BLACKMAGEUNIT:
+				break;
+			case WARLOCK:
+				break;
+			}
+		}
+	}
+};
 
 void GameEngine::Render()
 {
@@ -386,6 +489,7 @@ void GameEngine::Render()
 void GameEngine::Shutdown()
 {
 	// Release COM objects in the opposite order they were created in
+	SAFE_RELEASE(m_archerUnit);
 	SAFE_RELEASE(m_goldMine);
 	SAFE_RELEASE(m_playerUIBackground);
 	SAFE_RELEASE(m_blackMageCharacter);
@@ -458,13 +562,15 @@ void GameEngine::drawGameBoard(){
 			m_pD3DSprite->Draw(m_gamePiece, 0, &D3DXVECTOR3(m_gamePieceInfo.Width * 0.5f, m_gamePieceInfo.Height * 0.5f, 0.0f),
 				0, D3DCOLOR_ARGB(255, 255, 255, 255));
 
-
-			//////////////////////////////////////////////////////////////////////////////////
-			//  INFO:  If the gamespace is occupied by a unit, draw that unit.  
-			switch(m_gameBoard[i][j].getOccupiedBy()){
+				D3DXMatrixIdentity(&transMat);
 				D3DXMatrixIdentity(&scaleMat);
 				D3DXMatrixIdentity(&rotMat);
 				D3DXMatrixIdentity(&worldMat);
+				int testX, testY;
+			//////////////////////////////////////////////////////////////////////////////////
+			//  INFO:  If the gamespace is occupied by a unit, draw that unit.  
+			switch(m_gameBoard[i][j].getOccupiedBy()){
+
 			case NOUNIT:
 				break;
 			case GOLDMINES:
@@ -488,6 +594,16 @@ void GameEngine::drawGameBoard(){
 			case WOLF:
 				break;
 			case ARCHERUNIT:
+				//////////////////////////////////////////////////////////////////////////////////////////////////////////
+				//  INFO:  Adds an offset using "magic numbers" to draw archer units in the correct space
+				D3DXMatrixScaling(&scaleMat, 0.75f, 0.74f, 0.0f);			// Scaling
+				D3DXMatrixTranslation(&transMat, m_gameBoard[i][j].getPosX()+33, m_gameBoard[i][j].getPosY()+33, 0.0f);			// Translation
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+				// Set Transform
+				m_pD3DSprite->SetTransform(&worldMat);
+				m_pD3DSprite->Draw(m_archerUnit, &m_gameBoard[i][j].getAnimationRect(), &D3DXVECTOR3(m_gameBoard[i][j].getAnimationRect().right - m_gameBoard[i][j].getAnimationRect().left, m_gameBoard[i][j].getAnimationRect().bottom - m_gameBoard[i][j].getAnimationRect().top, 0.0f),
+					0, D3DCOLOR_ARGB(255, 255, 255, 255));
 				break;
 			case THIEF:
 				break;

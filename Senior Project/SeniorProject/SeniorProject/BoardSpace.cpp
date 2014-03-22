@@ -1,11 +1,17 @@
 #include "BoardSpace.h"
 
 BoardSpace::BoardSpace(){
-	posX		=	0;
-	posY		=	0;
-	spaceNumber =	0;
-	occupiedBy	=	0;
-	highlighted	=	false;
+	posX						=	0;
+	posY						=	0;
+	spaceNumber					=	0;
+	occupiedBy					=	0;
+	highlighted					=	false;
+	unitIsAttacking				=	false;
+	animationTimer				=	0;
+	unitAnimationRect.top		=	0;
+	unitAnimationRect.left		=	0;
+	unitAnimationRect.bottom	=	0;
+	unitAnimationRect.right		=	0;
 };
 
 void BoardSpace::setPosX(int pX){
@@ -46,4 +52,34 @@ void BoardSpace::setHighlight(bool b){
 
 bool BoardSpace::isHighlighted(){
 	return highlighted;
+};
+
+void BoardSpace::setUnitAttack(bool b){
+	unitIsAttacking  = b;
+};
+
+bool BoardSpace::isUnitAttacking(){
+	return unitIsAttacking;
+};
+
+void BoardSpace::setAnimationTimer(double time){
+	animationTimer = time;
+};
+
+void BoardSpace::adjustAnimationTimer(double time){
+	animationTimer += time;
+};
+
+float BoardSpace::getAnimationTimer(){
+	return animationTimer;
+};
+void BoardSpace::setAnimationRect(int t, int l, int r, int b){
+	unitAnimationRect.top		=	t;
+	unitAnimationRect.left		=	l;
+	unitAnimationRect.right		=	r;
+	unitAnimationRect.bottom	=	b;
+};
+
+RECT BoardSpace::getAnimationRect(){
+	return unitAnimationRect;
 };
