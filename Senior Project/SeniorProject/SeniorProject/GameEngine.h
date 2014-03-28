@@ -21,6 +21,7 @@
 #include "DefinesAndEnums.h"
 #include "Character.h"
 #include "BoardSpace.h"
+#include "Buttons.h"
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //  Direct3D headers && includes
 #include <d3d9.h>
@@ -44,8 +45,12 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //  For safely releasing objects
 #define SAFE_RELEASE(x) if(x){x->Release(); x = 0;}
+
 #define MAXBOARDWIDTH 16
 #define MAXBOARDHEIGHT 5
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Define for buttons used in battle
+#define MAX_BATTLE_BUTTONS 12
 
 class GameEngine{
 	//////////////////////////////////////////////////////////////////////////
@@ -78,6 +83,12 @@ class GameEngine{
 	D3DXIMAGE_INFO		m_battleBackgroundOneInfo, m_gamePieceInfo, m_archerCharacterInfo, m_blackMageCharacterInfo, m_playerUIBackgroundInfo,
 						m_goldMineInfo, m_archerUnitInfo, m_blackMageUnitInfo;	// File details of a texture
 
+	//Clickable Button Icons
+	std::vector<Buttons> units_sprite_pos;
+
+	IDirect3DTexture9*	m_archerIcon, *m_golemIcon, *m_blackMageIcon, *m_thiefIcon, *m_wolfIcon, *m_blackHoleIcon, *m_wallIcon;
+	D3DXIMAGE_INFO		m_archerIconInfo, m_golemIconInfo, m_blackMageIconInfo, m_thiefIconInfo, m_wolfIconInfo, m_blackHoleIconInfo, m_wallIconInfo;
+
 	//////////////////////////////////////////////////////////////////////////
 	// DirectInput
 	//////////////////////////////////////////////////////////////////////////
@@ -87,7 +98,7 @@ class GameEngine{
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Mouse pos
-	D3DVECTOR cursor;
+	D3DXVECTOR2 cursor;
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//  Audio Includes
@@ -161,5 +172,7 @@ class GameEngine{
 	void drawPlayers();
 	void drawUIText();
 	void calcDeltaTime();
+
+	void drawIcons(int);
 
 };

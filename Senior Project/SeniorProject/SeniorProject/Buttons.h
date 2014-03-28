@@ -39,3 +39,10 @@ public:
 	bool isHighlighted();
 	bool isOn(float, float, int);
 };
+
+struct RectData
+{
+	int t, l, b, r;
+	float x, y;
+	bool highlight;
+};

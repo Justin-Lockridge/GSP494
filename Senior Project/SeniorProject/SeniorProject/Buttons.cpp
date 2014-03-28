@@ -44,3 +44,14 @@ D3DXVECTOR3 Buttons::getPosition()
 	return position;
 }
 
+bool Buttons::isHighlighted()
+{
+	return highlight;
+}
+
+bool Buttons::isOn(float x, float y, int scale)
+{
+	return (x < (position.x + (width / scale)) && x > (position.x -  (width / scale)) &&
+		y < (position.y + (height / scale)) && y > (position.y -  (height / scale)));
+}
+

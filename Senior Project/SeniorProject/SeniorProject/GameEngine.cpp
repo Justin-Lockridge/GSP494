@@ -137,6 +137,45 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"BlackMageSheet.png", 0, 0, 0, 0, 
 		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
 		D3DCOLOR_XRGB(255, 0, 255), &m_blackMageUnitInfo, 0, &m_blackMageUnit);
+
+	/////////////////////////////////////////////////////
+	// Icons: Units, abilities
+	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"ArcherIcon.png", 0, 0, 0, 0, 
+		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
+		D3DCOLOR_XRGB(255, 0, 255), &m_archerIconInfo, 0, &m_archerIcon);
+
+	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"BlackHoleIcon.png", 0, 0, 0, 0, 
+		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
+		D3DCOLOR_XRGB(255, 0, 255), &m_blackHoleIconInfo, 0, &m_blackHoleIcon);
+
+	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"BlackmageIcon.png", 0, 0, 0, 0, 
+		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
+		D3DCOLOR_XRGB(255, 0, 255), &m_blackMageIconInfo, 0, &m_blackMageIcon);
+
+	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"GolemIcon.png", 0, 0, 0, 0, 
+		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
+		D3DCOLOR_XRGB(255, 0, 255), &m_golemIconInfo, 0, &m_golemIcon);
+
+	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"GolemIcon.png", 0, 0, 0, 0, 
+		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
+		D3DCOLOR_XRGB(255, 0, 255), &m_golemIconInfo, 0, &m_golemIcon);
+
+	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"ThiefIcon.png", 0, 0, 0, 0, 
+		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
+		D3DCOLOR_XRGB(255, 0, 255), &m_thiefIconInfo, 0, &m_thiefIcon);
+
+	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"ThiefIcon.png", 0, 0, 0, 0, 
+		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
+		D3DCOLOR_XRGB(255, 0, 255), &m_thiefIconInfo, 0, &m_thiefIcon);
+
+	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"WallIcon.png", 0, 0, 0, 0, 
+		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
+		D3DCOLOR_XRGB(255, 0, 255), &m_wallIconInfo, 0, &m_wallIcon);
+
+	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"WolfIcon.png", 0, 0, 0, 0, 
+		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
+		D3DCOLOR_XRGB(255, 0, 255), &m_wolfIconInfo, 0, &m_wolfIcon);
+
 	// Seed rand() with time
 	srand(timeGetTime());
 
@@ -179,7 +218,7 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	m_deltaTime = 0;
 	cursor.x = 500;
 	cursor.y = 300;
-	cursor.z = 0;
+
 	//	if(!themeMusicChannel)
 	//{
 	//	channel->stop();
@@ -237,6 +276,32 @@ void GameEngine::InitGameBoard(){
 				testerX += 0;
 			}
 		}
+	}
+
+	units_sprite_pos.clear();
+
+	// T, L, B, R, X, Y, Highlighted
+	RectData temp_units_pos[] =
+	{
+		{230, 20, 310, 140, 140, 500, false},
+
+	};
+
+	for(int i = 0; i < MAX_BATTLE_BUTTONS; i++)
+	{
+		Buttons temp;
+		RECT rect;
+
+		rect.top = temp_units_pos[i].t;
+		rect.left = temp_units_pos[i].l;
+		rect.bottom = temp_units_pos[i].b;
+		rect.right = temp_units_pos[i].r;
+
+		temp.setPosition(temp_units_pos[i].x, temp_units_pos[i].y);
+		temp.setHighlight(temp_units_pos[i].highlight);
+		temp.setRect(rect);
+
+		units_sprite_pos.push_back(temp);		
 	}
 };
 
@@ -351,7 +416,7 @@ void GameEngine::Update(float dt)
 		if(buffer[DIK_RIGHT] & 0x80){
 			if(!keyIsDown[DIK_RIGHT]){
 				keyIsDown[DIK_RIGHT] = true;
-			m_gameBoard[4][14].setAnimationRect(m_gameBoard[4][14].getAnimationRect().top, m_gameBoard[4][14].getAnimationRect().left + 70, m_gameBoard[4][14].getAnimationRect().right + 70, m_gameBoard[4][14].getAnimationRect().bottom);
+				m_gameBoard[4][14].setAnimationRect(m_gameBoard[4][14].getAnimationRect().top, m_gameBoard[4][14].getAnimationRect().left + 70, m_gameBoard[4][14].getAnimationRect().right + 70, m_gameBoard[4][14].getAnimationRect().bottom);
 			}
 		}
 		else
@@ -359,12 +424,54 @@ void GameEngine::Update(float dt)
 		if(buffer[DIK_LEFT] & 0x80){
 			if(!keyIsDown[DIK_LEFT]){
 				keyIsDown[DIK_LEFT] = true;
-			m_gameBoard[4][14].setAnimationRect(m_gameBoard[4][14].getAnimationRect().top, m_gameBoard[4][14].getAnimationRect().left - 70, m_gameBoard[4][14].getAnimationRect().right - 70, m_gameBoard[4][14].getAnimationRect().bottom);
+				m_gameBoard[4][14].setAnimationRect(m_gameBoard[4][14].getAnimationRect().top, m_gameBoard[4][14].getAnimationRect().left - 70, m_gameBoard[4][14].getAnimationRect().right - 70, m_gameBoard[4][14].getAnimationRect().bottom);
 			}
 		}
 		else
 			keyIsDown[DIK_LEFT] = false;
 		updateAnimations(dt);
+
+		//////////////////////////////////////////////////
+		//// Check for units icon hover over and pressing
+		for(int i = 0; i < MAX_BATTLE_BUTTONS; i++)
+		{
+			if(units_sprite_pos[i].isOn(cursor.x, cursor.y, 3))
+			{
+				units_sprite_pos[i].setHighlight(true);
+				units_sprite_pos[i].setColor(D3DCOLOR_ARGB(255, 255, 255, 50));
+			}else
+			{
+				units_sprite_pos[i].setHighlight(false);
+				units_sprite_pos[i].setColor(D3DCOLOR_ARGB(255, 255, 255, 255));
+			}
+
+			//Check for cursor over icon option and left mouse button click
+			if(mouseState.rgbButtons[0] & 0x80 != 0)
+			{
+				if(units_sprite_pos[i].isHighlighted())
+				{
+					//Switch states accordingly
+					switch(i)
+					{
+					case 0: // first unit(s)
+						break;
+					case 1: // second unit(s)
+						break;
+					case 2: // third unit(s)
+						break;
+					case 3: // special unit(s)
+						break;
+					case 4: // Ability 1
+						break;
+					case 5: // Ability 2
+						break;
+					default:
+						break;
+					}
+				}
+			}
+		}
+
 		break;
 	}
 }
@@ -424,7 +531,7 @@ void GameEngine::updateAnimations(float dt){
 						m_gameBoard[i][j].setAnimationRect(75, 5, 70, 145);
 						break;
 					}
-					
+
 				}
 				break;
 			case WARLOCK:
@@ -468,6 +575,7 @@ void GameEngine::Render()
 					drawBackground();
 					drawGameBoard();
 					drawPlayers();
+					drawIcons(0);
 					break;
 				}
 				m_pD3DSprite->End();
@@ -488,7 +596,7 @@ void GameEngine::Render()
 				break;
 			}
 
-				m_pD3DDevice->EndScene();
+			m_pD3DDevice->EndScene();
 		}
 		m_pD3DDevice->Present(0, 0, 0, 0);
 	}
@@ -520,6 +628,14 @@ void GameEngine::Shutdown()
 	SAFE_RELEASE(m_archerCharacter);
 	SAFE_RELEASE(m_gamePiece);
 	SAFE_RELEASE(m_battleBackgroundOne);
+	// Icons
+	SAFE_RELEASE(m_wallIcon);
+	SAFE_RELEASE(m_blackHoleIcon);
+	SAFE_RELEASE(m_wolfIcon);
+	SAFE_RELEASE(m_thiefIcon);
+	SAFE_RELEASE(m_blackMageIcon);
+	SAFE_RELEASE(m_golemIcon);
+	SAFE_RELEASE(m_archerIcon);
 
 
 	SAFE_RELEASE(m_pD3DFont);
@@ -545,7 +661,6 @@ void GameEngine::drawBackground(){
 	D3DXMatrixIdentity(&worldMat);
 
 	D3DXMatrixScaling(&scaleMat, 1.0f, 3.3f, 0.0f);			// Scaling
-	//D3DXMatrixRotationZ(&rotMat, D3DXToRadian(90.0f));		// Rotation on Z axis, value in radians, converting from degrees
 	D3DXMatrixTranslation(&transMat, 220, -200, 0.0f);			// Translation
 	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
 	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
@@ -574,7 +689,6 @@ void GameEngine::drawGameBoard(){
 			D3DXMatrixIdentity(&worldMat);
 
 			D3DXMatrixScaling(&scaleMat, 0.7f, 0.80f, 0.0f);			// Scaling
-			//D3DXMatrixRotationZ(&rotMat, D3DXToRadian(90.0f));		// Rotation on Z axis, value in radians, converting from degrees
 			D3DXMatrixTranslation(&transMat, m_gameBoard[i][j].getPosX(), m_gameBoard[i][j].getPosY(), 0.0f);			// Translation
 			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
 			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
@@ -586,11 +700,11 @@ void GameEngine::drawGameBoard(){
 			m_pD3DSprite->Draw(m_gamePiece, 0, &D3DXVECTOR3(m_gamePieceInfo.Width * 0.5f, m_gamePieceInfo.Height * 0.5f, 0.0f),
 				0, D3DCOLOR_ARGB(255, 255, 255, 255));
 
-				D3DXMatrixIdentity(&transMat);
-				D3DXMatrixIdentity(&scaleMat);
-				D3DXMatrixIdentity(&rotMat);
-				D3DXMatrixIdentity(&worldMat);
-				//int testX, testY;
+			D3DXMatrixIdentity(&transMat);
+			D3DXMatrixIdentity(&scaleMat);
+			D3DXMatrixIdentity(&rotMat);
+			D3DXMatrixIdentity(&worldMat);
+			//int testX, testY;
 			//////////////////////////////////////////////////////////////////////////////////
 			//  INFO:  If the gamespace is occupied by a unit, draw that unit.  
 			switch(m_gameBoard[i][j].getOccupiedBy()){
@@ -670,61 +784,15 @@ void GameEngine::drawPlayers(){
 	D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
 	int invertImage = 1;
 
-	for(int i = 0; i < 2; ++i){
-	D3DXMatrixIdentity(&transMat);
-	D3DXMatrixIdentity(&scaleMat);
-	D3DXMatrixIdentity(&rotMat);
-	D3DXMatrixIdentity(&worldMat);
-	D3DXMatrixScaling(&scaleMat, 1.60f, 0.35f, 0.0f);			// Scaling
-	//D3DXMatrixRotationZ(&rotMat, D3DXToRadian(90.0f));		// Rotation on Z axis, value in radians, converting from degrees
-	D3DXMatrixTranslation(&transMat, 210, 48 + 425 * i, 0.0f);			// Translation
-	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
-	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
-
-	// Set Transform
-	m_pD3DSprite->SetTransform(&worldMat);
-
-
-	m_pD3DSprite->Draw(m_playerUIBackground, 0, &D3DXVECTOR3(m_playerUIBackgroundInfo.Width * 0.5f, m_playerUIBackgroundInfo.Height * 0.5f, 0.0f),
-		0, D3DCOLOR_ARGB(255, 255, 255, 255));
-
-	////////////////////////////////////////////
-	//  INFO:  Offset for drawing characters on opposite sides of the screen
-	int offset = 0;
-
-	switch(m_player[i].getCharacterType()){
-		////////////////////////////////////////
-		//  INFO:  Clear Matrices after drawing character backgrounds
+	for(int i = 0; i < 2; ++i)
+	{
 		D3DXMatrixIdentity(&transMat);
 		D3DXMatrixIdentity(&scaleMat);
 		D3DXMatrixIdentity(&rotMat);
 		D3DXMatrixIdentity(&worldMat);
-	case WARRIOR:
-		offset = 0;
-		//D3DXMatrixScaling(&scaleMat, 1.0f, 1.0f, 0.0f);			// Scaling
-		////D3DXMatrixRotationZ(&rotMat, D3DXToRadian(90.0f));		// Rotation on Z axis, value in radians, converting from degrees
-		//D3DXMatrixTranslation(&transMat, 120, 200, 0.0f);			// Translation
-		//D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
-		//D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
 
-		//// Set Transform
-		//m_pD3DSprite->SetTransform(&worldMat);
-
-
-		//m_pD3DSprite->Draw(m_, 0, &D3DXVECTOR3(m_battleBackgroundOneInfo.Width * 0.5f, m_battleBackgroundOneInfo.Height * 0.5f, 0.0f),
-		//	0, D3DCOLOR_ARGB(255, 255, 255, 255));
-		break;
-	case ARCHER:
-		/////////////////////////////////////////////////////////////////////
-		//  TODO:  Sloppy way to handle this, but it technically works.  Find a better way later
-		//  INFO:  Creates an offset to draw the player appropriately on both sides of the screen
-		offset = 0;
-		if(m_player[i].getPlayerNumber() == 1){
-			offset = 140;
-		}
-		D3DXMatrixScaling(&scaleMat, 0.10f * invertImage, 0.075f, 0.0f);			// Scaling
-		//D3DXMatrixRotationZ(&rotMat, D3DXToRadian(90.0f));		// Rotation on Z axis, value in radians, converting from degrees
-		D3DXMatrixTranslation(&transMat, 75 + offset + 500 * i, 60, 0.0f);			// Translation
+		D3DXMatrixScaling(&scaleMat, 1.60f, 0.35f, 0.0f);			// Scaling
+		D3DXMatrixTranslation(&transMat, 210, 48 + 425 * i, 0.0f);			// Translation
 		D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
 		D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
 
@@ -732,34 +800,79 @@ void GameEngine::drawPlayers(){
 		m_pD3DSprite->SetTransform(&worldMat);
 
 
-		m_pD3DSprite->Draw(m_archerCharacter, 0, &D3DXVECTOR3(m_archerCharacterInfo.Width * 0.5f, m_archerCharacterInfo.Height * 0.5f, 0.0f),
+		m_pD3DSprite->Draw(m_playerUIBackground, 0, &D3DXVECTOR3(m_playerUIBackgroundInfo.Width * 0.5f, m_playerUIBackgroundInfo.Height * 0.5f, 0.0f),
 			0, D3DCOLOR_ARGB(255, 255, 255, 255));
-		break;
-	case BLACKMAGE:
-		/////////////////////////////////////////////////////////////////////
-		//  TODO:  Sloppy way to handle this, but it technically works.  Find a better way later
-		//  INFO:  Creates an offset to draw the player appropriately on both sides of the screen
-		offset = 0;
-		if(m_player[i].getPlayerNumber() == 1){
-			offset = 90;
+
+		////////////////////////////////////////////
+		//  INFO:  Offset for drawing characters on opposite sides of the screen
+		int offset = 0;
+
+		switch(m_player[i].getCharacterType()){
+			////////////////////////////////////////
+			//  INFO:  Clear Matrices after drawing character backgrounds
+			D3DXMatrixIdentity(&transMat);
+			D3DXMatrixIdentity(&scaleMat);
+			D3DXMatrixIdentity(&rotMat);
+			D3DXMatrixIdentity(&worldMat);
+		case WARRIOR:
+			offset = 0;
+			//D3DXMatrixScaling(&scaleMat, 1.0f, 1.0f, 0.0f);			// Scaling
+			////D3DXMatrixRotationZ(&rotMat, D3DXToRadian(90.0f));		// Rotation on Z axis, value in radians, converting from degrees
+			//D3DXMatrixTranslation(&transMat, 120, 200, 0.0f);			// Translation
+			//D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+			//D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+
+			//// Set Transform
+			//m_pD3DSprite->SetTransform(&worldMat);
+
+
+			//m_pD3DSprite->Draw(m_, 0, &D3DXVECTOR3(m_battleBackgroundOneInfo.Width * 0.5f, m_battleBackgroundOneInfo.Height * 0.5f, 0.0f),
+			//	0, D3DCOLOR_ARGB(255, 255, 255, 255));
+			break;
+		case ARCHER:
+			/////////////////////////////////////////////////////////////////////
+			//  TODO:  Sloppy way to handle this, but it technically works.  Find a better way later
+			//  INFO:  Creates an offset to draw the player appropriately on both sides of the screen
+			offset = 0;
+			if(m_player[i].getPlayerNumber() == 1){
+				offset = 140;
+			}
+			D3DXMatrixScaling(&scaleMat, 0.10f * invertImage, 0.075f, 0.0f);			// Scaling
+			D3DXMatrixTranslation(&transMat, 75 + offset + 500 * i, 60, 0.0f);			// Translation
+			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+
+			// Set Transform
+			m_pD3DSprite->SetTransform(&worldMat);
+
+
+			m_pD3DSprite->Draw(m_archerCharacter, 0, &D3DXVECTOR3(m_archerCharacterInfo.Width * 0.5f, m_archerCharacterInfo.Height * 0.5f, 0.0f),
+				0, D3DCOLOR_ARGB(255, 255, 255, 255));
+			break;
+		case BLACKMAGE:
+			/////////////////////////////////////////////////////////////////////
+			//  TODO:  Sloppy way to handle this, but it technically works.  Find a better way later
+			//  INFO:  Creates an offset to draw the player appropriately on both sides of the screen
+			offset = 0;
+			if(m_player[i].getPlayerNumber() == 1){
+				offset = 90;
+			}
+			D3DXMatrixScaling(&scaleMat, 0.15f * invertImage, 0.15f, 0.0f);			// Scaling
+			D3DXMatrixTranslation(&transMat, 105 + offset + 500 * i, 80, 0.0f);			// Translation
+			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+
+			// Set Transform
+			m_pD3DSprite->SetTransform(&worldMat);
+
+
+			m_pD3DSprite->Draw(m_blackMageCharacter, 0, &D3DXVECTOR3(m_blackMageCharacterInfo.Width * 0.5f, m_blackMageCharacterInfo.Height * 0.5f, 0.0f),
+				0, D3DCOLOR_ARGB(255, 255, 255, 255));
+			break;
+		case WHITEMAGE:
+			break;
 		}
-		D3DXMatrixScaling(&scaleMat, 0.15f * invertImage, 0.15f, 0.0f);			// Scaling
-		//D3DXMatrixRotationZ(&rotMat, D3DXToRadian(90.0f));		// Rotation on Z axis, value in radians, converting from degrees
-		D3DXMatrixTranslation(&transMat, 105 + offset + 500 * i, 80, 0.0f);			// Translation
-		D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
-		D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
-
-		// Set Transform
-		m_pD3DSprite->SetTransform(&worldMat);
-
-
-		m_pD3DSprite->Draw(m_blackMageCharacter, 0, &D3DXVECTOR3(m_blackMageCharacterInfo.Width * 0.5f, m_blackMageCharacterInfo.Height * 0.5f, 0.0f),
-			0, D3DCOLOR_ARGB(255, 255, 255, 255));
-		break;
-	case WHITEMAGE:
-		break;
-	}
-	invertImage = -1;
+		invertImage = -1;
 	}
 };
 
@@ -793,3 +906,115 @@ void GameEngine::drawUIText(){
 void GameEngine::calcDeltaTime(){
 	m_deltaTime = difftime(time(0), start);
 };
+
+void GameEngine::drawIcons(int thisButton)
+{
+	for(auto &Buttons: units_sprite_pos)
+	{
+		D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
+		D3DXMatrixIdentity(&transMat);
+		D3DXMatrixIdentity(&scaleMat);
+		D3DXMatrixIdentity(&rotMat);
+		D3DXMatrixIdentity(&worldMat);
+
+		for(unsigned int i = 0; i <= units_sprite_pos.size(); i++)
+		{
+			//Checking if thisButton is starting at a certain #
+			// For Archer thisButton should start at 0
+			// For Black Mage thisButton should start at 6
+			// Warrior thisButton start at 12
+			if(thisButton == ARCHERBUTTON)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
+				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x, Buttons.getPosition().y, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_archerIcon, 0, &D3DXVECTOR3(m_archerIconInfo.Width * 0.5f, m_archerIconInfo.Height * 0.5f, 0.0f),
+					0, D3DCOLOR_ARGB(255, 255, 255, 255));
+			}
+
+			if(thisButton == THIEFBUTTON)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
+				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x+50, Buttons.getPosition().y, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_thiefIcon, 0, &D3DXVECTOR3(m_thiefIconInfo.Width * 0.5f, m_thiefIconInfo.Height * 0.5f, 0.0f),
+					0, D3DCOLOR_ARGB(255, 255, 255, 255));
+			}
+
+			if(thisButton == WOLFBUTTON)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
+				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x+100, Buttons.getPosition().y, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_wolfIcon, 0, &D3DXVECTOR3(m_wolfIconInfo.Width * 0.5f, m_wolfIconInfo.Height * 0.5f, 0.0f),
+					0, D3DCOLOR_ARGB(255, 255, 255, 255));
+			}
+
+			if(thisButton == WALLBUTTON)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
+				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x+120, Buttons.getPosition().y, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_wallIcon, 0, &D3DXVECTOR3(m_wallIconInfo.Width * 0.5f, m_wallIconInfo.Height * 0.5f, 0.0f),
+					0, D3DCOLOR_ARGB(255, 255, 255, 255));
+			}
+
+			if(thisButton == BLACKHOLEBUTTON)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
+				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x+500, Buttons.getPosition().y+60, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_blackHoleIcon, 0, &D3DXVECTOR3(m_blackHoleIconInfo.Width * 0.5f, m_blackHoleIconInfo.Height * 0.5f, 0.0f),
+					0, D3DCOLOR_ARGB(255, 255, 255, 255));
+			}
+
+			if(thisButton == BLACKMAGEBUTTON)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
+				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x+500, Buttons.getPosition().y, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_blackMageIcon, 0, &D3DXVECTOR3(m_blackMageIconInfo.Width * 0.5f, m_blackMageIconInfo.Height * 0.5f, 0.0f),
+					0, D3DCOLOR_ARGB(255, 255, 255, 255));
+			}
+
+			if(thisButton == GOLEMBUTTON)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
+				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x+400, Buttons.getPosition().y, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_golemIcon, 0, &D3DXVECTOR3(m_golemIconInfo.Width * 0.5f, m_golemIconInfo.Height * 0.5f, 0.0f),
+					0, D3DCOLOR_ARGB(255, 255, 255, 255));
+			}
+
+			thisButton +=1;
+		}
+	}
+}
