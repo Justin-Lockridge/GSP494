@@ -6,7 +6,7 @@ BoardSpace::BoardSpace(){
 	spaceNumber					=	0;
 	occupiedBy					=	0;
 	highlighted					=	false;
-	unitIsAttacking				=	false;
+	unitCanTakeAction			=	false;
 	animationTimer				=	0;
 	unitAnimationRect.top		=	0;
 	unitAnimationRect.left		=	0;
@@ -54,12 +54,12 @@ bool BoardSpace::isHighlighted(){
 	return highlighted;
 };
 
-void BoardSpace::setUnitAttack(bool b){
-	unitIsAttacking  = b;
+void BoardSpace::setUnitCanTakeAction(bool b){
+	unitCanTakeAction  = b;
 };
 
-bool BoardSpace::isUnitAttacking(){
-	return unitIsAttacking;
+bool BoardSpace::canUnitTakeAction(){
+	return unitCanTakeAction;
 };
 
 void BoardSpace::setAnimationTimer(double time){
@@ -82,4 +82,12 @@ void BoardSpace::setAnimationRect(int t, int l, int r, int b){
 
 RECT BoardSpace::getAnimationRect(){
 	return unitAnimationRect;
+};
+
+void BoardSpace::setWhoUnitBelongsTo(int player){
+	unitBelongsTo = player;
+};
+
+int BoardSpace::getWhoUnitBelongsTo(){
+	return unitBelongsTo;
 };

@@ -8,8 +8,9 @@
 
 class BoardSpace{
 	int posX, posY, spaceNumber, occupiedBy;
-	bool highlighted, unitIsAttacking;
+	bool highlighted, unitCanTakeAction;
 	float animationTimer;
+	int unitBelongsTo;
 	//////////////////////////////////////////
 	//  INFO:  Each game space holds the rect
 	//			for drawing the occupied unit
@@ -32,8 +33,8 @@ public:
 	void setHighlight(bool b);
 	bool isHighlighted();
 
-	void setUnitAttack(bool b);
-	bool isUnitAttacking();
+	void setUnitCanTakeAction(bool b);
+	bool canUnitTakeAction();
 
 	void   setAnimationTimer(double time);
 	void   adjustAnimationTimer(double time);
@@ -41,4 +42,7 @@ public:
 
 	void setAnimationRect(int t, int l, int r, int b);
 	RECT getAnimationRect();
+
+	void setWhoUnitBelongsTo(int player);
+	int  getWhoUnitBelongsTo();
 };

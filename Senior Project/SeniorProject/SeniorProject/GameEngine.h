@@ -61,6 +61,13 @@ class GameEngine{
 	float				m_currTime;				// Time to render current frame
 	float				m_prevTime, m_deltaTime, m_frameTime;				// Time to render previous frame
 	int					m_FPS;			// Frames per second  
+	int					m_gamePhase;
+	bool				m_unitCurrentlyAttacking, m_fireBallActive, m_arrowActive, m_floatingTextActive;
+	float				m_projectilePosX, m_projectilePosY, m_arrowForAttackingUnitPosX, m_arrowForAttackingUnitPosY;
+	float				m_temporaryTimer;
+	int					m_attackingSpaceX, m_attackingSpaceY, m_attackTargetSpaceX, m_attackTargetSpaceY;
+	float				m_fireballRotation, m_floatingRectTopMax, m_floatingRectTimer;
+	RECT				m_floatingTextRect;
 
 	//////////////////////////////////////////////////////////////////////////
 	// Direct3D Variables
@@ -79,9 +86,9 @@ class GameEngine{
 	//////////////////////////////////////////////////////////////////////////
 	ID3DXSprite*		m_pD3DSprite;	// Sprite Object
 	IDirect3DTexture9*	m_battleBackgroundOne, *m_gamePiece, *m_archerCharacter, *m_blackMageCharacter, *m_playerUIBackground,
-						*m_goldMine, *m_archerUnit, *m_blackMageUnit;		// Texture Object for a sprite
+						*m_goldMine, *m_archerUnit, *m_blackMageUnit, *m_arrow, *m_fireball, *m_archerArrow;		// Texture Object for a sprite
 	D3DXIMAGE_INFO		m_battleBackgroundOneInfo, m_gamePieceInfo, m_archerCharacterInfo, m_blackMageCharacterInfo, m_playerUIBackgroundInfo,
-						m_goldMineInfo, m_archerUnitInfo, m_blackMageUnitInfo;	// File details of a texture
+						m_goldMineInfo, m_archerUnitInfo, m_blackMageUnitInfo, m_arrowInfo, m_fireballInfo, m_archerArrowInfo;	// File details of a texture
 
 	//Clickable Button Icons
 	std::vector<Buttons> units_sprite_pos;
@@ -104,7 +111,8 @@ class GameEngine{
 	//  Audio Includes
 	//  TODO:  
 	FMOD::System* fmodSystem;
-	FMOD::Sound* themeMusicOne;
+	FMOD::Sound* themeMusicOne, *battleTheme;
+	FMOD::Sound* hitMines, *arrowHit, *castFireball, *shootArrow, *fireballHit;
 	FMOD::Channel* mainChannel;
 	FMOD::Channel* channel;
 	bool keyIsDown[255];
@@ -148,6 +156,8 @@ class GameEngine{
 	//////////////////////////////////////////////////////////////////////////
 	void Update(float dt);
 	void updateAnimations(float dt);
+	void updateEventPhase(float dt);
+	void findNextTarget(int row);
 	//////////////////////////////////////////////////////////////////////////
 	// Name:		Render
 	// Parameters:	float elapsedTime - Time that has elapsed since the last
@@ -174,5 +184,5 @@ class GameEngine{
 	void calcDeltaTime();
 
 	void drawIcons(int);
-
+	
 };

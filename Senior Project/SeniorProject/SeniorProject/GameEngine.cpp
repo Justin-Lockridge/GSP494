@@ -176,6 +176,18 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
 		D3DCOLOR_XRGB(255, 0, 255), &m_wolfIconInfo, 0, &m_wolfIcon);
 
+	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"Arrow.png", 0, 0, 0, 0, 
+		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
+		D3DCOLOR_XRGB(255, 0, 255), &m_arrowInfo, 0, &m_arrow);
+
+	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"fireball.png", 0, 0, 0, 0, 
+		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
+		D3DCOLOR_XRGB(255, 0, 255), &m_fireballInfo, 0, &m_fireball);
+
+	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"ArcherArrow.png", 0, 0, 0, 0, 
+		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
+		D3DCOLOR_XRGB(255, 0, 255), &m_archerArrowInfo, 0, &m_archerArrow);
+
 	// Seed rand() with time
 	srand(timeGetTime());
 
@@ -205,10 +217,12 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	fmodSystem->init(10, FMOD_INIT_NORMAL, 0);
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//  TODO:  Get streaming sound working
-	//fmodSystem->createStream("TMNT_Theme.mp3", FMOD_LOOP_NORMAL | FMOD_2D | FMOD_HARDWARE, 0, &themeMusic);
-	//fmodSystem->createSound("Thwack.mp3", FMOD_DEFAULT, 0, &thwack);
-	//fmodSystem->createSound("collide.wav", FMOD_DEFAULT, 0, &collide);
-	//fmodSystem->createSound("sizzle.mp3", FMOD_DEFAULT, 0, &sizzle);
+	fmodSystem->createStream("BattleTheme.mp3", FMOD_LOOP_NORMAL | FMOD_2D | FMOD_HARDWARE, 0, &battleTheme);
+	fmodSystem->createSound("HitMines.mp3", FMOD_DEFAULT, 0, &hitMines);
+	fmodSystem->createSound("ArrowHit.wav", FMOD_DEFAULT, 0, &arrowHit);
+	fmodSystem->createSound("CastFireball.mp3", FMOD_DEFAULT, 0, &castFireball);
+	fmodSystem->createSound("ShootArrow.wav", FMOD_DEFAULT, 0, &shootArrow);
+	fmodSystem->createSound("FireballHit.wav", FMOD_DEFAULT, 0, &fireballHit);
 	//fmodSystem->createStream // for streaming audio
 	for(int i = 0; i < 255; ++i){
 		keyIsDown[i] = false;
@@ -236,26 +250,45 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	///////////////////////////////////////////////////
 	//  INFO:  Initializes gameboard and gold mines
 	InitGameBoard();
+	m_unitCurrentlyAttacking = false;
+	m_fireballRotation = 0.0f;
 	////////////////////////////////////////////////////////
 	//  INFO:  Changed the gamestate manually for testing
 	m_gameState = BATTLE;
-	m_gameBoard[1][4].setOccupiedBy(ARCHERUNIT);
-	m_gameBoard[1][4].setAnimationRect(15, 10, 70, 70);
-	m_gameBoard[1][4].setAnimationTimer(1.34);
+	m_gameBoard[1][5].setOccupiedBy(ARCHERUNIT);
+	m_gameBoard[1][5].setAnimationRect(15, 10, 70, 70);
+	m_gameBoard[1][5].setAnimationTimer(1.34);
+	m_gameBoard[1][5].setWhoUnitBelongsTo(PLAYERTWO);
+	m_gameBoard[1][5].setUnitCanTakeAction(true);
 
 	m_gameBoard[1][14].setOccupiedBy(ARCHERUNIT);
 	m_gameBoard[1][14].setAnimationRect(15, 10, 70, 70);
 	m_gameBoard[1][14].setAnimationTimer(0.25);
+	m_gameBoard[1][14].setWhoUnitBelongsTo(PLAYERONE);
+	m_gameBoard[1][14].setUnitCanTakeAction(true);
 
 	m_gameBoard[3][9].setOccupiedBy(ARCHERUNIT);
 	m_gameBoard[3][9].setAnimationRect(15, 10, 70, 70);
 	m_gameBoard[3][9].setAnimationTimer(0.10);
+	m_gameBoard[3][9].setWhoUnitBelongsTo(PLAYERONE);
+	m_gameBoard[3][9].setUnitCanTakeAction(true);
 
-	m_gameBoard[0][1].setOccupiedBy(BLACKMAGEUNIT);
-	m_gameBoard[0][1].setAnimationRect(75, 5, 70, 145);
+	m_gameBoard[1][1].setOccupiedBy(BLACKMAGEUNIT);
+	m_gameBoard[1][1].setAnimationRect(75, 5, 70, 145);
+	m_gameBoard[1][1].setWhoUnitBelongsTo(PLAYERONE);
+	m_gameBoard[1][1].setUnitCanTakeAction(true);
 
 	m_gameBoard[2][6].setOccupiedBy(BLACKMAGEUNIT);
 	m_gameBoard[2][6].setAnimationRect(75, 5, 70, 145);
+	m_gameBoard[2][6].setWhoUnitBelongsTo(PLAYERONE);
+	m_gameBoard[2][6].setUnitCanTakeAction(true);
+
+	////////////////////////////////////////////////////
+	//  INFO:  Set ownership of right side goldmines
+	//m_gameBoard[0][15].setWhoUnitBelongsTo(PLAYERTWO);
+	//m_gameBoard[1][15].setWhoUnitBelongsTo(PLAYERTWO);
+	//m_gameBoard[2][15].setWhoUnitBelongsTo(PLAYERTWO);
+	//m_gameBoard[3][15].setWhoUnitBelongsTo(PLAYERTWO);
 }
 
 void GameEngine::InitGameBoard(){
@@ -264,6 +297,7 @@ void GameEngine::InitGameBoard(){
 			m_gameBoard[i][j].setPosX(75 + j * 43);
 			m_gameBoard[i][j].setPosY(190 + i * 50);
 			m_gameBoard[i][j].setSpaceNumber( i * MAXBOARDWIDTH + j );
+			m_gameBoard[i][j].setWhoUnitBelongsTo(-1);
 			//////////////////////////////////////////////
 			//  INFO:  Sets the end game spaces to be occupied by gold mines
 			if(j == 0 || j == MAXBOARDWIDTH-1){
@@ -303,11 +337,45 @@ void GameEngine::InitGameBoard(){
 
 		units_sprite_pos.push_back(temp);		
 	}
+
+	//////////////////////////////////////////////////////////
+	//  Reset m_gamePhase
+	m_gamePhase						=		PLAYERONE_PLAYPHASE;
+	m_fireBallActive				=		false;
+	m_arrowActive					=		false;
+	m_floatingTextActive			=		false;
+	m_projectilePosX				=		0.0f;
+	m_projectilePosY				=		0.0f;
+	m_arrowForAttackingUnitPosX		=		0.0f;
+	m_arrowForAttackingUnitPosY		=		0.0f;
+	m_temporaryTimer				=		0.0f;
+	m_attackingSpaceX				=		0;
+	m_attackingSpaceY				=		0;
+	m_attackTargetSpaceX			=		0;
+	m_attackTargetSpaceY			=		0;
+	m_floatingTextRect.top			=		0.1f;
+	m_floatingTextRect.left			=		0.0f;
+	m_floatingTextRect.right		=		0.0f;
+	m_floatingTextRect.bottom		=		0.0f;
+	m_floatingRectTopMax			=		0.0f;
+	m_floatingRectTimer				=		0.0f;
+	////////////////////////////////////////////////////
+	//  INFO:  Set ownership of right side goldmines
+	m_gameBoard[0][15].setWhoUnitBelongsTo(PLAYERTWO);
+	m_gameBoard[1][15].setWhoUnitBelongsTo(PLAYERTWO);
+	m_gameBoard[2][15].setWhoUnitBelongsTo(PLAYERTWO);
+	m_gameBoard[3][15].setWhoUnitBelongsTo(PLAYERTWO);
 };
 
 void GameEngine::Update(float dt)
 {
-
+	//////////////////////////////////////////////////////////////
+	//  INFO:  Start audio automatically.  Remove or move later
+	//  TODO:  Fix
+	if(!channel){
+		fmodSystem->playSound( FMOD_CHANNEL_FREE, battleTheme, false, &channel);
+	}
+	fmodSystem->update();
 	//////////////////////////////////////////////////////////////////////////
 	// Get and Acquire Keyboard Input
 	//////////////////////////////////////////////////////////////////////////
@@ -413,10 +481,31 @@ void GameEngine::Update(float dt)
 	case OVERWORLD:
 		break;
 	case BATTLE:
+		switch(m_gamePhase){
+		case PLAYERONE_PLAYPHASE:
+			break;
+		case PLAYERONE_EVENTPHASE:
+			updateEventPhase(dt);
+			break;
+		case PLAYERTWO_PLAYPHASE:
+			break;
+		case PLAYERTWO_EVENTPHASE:
+			updateEventPhase(dt);
+			break;
+		};
 		if(buffer[DIK_RIGHT] & 0x80){
 			if(!keyIsDown[DIK_RIGHT]){
 				keyIsDown[DIK_RIGHT] = true;
-				m_gameBoard[4][14].setAnimationRect(m_gameBoard[4][14].getAnimationRect().top, m_gameBoard[4][14].getAnimationRect().left + 70, m_gameBoard[4][14].getAnimationRect().right + 70, m_gameBoard[4][14].getAnimationRect().bottom);
+				m_gamePhase += 1;
+				if(m_gamePhase > 3){
+					m_gameBoard[1][4].setUnitCanTakeAction(true);
+					m_gameBoard[1][14].setUnitCanTakeAction(true);
+					m_gameBoard[3][9].setUnitCanTakeAction(true);
+					m_gameBoard[0][1].setUnitCanTakeAction(true);
+					m_gameBoard[2][6].setUnitCanTakeAction(true);
+					m_gamePhase = 0;
+				}
+				//m_gameBoard[4][14].setAnimationRect(m_gameBoard[4][14].getAnimationRect().top, m_gameBoard[4][14].getAnimationRect().left + 70, m_gameBoard[4][14].getAnimationRect().right + 70, m_gameBoard[4][14].getAnimationRect().bottom);
 			}
 		}
 		else
@@ -424,11 +513,28 @@ void GameEngine::Update(float dt)
 		if(buffer[DIK_LEFT] & 0x80){
 			if(!keyIsDown[DIK_LEFT]){
 				keyIsDown[DIK_LEFT] = true;
-				m_gameBoard[4][14].setAnimationRect(m_gameBoard[4][14].getAnimationRect().top, m_gameBoard[4][14].getAnimationRect().left - 70, m_gameBoard[4][14].getAnimationRect().right - 70, m_gameBoard[4][14].getAnimationRect().bottom);
+				m_gamePhase -= 1;
+				if(m_gamePhase < 0)
+					m_gamePhase = 3;
+				//m_gameBoard[4][14].setAnimationRect(m_gameBoard[4][14].getAnimationRect().top, m_gameBoard[4][14].getAnimationRect().left - 70, m_gameBoard[4][14].getAnimationRect().right - 70, m_gameBoard[4][14].getAnimationRect().bottom);
 			}
 		}
 		else
 			keyIsDown[DIK_LEFT] = false;
+		if(buffer[DIK_UP] & 0x80){
+			if(!keyIsDown[DIK_UP]){
+				keyIsDown[DIK_UP] = true;
+				m_gamePhase = PLAYERTWO_EVENTPHASE;
+				//if(m_gamePhase < 0)
+					//m_gamePhase = 3;
+				//m_gameBoard[4][14].setAnimationRect(m_gameBoard[4][14].getAnimationRect().top, m_gameBoard[4][14].getAnimationRect().left - 70, m_gameBoard[4][14].getAnimationRect().right - 70, m_gameBoard[4][14].getAnimationRect().bottom);
+			}
+		}
+		else
+			keyIsDown[DIK_UP] = false;
+
+		///////////////////////////////////////////////////////////
+		//  INFO:  Updates unit animations
 		updateAnimations(dt);
 
 		//////////////////////////////////////////////////
@@ -541,6 +647,243 @@ void GameEngine::updateAnimations(float dt){
 	}
 };
 
+void GameEngine::updateEventPhase(float dt){
+	if(m_floatingTextActive){
+		m_floatingRectTimer += 100 * dt;
+		if(m_floatingRectTimer > 2.0f){
+			m_floatingTextRect.top -=  1;
+			m_floatingRectTimer -= 2.0f;
+		}
+		if(m_floatingRectTopMax > m_floatingTextRect.top){
+			m_floatingRectTopMax = 0.0f;
+			m_floatingTextRect.top		=		0.0f;
+			m_floatingTextRect.left		=		0.0f;
+			m_floatingTextRect.right	=		0.0f;
+			m_floatingTextRect.bottom	=		0.0f;
+			m_floatingTextActive = false;
+		}
+	}
+	////////////////////////////////////////////////////////////////////////////////////////////////
+	//  INFO:  If no unit is attacking, find the next unit to take action
+	if(!m_unitCurrentlyAttacking){
+		if(m_gamePhase == PLAYERONE_EVENTPHASE){
+			for(int i = 0; i < MAXBOARDHEIGHT; ++i){
+				int trial = 0;
+				for(int j = MAXBOARDWIDTH-1; j > 0; --j){
+					if(m_gameBoard[i][j].getWhoUnitBelongsTo() == PLAYERONE && m_gameBoard[i][j].canUnitTakeAction()){
+						m_unitCurrentlyAttacking = true;
+						m_arrowForAttackingUnitPosX	=	m_gameBoard[i][j].getPosX() + 10;
+						m_arrowForAttackingUnitPosY	=	m_gameBoard[i][j].getPosY() - 40;
+						switch(m_gameBoard[i][j].getOccupiedBy()){
+						case NOUNIT:
+							break;
+						case GOLDMINES:
+							break;
+						case WALL:
+							break;
+						case WARRIORUNIT:
+							break;
+						case MARKSMAN:
+							break;
+						case CAVALRY:
+							break;
+						case WOLF:
+							break;
+						case ARCHERUNIT:
+							m_attackingSpaceX	=	i;
+							m_attackingSpaceY	=	j;
+							m_temporaryTimer += 0.0001f;
+							m_projectilePosX = m_gameBoard[i][j].getPosX()+5;
+							m_projectilePosY = m_gameBoard[i][j].getPosY()+10;
+							m_arrowActive = true;
+							findNextTarget(i);
+							fmodSystem->playSound( FMOD_CHANNEL_FREE, shootArrow, false, 0 );
+							return;
+							//break;
+						case THIEF:
+							break;
+						case GOLEM:
+							break;
+						case BLACKMAGEUNIT:
+							m_attackingSpaceX	=	i;
+							m_attackingSpaceY	=	j;
+							m_temporaryTimer += 0.0001f;
+							m_projectilePosX = m_gameBoard[i][j].getPosX()+5;
+							m_projectilePosY = m_gameBoard[i][j].getPosY()+10;
+							m_fireBallActive = true;
+							findNextTarget(i);
+							fmodSystem->playSound( FMOD_CHANNEL_FREE, castFireball, false, 0);
+							return;
+							//break;
+						case WARLOCK:
+							break;
+						}
+					}
+
+				}
+			}
+		}
+		else if(m_gamePhase == PLAYERTWO_EVENTPHASE){
+			for(int i = 0; i < MAXBOARDHEIGHT; ++i){
+				int trial = 0;
+				for(int j = 0; j < MAXBOARDWIDTH; ++j){
+					if(m_gameBoard[i][j].getWhoUnitBelongsTo() == PLAYERTWO && m_gameBoard[i][j].canUnitTakeAction()){
+						m_unitCurrentlyAttacking = true;
+						m_arrowForAttackingUnitPosX	=	m_gameBoard[i][j].getPosX() + 10;
+						m_arrowForAttackingUnitPosY	=	m_gameBoard[i][j].getPosY() - 40;
+						switch(m_gameBoard[i][j].getOccupiedBy()){
+						case NOUNIT:
+							break;
+						case GOLDMINES:
+							break;
+						case WALL:
+							break;
+						case WARRIORUNIT:
+							break;
+						case MARKSMAN:
+							break;
+						case CAVALRY:
+							break;
+						case WOLF:
+							break;
+						case ARCHERUNIT:
+							m_attackingSpaceX	=	i;
+							m_attackingSpaceY	=	j;
+							m_temporaryTimer += 0.0001f;
+							m_projectilePosX = m_gameBoard[i][j].getPosX()+5;
+							m_projectilePosY = m_gameBoard[i][j].getPosY()+10;
+							m_arrowActive = true;
+							findNextTarget(i);
+							fmodSystem->playSound( FMOD_CHANNEL_FREE, shootArrow, false, 0 );
+							return;
+							//break;
+						case THIEF:
+							break;
+						case GOLEM:
+							break;
+						case BLACKMAGEUNIT:
+							m_attackingSpaceX	=	i;
+							m_attackingSpaceY	=	j;
+							m_temporaryTimer += 0.0001f;
+							m_projectilePosX = m_gameBoard[i][j].getPosX()+5;
+							m_projectilePosY = m_gameBoard[i][j].getPosY()+10;
+							m_fireBallActive = true;
+							findNextTarget(i);
+							fmodSystem->playSound( FMOD_CHANNEL_FREE, castFireball, false, 0);
+							return;
+							//break;
+						case WARLOCK:
+							break;
+						}
+					}
+
+				}
+			}
+		}
+	}
+	else{
+		m_temporaryTimer += dt;
+		int flip = 1;
+		if(m_arrowActive){
+			if(m_gamePhase == PLAYERTWO_EVENTPHASE)
+				flip *= -1;
+			m_projectilePosX += 100 * dt * flip;
+		}
+		else if(m_fireBallActive){
+			if(m_gamePhase == PLAYERTWO_EVENTPHASE)
+				flip *= -1;
+			m_projectilePosX += 100 * dt * flip;
+			m_fireballRotation += 800 * dt;
+		}
+	//	if(m_temporaryTimer > 2.0 ){
+		if( ( ( m_projectilePosX > m_gameBoard[m_attackTargetSpaceX][m_attackTargetSpaceY].getPosX() - 5 ) && ( m_projectilePosX < m_gameBoard[m_attackTargetSpaceX][m_attackTargetSpaceY].getPosX() + 5 ) ) || m_projectilePosX > 700 ){
+
+			////////////////////////////////////////////////////////////////
+			//  INFO:  Set data for floating text
+			m_floatingTextActive = true;
+			m_floatingRectTopMax	=	m_gameBoard[m_attackingSpaceX][m_attackingSpaceY].getPosY() - 35;
+			m_floatingTextRect.top = m_gameBoard[m_attackingSpaceX][m_attackTargetSpaceY].getPosY() - 10;
+			m_floatingTextRect.left = m_gameBoard[m_attackingSpaceX][m_attackTargetSpaceY].getPosX() - 10;
+			m_floatingTextRect.right = m_gameBoard[m_attackingSpaceX][m_attackTargetSpaceY].getPosX() + 10;
+			m_floatingTextRect.bottom = m_gameBoard[m_attackingSpaceX][m_attackTargetSpaceY].getPosY() + 10;
+
+			////////////////////////////////////////////////////////////////
+			//  INFO:  Play sound effects based on collision
+			if(m_arrowActive ){//&& m_gameBoard[m_attackingSpaceX][m_attackingSpaceY].getOccupiedBy() == GOLDMINES){
+				switch(m_gameBoard[m_attackingSpaceX][m_attackingSpaceY].getOccupiedBy()){
+				case GOLDMINES:
+					fmodSystem->playSound( FMOD_CHANNEL_FREE, hitMines, false, 0 );
+					break;
+				case BLACKMAGEUNIT:
+					fmodSystem->playSound( FMOD_CHANNEL_FREE, arrowHit, false, 0 );
+					break;
+				case ARCHERUNIT:
+					fmodSystem->playSound( FMOD_CHANNEL_FREE, arrowHit, false, 0 );
+					break;
+				}
+			}
+			else if(m_fireBallActive){
+				fmodSystem->playSound( FMOD_CHANNEL_FREE, fireballHit, false, 0 );
+			}
+			m_gameBoard[m_attackingSpaceX][m_attackingSpaceY].setUnitCanTakeAction(false);
+			m_projectilePosX = 0;
+			m_projectilePosY = 0;
+			m_attackTargetSpaceX = 0;
+			m_attackTargetSpaceY = 0;
+			m_temporaryTimer = 0.0f;
+			m_unitCurrentlyAttacking = false;
+			m_arrowActive = false;
+			m_fireBallActive = false;
+			//m_attackingSpaceX	=	-1;
+			//m_attackingSpaceY	=	-1;
+		}
+		//}
+	}
+	int test;
+	if(m_gamePhase == PLAYERTWO_EVENTPHASE)
+		test = 0;
+};
+
+void GameEngine::findNextTarget(int row){
+	//if(m_gamePhase == PLAYERONE_EVENTPHASE){
+	//	///////////////////////////////////////////////////////////////////////////////////
+	//	//  INFO:  Finds the first available target and sets it, then returns
+	//	for(int i = 0; i < MAXBOARDHEIGHT; ++i){
+	//		for(int j = 0; j < MAXBOARDWIDTH; ++j){
+	//			if(m_gameBoard[i][j].getWhoUnitBelongsTo() == PLAYERTWO){
+	//				m_attackTargetSpaceX = i;
+	//				m_attackTargetSpaceY = j;
+	//				return;
+	//			}
+	//		}
+	//	}
+	//}
+	if(m_gamePhase == PLAYERONE_EVENTPHASE){
+		///////////////////////////////////////////////////////////////////////////////////
+		//  INFO:  Finds the first available target and sets it, then returns
+		//for(int i = 0; i < MAXBOARDHEIGHT; ++i){
+		for(int i = 0; i < MAXBOARDWIDTH; ++i){
+				if(m_gameBoard[row][i].getWhoUnitBelongsTo() == PLAYERTWO){
+					m_attackTargetSpaceX = row;
+					m_attackTargetSpaceY = i;
+					break;
+				}
+			}
+		}
+	else if(m_gamePhase == PLAYERTWO_EVENTPHASE){
+		for(int i = MAXBOARDWIDTH; i > 0; --i){
+			if(m_gameBoard[row][i].getWhoUnitBelongsTo() == PLAYERONE){
+				if(i > m_attackingSpaceX )
+					continue;
+				m_attackTargetSpaceX = row;
+				m_attackTargetSpaceY = i;
+				break;
+			}
+		}
+	}
+	//}
+};
+
 void GameEngine::Render()
 {
 	// If the device was not created successfully, return
@@ -620,6 +963,9 @@ void GameEngine::Render()
 void GameEngine::Shutdown()
 {
 	// Release COM objects in the opposite order they were created in
+	SAFE_RELEASE(m_archerArrow);
+	SAFE_RELEASE(m_fireball);
+	SAFE_RELEASE(m_arrow);
 	SAFE_RELEASE(m_blackMageUnit);
 	SAFE_RELEASE(m_archerUnit);
 	SAFE_RELEASE(m_goldMine);
@@ -682,7 +1028,11 @@ void GameEngine::drawGameBoard(){
 	//////////////////////////////////////////////////////////////////////////
 	D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
 	for(int i = 0; i < MAXBOARDHEIGHT; ++i){
+		int flip = 1;
 		for(int j = 0; j < MAXBOARDWIDTH; ++j){
+			/////////////////////////////////////////////////////////
+			//  INFO:  For inverting images for 2nd player
+			flip = 1;
 			D3DXMatrixIdentity(&transMat);
 			D3DXMatrixIdentity(&scaleMat);
 			D3DXMatrixIdentity(&rotMat);
@@ -704,6 +1054,12 @@ void GameEngine::drawGameBoard(){
 			D3DXMatrixIdentity(&scaleMat);
 			D3DXMatrixIdentity(&rotMat);
 			D3DXMatrixIdentity(&worldMat);
+
+			////////////////////////////////////////////////////////////////////////////////
+			//  INFO:  For inverting images for player 2
+			if(m_gameBoard[i][j].getWhoUnitBelongsTo() == 1)
+				flip *= -1;
+			int offset = 0;
 			//int testX, testY;
 			//////////////////////////////////////////////////////////////////////////////////
 			//  INFO:  If the gamespace is occupied by a unit, draw that unit.  
@@ -733,9 +1089,13 @@ void GameEngine::drawGameBoard(){
 				break;
 			case ARCHERUNIT:
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////
-				//  INFO:  Adds an offset using "magic numbers" to draw archer units in the correct space
-				D3DXMatrixScaling(&scaleMat, 0.75f, 0.74f, 0.0f);			// Scaling
-				D3DXMatrixTranslation(&transMat, m_gameBoard[i][j].getPosX()+33, m_gameBoard[i][j].getPosY()+33, 0.0f);			// Translation
+				//  INFO:  Adds an offset to draw unit in the center of the gamespace
+				if(m_gameBoard[i][j].getWhoUnitBelongsTo() == PLAYERONE )
+					offset = 33;
+				if(m_gameBoard[i][j].getWhoUnitBelongsTo() == PLAYERTWO )
+					offset = -15;
+				D3DXMatrixScaling(&scaleMat, 0.75f * flip, 0.74f, 0.0f);			// Scaling
+				D3DXMatrixTranslation(&transMat, m_gameBoard[i][j].getPosX() + offset, m_gameBoard[i][j].getPosY()+33, 0.0f);			// Translation
 				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
 				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
 				// Set Transform
@@ -748,8 +1108,14 @@ void GameEngine::drawGameBoard(){
 			case GOLEM:
 				break;
 			case BLACKMAGEUNIT:
-				D3DXMatrixScaling(&scaleMat, 0.75f, 0.74f, 0.0f);			// Scaling
-				D3DXMatrixTranslation(&transMat, m_gameBoard[i][j].getPosX()+35, m_gameBoard[i][j].getPosY()+35, 0.0f);			// Translation
+				//////////////////////////////////////////////////////////////////////////////////////////////////////////
+				//  INFO:  Adds an offset to draw unit in the center of the gamespace
+				if(m_gameBoard[i][j].getWhoUnitBelongsTo() == PLAYERONE)
+					offset = 35;
+				if(m_gameBoard[i][j].getWhoUnitBelongsTo() == PLAYERTWO)
+					offset = -15;
+				D3DXMatrixScaling(&scaleMat, 0.75f * flip, 0.74f, 0.0f);			// Scaling
+				D3DXMatrixTranslation(&transMat, m_gameBoard[i][j].getPosX() + offset, m_gameBoard[i][j].getPosY()+35, 0.0f);			// Translation
 				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
 				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
 				// Set Transform
@@ -772,6 +1138,51 @@ void GameEngine::drawGameBoard(){
 
 			//m_pD3DSprite->Draw(m_gamePiece, 0, &D3DXVECTOR3(m_gamePieceInfo.Width * 0.5f, m_gamePieceInfo.Height * 0.5f, 0.0f),
 			//	0, D3DCOLOR_ARGB(255, 255, 255, 255));
+		}
+	}
+	if(m_unitCurrentlyAttacking){
+		/////////////////////////////////////////////////////////////
+		//  INFO:  For inverting images if they belong to player 2
+		int flip = 1;
+		if(m_gamePhase == PLAYERTWO_EVENTPHASE)
+			flip *= -1;
+		D3DXMatrixIdentity(&transMat);
+		D3DXMatrixIdentity(&scaleMat);
+		D3DXMatrixIdentity(&rotMat);
+		D3DXMatrixIdentity(&worldMat);
+		D3DXMatrixScaling(&scaleMat, 0.03f, 0.03f, 0.0f);			// Scaling
+		D3DXMatrixTranslation(&transMat, m_arrowForAttackingUnitPosX, m_arrowForAttackingUnitPosY, 0.0f);			// Translation
+		D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+		D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+		m_pD3DSprite->SetTransform(&worldMat);
+		m_pD3DSprite->Draw(m_arrow, 0, &D3DXVECTOR3(m_arrowInfo.Width * 0.5f, m_arrowInfo.Height * 0.5f, 0.0f),
+					0, D3DCOLOR_ARGB(255, 255, 255, 255));
+		if(m_fireBallActive){
+			D3DXMatrixIdentity(&transMat);
+			D3DXMatrixIdentity(&scaleMat);
+			D3DXMatrixIdentity(&rotMat);
+			D3DXMatrixIdentity(&worldMat);
+			D3DXMatrixScaling(&scaleMat, 0.05f * flip, 0.04f, 0.0f);			// Scaling
+			D3DXMatrixTranslation(&transMat, m_projectilePosX, m_projectilePosY, 0.0f);			// Translation
+			D3DXMatrixRotationZ(&rotMat, D3DXToRadian(m_fireballRotation));		// Rotation on Z axis, value in radians, converting from degrees
+			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+			m_pD3DSprite->SetTransform(&worldMat);
+			m_pD3DSprite->Draw(m_fireball, 0, &D3DXVECTOR3(m_fireballInfo.Width * 0.5f, m_fireballInfo.Height * 0.5f, 0.0f),
+				0, D3DCOLOR_ARGB(255, 255, 255, 255));
+		}
+		if(m_arrowActive){
+			D3DXMatrixIdentity(&transMat);
+			D3DXMatrixIdentity(&scaleMat);
+			D3DXMatrixIdentity(&rotMat);
+			D3DXMatrixIdentity(&worldMat);
+			D3DXMatrixScaling(&scaleMat, 1.0f * flip, 1.0f, 1.0f);			// Scaling
+			D3DXMatrixTranslation(&transMat, m_projectilePosX, m_projectilePosY, 0.0f);			// Translation
+			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+			m_pD3DSprite->SetTransform(&worldMat);
+			m_pD3DSprite->Draw(m_archerArrow, 0, &D3DXVECTOR3(m_archerArrowInfo.Width * 0.5f, m_archerArrowInfo.Height * 0.5f, 0.0f),
+				0, D3DCOLOR_ARGB(255, 255, 255, 255));
 		}
 	}
 };
@@ -900,6 +1311,11 @@ void GameEngine::drawUIText(){
 	rect.left -= 620;
 	swprintf_s(buffer, 128, L"Units\n\nAbilities");
 	m_pD3DFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
+
+	if(m_floatingTextActive){
+		swprintf_s(buffer, 128, L"%d", 20);
+		m_pD3DFont->DrawText(0, buffer, -1, &m_floatingTextRect, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 0, 0));
+	}
 
 };
 
