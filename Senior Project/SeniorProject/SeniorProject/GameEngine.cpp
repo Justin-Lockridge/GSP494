@@ -87,7 +87,6 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	//////////////////////////////////////////////////////////////////////////
 	// Create a Font Object
 	//////////////////////////////////////////////////////////////////////////
-
 	// Load a font for private use for this process
 	AddFontResourceEx(L"Old English Text MT.otf", FR_PRIVATE, 0);
 
@@ -98,14 +97,13 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	//////////////////////////////////////////////////////////////////////////
 	// Create Sprite Object and Textures
 	//////////////////////////////////////////////////////////////////////////
-
 	// Create a sprite object, note you will only need one for all 2D sprites
 	D3DXCreateSprite(m_pD3DDevice, &m_pD3DSprite);
 
-	// Create a texture, each different 2D sprite to display to the screen
-	// will need a new texture object.  If drawing the same sprite texture
-	// multiple times, just call that sprite's Draw() with different 
-	// transformation values.
+	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"cursor.png", 0, 0, 0, 0, 
+		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
+		D3DCOLOR_XRGB(255, 0, 255), &m_cursorInfo, 0, &m_cursor);
+
 	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"Dojo.png", 0, 0, 0, 0, 
 		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
 		D3DCOLOR_XRGB(255, 0, 255), &m_battleBackgroundOneInfo, 0, &m_battleBackgroundOne);
@@ -176,6 +174,8 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
 		D3DCOLOR_XRGB(255, 0, 255), &m_wolfIconInfo, 0, &m_wolfIcon);
 
+	/////////////////////////////////////////////////////
+	// Attacks
 	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"Arrow.png", 0, 0, 0, 0, 
 		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
 		D3DCOLOR_XRGB(255, 0, 255), &m_arrowInfo, 0, &m_arrow);
@@ -194,7 +194,6 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	//////////////////////////////////////////////////////////////////////////
 	// Initialize DirectInput
 	//////////////////////////////////////////////////////////////////////////
-
 	// Create the DI Object
 	DirectInput8Create(hInst, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&m_pDIObject, NULL);
 
@@ -209,7 +208,7 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	m_pDIKeyboard->SetDataFormat(&c_dfDIKeyboard);
 
 	// Set up Mouse (c_dfDIMouse2 = 8 button mouse)
-	m_pDIMouse->SetCooperativeLevel(hWnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
+	m_pDIMouse->SetCooperativeLevel(hWnd, DISCL_FOREGROUND | DISCL_EXCLUSIVE);
 	m_pDIMouse->SetDataFormat(&c_dfDIMouse2);
 
 	//  Set up Audio
@@ -230,14 +229,11 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	start = (time(0));
 	m_frameTime = 0;
 	m_deltaTime = 0;
+
 	cursor.x = 500;
 	cursor.y = 300;
 
-	//	if(!themeMusicChannel)
-	//{
-	//	channel->stop();
-	//	fmodSystem->playSound( FMOD_CHANNEL_FREE, themeMusic, false, &themeMusicChannel);
-	//}
+	myMouse.init();
 
 	//////////////////////////////////////////////
 	//  INFO:  Inits both players
@@ -283,12 +279,6 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	m_gameBoard[2][6].setWhoUnitBelongsTo(PLAYERONE);
 	m_gameBoard[2][6].setUnitCanTakeAction(true);
 
-	////////////////////////////////////////////////////
-	//  INFO:  Set ownership of right side goldmines
-	//m_gameBoard[0][15].setWhoUnitBelongsTo(PLAYERTWO);
-	//m_gameBoard[1][15].setWhoUnitBelongsTo(PLAYERTWO);
-	//m_gameBoard[2][15].setWhoUnitBelongsTo(PLAYERTWO);
-	//m_gameBoard[3][15].setWhoUnitBelongsTo(PLAYERTWO);
 }
 
 void GameEngine::InitGameBoard(){
@@ -312,13 +302,17 @@ void GameEngine::InitGameBoard(){
 		}
 	}
 
-	units_sprite_pos.clear();
+	player1_units.clear();
 
 	// T, L, B, R, X, Y, Highlighted
 	RectData temp_units_pos[] =
 	{
-		{230, 20, 310, 140, 140, 500, false},
-
+		{480, 120, 520, 160, 140, 500, false}, //unit 1
+		{480, 170, 520, 210, 190, 500, false}, //unit 2
+		{480, 220, 520, 260, 240, 500, false}, //unit 3
+		{480, 270, 520, 310, 290, 500, false}, //unit 4
+		{540, 120, 580, 160, 140, 560, false}, //ability 1
+		{540, 170, 580, 210, 190, 560, false}, //ability 2
 	};
 
 	for(int i = 0; i < MAX_BATTLE_BUTTONS; i++)
@@ -335,7 +329,36 @@ void GameEngine::InitGameBoard(){
 		temp.setHighlight(temp_units_pos[i].highlight);
 		temp.setRect(rect);
 
-		units_sprite_pos.push_back(temp);		
+		player1_units.push_back(temp);		
+	}
+
+	player2_units.clear();
+
+	RectData temp_units_pos2[] =
+	{
+		{480, 120, 520, 160, 640, 500, false}, //player 2 unit 1
+		{480, 120, 520, 160, 590, 500, false}, //player 2 unit 2
+		{480, 120, 520, 160, 540, 500, false}, //player 2 unit 3
+		{480, 120, 520, 160, 490, 500, false}, //player 2 unit 4
+		{480, 120, 520, 160, 640, 560, false}, //player 2 ability 1
+		{480, 120, 520, 160, 590, 560, false}, //player 2 ability 2
+	};
+
+	for(int i = 0; i < MAX_BATTLE_BUTTONS; i++)
+	{
+		Buttons temp;
+		RECT rect;
+
+		rect.top = temp_units_pos2[i].t;
+		rect.left = temp_units_pos2[i].l;
+		rect.bottom = temp_units_pos2[i].b;
+		rect.right = temp_units_pos2[i].r;
+
+		temp.setPosition(temp_units_pos2[i].x, temp_units_pos2[i].y);
+		temp.setHighlight(temp_units_pos2[i].highlight);
+		temp.setRect(rect);
+
+		player2_units.push_back(temp);		
 	}
 
 	//////////////////////////////////////////////////////////
@@ -379,97 +402,38 @@ void GameEngine::Update(float dt)
 	//////////////////////////////////////////////////////////////////////////
 	// Get and Acquire Keyboard Input
 	//////////////////////////////////////////////////////////////////////////
-
-	// buffer - Stores our keyboard device state
-	char buffer[256];
-	ZeroMemory(buffer, sizeof(buffer));
-
 	// Get the input device state
 	HRESULT hr;
-	hr = m_pDIKeyboard->GetDeviceState( sizeof(buffer), (LPVOID)&buffer );
-
-	if(FAILED(hr))
+	hr = m_pDIKeyboard->Acquire();
+	if( FAILED(hr) )							//if keyboard fails to acquire
 	{
-		hr = m_pDIKeyboard->Acquire();
-
-		// Device has probably been lost if failed, if so keep trying to get it until it’s found.
-		while( hr == DIERR_INPUTLOST)
-		{
-			hr = m_pDIKeyboard->Acquire();
-		}
-
-		// If we failed for some other reason
-		if(FAILED(hr))
-			return;
-
-		// Read the device state again
-		m_pDIKeyboard->GetDeviceState(sizeof(buffer), buffer);
-	}
+		ZeroMemory(buffer, sizeof(buffer) );	//clear keyboard buffer memory
+		hr = m_pDIKeyboard->Acquire();				//and re-acquire
+	}else										//else get the state of the keyboard
+		hr = m_pDIKeyboard->GetDeviceState( sizeof(buffer),  (LPVOID)&buffer ); 
 
 	//////////////////////////////////////////////////////////////////////////
 	// Get and Acquire Mouse Input
 	//////////////////////////////////////////////////////////////////////////
-	// Stores our mouse state for an 8 button mouse.
-	DIMOUSESTATE2 mouseState;
-	ZeroMemory(&mouseState, sizeof(mouseState));
-
-	// Get the input device state
-	hr = m_pDIMouse->GetDeviceState( sizeof(DIMOUSESTATE2), &mouseState );
-	if(FAILED(hr))
+	hr = m_pDIMouse->Acquire();
+	//check for failure to acquire mouse
+	if( FAILED(hr) )
 	{
-		hr = m_pDIMouse->Acquire();
-
-		// Device has probably been lost if failed, if so keep trying to get it until it’s found.
-		while( hr == DIERR_INPUTLOST)
-		{
-			hr = m_pDIMouse->Acquire();
-		}
-
-		// If we failed for some other reason
-		if(FAILED(hr))
-			return;
-		// Read the device state again
-		m_pDIMouse->GetDeviceState(sizeof(DIMOUSESTATE2), &mouseState);
-	}
-
-	//////////////////////////////////////////////////////////////////////////
-	//	Keyboard Code Examples: [DIK (DirectInput Key) codes we translate]
-	//	DIK_0 – DIK_9
-	//	DIK_NUMPAD0 – DIK_NUMPAD9
-	//	DIK_A – DIK_Z
-	//	DIK_F1 – DIK_F12
-	//	DIK_UP, DIK_DOWN, DIK_LEFT, DIK_RIGHT	// Arrow Keys
-	//	DIK_SPACE, DIK_TAB, DIK_CAPITAL, DIK_LCONTROL (Left Ctrl Key), 
-	//  DIK_RCONTROL (Right Ctrl Key), DIK_RETURN, DIK_LMENU (Left Alt Key), 
-	//  DIK_LWIN (Left Windows Key), DIK_LSHIFT (Left Shift Key), etc.
-	//	Complete list under Keyboard Device in the documentation.
-	//////////////////////////////////////////////////////////////////////////
-
-	//////////////////////////////////////////////////////////////////////////
-	//	Mouse variables:  [MouseState2 structure supports 8 button mice]
-	//	lX				-	X-axis mouse relative coordinates
-	//	lY				-	Y-axis mouse relative coordinates
-	//	lZ				-	Mouse wheel relative coordinates
-	//	rgbButtons[8]	-	Array of 8 mouse buttons
-	//
-	//	Usually mouse hardware maps the button layout in a standard way for 
-	//	the first 4 buttons, after that it depends on the mouse hardware layout
-	//	rgbButtons[0]	-	Left Mouse Button
-	//	rgbButtons[1]	-	Right Mouse Button
-	//	rgbButtons[2]	-	Middle Mouse Button (click scroll wheel)
-	//	rgbButtons[3]	-	Side Mouse Button 1
-	//	rgbButtons[4]	-	Side Mouse Button 2
-	//	rgbButtons[5]	-	Side Mouse Button 3
-	//	rgbButtons[6]	-	Side Mouse Button 4
-	//	rgbButtons[7]	-	Side Mouse Button 5
-	//////////////////////////////////////////////////////////////////////////
+		ZeroMemory(&mouseState, sizeof( DIMOUSESTATE2 ) );  //if mouse fails, clear the memory out
+		hr = m_pDIMouse->Acquire();								//and re-acquire
+	}else													//else get the state of the mouse
+		hr = m_pDIMouse->GetDeviceState( sizeof( DIMOUSESTATE2 ), &mouseState); 
 
 
 	calcDeltaTime();
 
-
-
 	fmodSystem->update();
+	//////////////////////////////////////////////////////////////////////////
+	// Mouse/Cursor updates
+	//////////////////////////////////////////////////////////////////////////
+	myMouse.update(mouseState.lX, mouseState.lY);
+	cursor.x = myMouse.cursorPos.x;
+	cursor.y = myMouse.cursorPos.y;
 
 	switch(m_gameState){
 	case MENUMAIN:
@@ -526,7 +490,7 @@ void GameEngine::Update(float dt)
 				keyIsDown[DIK_UP] = true;
 				m_gamePhase = PLAYERTWO_EVENTPHASE;
 				//if(m_gamePhase < 0)
-					//m_gamePhase = 3;
+				//m_gamePhase = 3;
 				//m_gameBoard[4][14].setAnimationRect(m_gameBoard[4][14].getAnimationRect().top, m_gameBoard[4][14].getAnimationRect().left - 70, m_gameBoard[4][14].getAnimationRect().right - 70, m_gameBoard[4][14].getAnimationRect().bottom);
 			}
 		}
@@ -539,29 +503,36 @@ void GameEngine::Update(float dt)
 
 		//////////////////////////////////////////////////
 		//// Check for units icon hover over and pressing
-		for(int i = 0; i < MAX_BATTLE_BUTTONS; i++)
+		if(m_player[0].checkIfActivePlayer())
 		{
-			if(units_sprite_pos[i].isOn(cursor.x, cursor.y, 3))
+			for(auto &Buttons: player1_units)
 			{
-				units_sprite_pos[i].setHighlight(true);
-				units_sprite_pos[i].setColor(D3DCOLOR_ARGB(255, 255, 255, 50));
-			}else
-			{
-				units_sprite_pos[i].setHighlight(false);
-				units_sprite_pos[i].setColor(D3DCOLOR_ARGB(255, 255, 255, 255));
-			}
-
-			//Check for cursor over icon option and left mouse button click
-			if(mouseState.rgbButtons[0] & 0x80 != 0)
-			{
-				if(units_sprite_pos[i].isHighlighted())
+				if(Buttons.isOn(cursor.x, cursor.y, 3))
 				{
+					Buttons.setHighlight(true);
+					Buttons.setColor(D3DCOLOR_ARGB(255, 255, 0, 0));
+				}else
+				{
+					Buttons.setHighlight(false);
+					Buttons.setColor(D3DCOLOR_ARGB(255, 255, 255, 255));
+				}
+
+				if(mouseState.rgbButtons[0])
+				{
+					int selected = 99;
+					for(int i = 0; i < 6; i++)
+						if(player1_units[i].isHighlighted())
+							selected = i;
 					//Switch states accordingly
-					switch(i)
+					switch(selected)
 					{
 					case 0: // first unit(s)
+						m_gameBoard[2][4].setOccupiedBy(ARCHERUNIT);
+						m_gameBoard[2][4].setAnimationRect(15, 10, 70, 70);
 						break;
 					case 1: // second unit(s)
+						m_gameBoard[3][4].setOccupiedBy(THIEF);
+						m_gameBoard[3][4].setAnimationRect(15, 10, 70, 70);
 						break;
 					case 2: // third unit(s)
 						break;
@@ -578,6 +549,51 @@ void GameEngine::Update(float dt)
 			}
 		}
 
+		if(m_player[1].checkIfActivePlayer())
+		{
+			for(auto &Buttons: player2_units)
+			{
+				if(Buttons.isOn(cursor.x, cursor.y, 3))
+				{
+					Buttons.setHighlight(true);
+					Buttons.setColor(D3DCOLOR_ARGB(255, 255, 0, 0));
+				}else
+				{
+					Buttons.setHighlight(false);
+					Buttons.setColor(D3DCOLOR_ARGB(255, 255, 255, 255));
+				}
+
+				if(mouseState.rgbButtons[0])
+				{
+					int selected = 99;
+					for(int i = 0; i < 6; i++)
+						if(player1_units[i].isHighlighted())
+							selected = i;
+					//Switch states accordingly
+					switch(selected)
+					{
+					case 0: // first unit(s)
+						m_gameBoard[2][10].setOccupiedBy(BLACKMAGEUNIT);
+						m_gameBoard[2][10].setAnimationRect(75, 5, 70, 145);
+						break;
+					case 1: // second unit(s)
+						m_gameBoard[3][8].setOccupiedBy(THIEF); // CHANGE THEIF
+						m_gameBoard[3][8].setAnimationRect(15, 10, 70, 70);
+						break;
+					case 2: // third unit(s)
+						break;
+					case 3: // special unit(s)
+						break;
+					case 4: // Ability 1
+						break;
+					case 5: // Ability 2
+						break;
+					default:
+						break;
+					}
+				}
+			}
+		}
 		break;
 	}
 }
@@ -795,7 +811,7 @@ void GameEngine::updateEventPhase(float dt){
 			m_projectilePosX += 100 * dt * flip;
 			m_fireballRotation += 800 * dt;
 		}
-	//	if(m_temporaryTimer > 2.0 ){
+		//	if(m_temporaryTimer > 2.0 ){
 		if( ( ( m_projectilePosX > m_gameBoard[m_attackTargetSpaceX][m_attackTargetSpaceY].getPosX() - 5 ) && ( m_projectilePosX < m_gameBoard[m_attackTargetSpaceX][m_attackTargetSpaceY].getPosX() + 5 ) ) || m_projectilePosX > 700 ){
 
 			////////////////////////////////////////////////////////////////
@@ -863,13 +879,13 @@ void GameEngine::findNextTarget(int row){
 		//  INFO:  Finds the first available target and sets it, then returns
 		//for(int i = 0; i < MAXBOARDHEIGHT; ++i){
 		for(int i = 0; i < MAXBOARDWIDTH; ++i){
-				if(m_gameBoard[row][i].getWhoUnitBelongsTo() == PLAYERTWO){
-					m_attackTargetSpaceX = row;
-					m_attackTargetSpaceY = i;
-					break;
-				}
+			if(m_gameBoard[row][i].getWhoUnitBelongsTo() == PLAYERTWO){
+				m_attackTargetSpaceX = row;
+				m_attackTargetSpaceY = i;
+				break;
 			}
 		}
+	}
 	else if(m_gamePhase == PLAYERTWO_EVENTPHASE){
 		for(int i = MAXBOARDWIDTH; i > 0; --i){
 			if(m_gameBoard[row][i].getWhoUnitBelongsTo() == PLAYERONE){
@@ -889,18 +905,10 @@ void GameEngine::Render()
 	// If the device was not created successfully, return
 	if(!m_pD3DDevice)
 		return;
-
-	//////////////////////////////////////////////////////////////////////////
-	// All draw calls between swap chain's functions, and pre-render and post- 
-	// render functions (Clear and Present, BeginScene and EndScene)
-	//////////////////////////////////////////////////////////////////////////
-
-	// Clear the back buffer, call BeginScene()
-	if(SUCCEEDED(m_pD3DDevice->Clear(0, 0, D3DCLEAR_TARGET, D3DXCOLOR(0.0f, 0.4f, 0.8f, 1.0f), 1.0f, 0)))
+	if(SUCCEEDED(m_pD3DDevice->Clear(0, 0, D3DCLEAR_TARGET, D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f), 1.0f, 0)))
 	{
 		if(SUCCEEDED(m_pD3DDevice->BeginScene()))
 		{
-			// Call Sprite's Begin to start rendering 2D sprite objects
 			if(SUCCEEDED(m_pD3DSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_SORT_DEPTH_FRONTTOBACK)))
 			{
 				///////////////////////////////////////////////////
@@ -918,9 +926,25 @@ void GameEngine::Render()
 					drawBackground();
 					drawGameBoard();
 					drawPlayers();
-					drawIcons(0);
+					//Check which character player is
+					if(m_player[0].characterType == ARCHER)
+						drawIcons(0, m_player[0]);
+					else if(m_player[0].characterType == BLACKMAGE)
+						drawIcons(6, m_player[0]);
+					else if(m_player[0].characterType == WARRIOR)
+						drawIcons(12, m_player[0]);
+
+					if(m_player[1].characterType == BLACKMAGE)
+						drawIcons(6, m_player[1]);
+					else if(m_player[1].characterType == WARRIOR)
+						drawIcons(12, m_player[1]);
+					else if(m_player[1].characterType == ARCHER)
+						drawIcons(0, m_player[1]);
+
 					break;
 				}
+				myMouse.render(m_pD3DSprite, m_cursor, m_cursorInfo);
+
 				m_pD3DSprite->End();
 			}
 			/////////////////////////////////////////////
@@ -1156,7 +1180,7 @@ void GameEngine::drawGameBoard(){
 		D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
 		m_pD3DSprite->SetTransform(&worldMat);
 		m_pD3DSprite->Draw(m_arrow, 0, &D3DXVECTOR3(m_arrowInfo.Width * 0.5f, m_arrowInfo.Height * 0.5f, 0.0f),
-					0, D3DCOLOR_ARGB(255, 255, 255, 255));
+			0, D3DCOLOR_ARGB(255, 255, 255, 255));
 		if(m_fireBallActive){
 			D3DXMatrixIdentity(&transMat);
 			D3DXMatrixIdentity(&scaleMat);
@@ -1317,28 +1341,34 @@ void GameEngine::drawUIText(){
 		m_pD3DFont->DrawText(0, buffer, -1, &m_floatingTextRect, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 0, 0));
 	}
 
+	//Drawing cursor positions onto screen
+	RECT cursorRect;
+	GetClientRect(m_hWnd, &cursorRect);
+	cursorRect.top = 470;
+	cursorRect.left = 300;
+	swprintf_s(buffer, 128, L"%f", cursor.x);
+	m_pD3DFont->DrawText(0, buffer, -1, &cursorRect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
+	cursorRect.top = 500;
+	swprintf_s(buffer, 128, L"%f", cursor.y);
+	m_pD3DFont->DrawText(0, buffer, -1, &cursorRect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
 };
 
 void GameEngine::calcDeltaTime(){
 	m_deltaTime = difftime(time(0), start);
 };
 
-void GameEngine::drawIcons(int thisButton)
+void GameEngine::drawIcons(int thisButton , Character thisPlayer)
 {
-	for(auto &Buttons: units_sprite_pos)
+	//ARCHER UNIT BUTTONS
+	if(thisButton == 0 && thisPlayer.getPlayerNumber() == 0)
 	{
 		D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
 		D3DXMatrixIdentity(&transMat);
 		D3DXMatrixIdentity(&scaleMat);
 		D3DXMatrixIdentity(&rotMat);
 		D3DXMatrixIdentity(&worldMat);
-
-		for(unsigned int i = 0; i <= units_sprite_pos.size(); i++)
+		for(auto &Buttons: player1_units)
 		{
-			//Checking if thisButton is starting at a certain #
-			// For Archer thisButton should start at 0
-			// For Black Mage thisButton should start at 6
-			// Warrior thisButton start at 12
 			if(thisButton == ARCHERBUTTON)
 			{
 				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
@@ -1355,7 +1385,7 @@ void GameEngine::drawIcons(int thisButton)
 			if(thisButton == THIEFBUTTON)
 			{
 				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
-				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x+50, Buttons.getPosition().y, 0.0f);
+				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x, Buttons.getPosition().y, 0.0f);
 				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
 				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
 
@@ -1368,7 +1398,7 @@ void GameEngine::drawIcons(int thisButton)
 			if(thisButton == WOLFBUTTON)
 			{
 				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
-				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x+100, Buttons.getPosition().y, 0.0f);
+				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x, Buttons.getPosition().y, 0.0f);
 				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
 				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
 
@@ -1381,7 +1411,7 @@ void GameEngine::drawIcons(int thisButton)
 			if(thisButton == WALLBUTTON)
 			{
 				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
-				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x+120, Buttons.getPosition().y, 0.0f);
+				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x, Buttons.getPosition().y, 0.0f);
 				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
 				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
 
@@ -1390,24 +1420,88 @@ void GameEngine::drawIcons(int thisButton)
 				m_pD3DSprite->Draw(m_wallIcon, 0, &D3DXVECTOR3(m_wallIconInfo.Width * 0.5f, m_wallIconInfo.Height * 0.5f, 0.0f),
 					0, D3DCOLOR_ARGB(255, 255, 255, 255));
 			}
-
-			if(thisButton == BLACKHOLEBUTTON)
+			thisButton += 1;
+		}
+	}
+	else if( thisButton == 0  && thisPlayer.getPlayerNumber() == 1)
+	{
+		for(auto &Buttons: player2_units)
+		{
+			D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
+			D3DXMatrixIdentity(&transMat);
+			D3DXMatrixIdentity(&scaleMat);
+			D3DXMatrixIdentity(&rotMat);
+			D3DXMatrixIdentity(&worldMat);
+			if(thisButton == ARCHERBUTTON)
 			{
 				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
-				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x+500, Buttons.getPosition().y+60, 0.0f);
+				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x, Buttons.getPosition().y, 0.0f);
 				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
 				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
 
 				m_pD3DSprite->SetTransform(&worldMat);
 
-				m_pD3DSprite->Draw(m_blackHoleIcon, 0, &D3DXVECTOR3(m_blackHoleIconInfo.Width * 0.5f, m_blackHoleIconInfo.Height * 0.5f, 0.0f),
+				m_pD3DSprite->Draw(m_archerIcon, 0, &D3DXVECTOR3(m_archerIconInfo.Width * 0.5f, m_archerIconInfo.Height * 0.5f, 0.0f),
 					0, D3DCOLOR_ARGB(255, 255, 255, 255));
 			}
 
+			if(thisButton == THIEFBUTTON)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
+				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x, Buttons.getPosition().y, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_thiefIcon, 0, &D3DXVECTOR3(m_thiefIconInfo.Width * 0.5f, m_thiefIconInfo.Height * 0.5f, 0.0f),
+					0, D3DCOLOR_ARGB(255, 255, 255, 255));
+			}
+
+			if(thisButton == WOLFBUTTON)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
+				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x, Buttons.getPosition().y, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_wolfIcon, 0, &D3DXVECTOR3(m_wolfIconInfo.Width * 0.5f, m_wolfIconInfo.Height * 0.5f, 0.0f),
+					0, D3DCOLOR_ARGB(255, 255, 255, 255));
+			}
+
+			if(thisButton == WALLBUTTON)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
+				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x, Buttons.getPosition().y, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_wallIcon, 0, &D3DXVECTOR3(m_wallIconInfo.Width * 0.5f, m_wallIconInfo.Height * 0.5f, 0.0f),
+					0, D3DCOLOR_ARGB(255, 255, 255, 255));
+			}
+			thisButton +=1;
+		}
+	}
+
+	//BLACKMAGE UNIT BUTTONS
+	if(thisButton == 6 && thisPlayer.getPlayerNumber() == 0)
+	{
+		D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
+		D3DXMatrixIdentity(&transMat);
+		D3DXMatrixIdentity(&scaleMat);
+		D3DXMatrixIdentity(&rotMat);
+		D3DXMatrixIdentity(&worldMat);
+
+		for(auto &Buttons: player1_units)
+		{
 			if(thisButton == BLACKMAGEBUTTON)
 			{
 				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
-				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x+500, Buttons.getPosition().y, 0.0f);
+				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x, Buttons.getPosition().y, 0.0f);
 				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
 				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
 
@@ -1420,7 +1514,7 @@ void GameEngine::drawIcons(int thisButton)
 			if(thisButton == GOLEMBUTTON)
 			{
 				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
-				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x+400, Buttons.getPosition().y, 0.0f);
+				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x, Buttons.getPosition().y, 0.0f);
 				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
 				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
 
@@ -1430,6 +1524,69 @@ void GameEngine::drawIcons(int thisButton)
 					0, D3DCOLOR_ARGB(255, 255, 255, 255));
 			}
 
+			if(thisButton == BLACKMAGEABILITY2)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
+				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x, Buttons.getPosition().y, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_blackHoleIcon, 0, &D3DXVECTOR3(m_blackHoleIconInfo.Width * 0.5f, m_blackHoleIconInfo.Height * 0.5f, 0.0f),
+					0, D3DCOLOR_ARGB(255, 255, 255, 255));
+			}
+			thisButton +=1;
+		}
+	}
+	else if(thisButton == 6 && thisPlayer.getPlayerNumber() == 1)
+	{
+		D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
+		D3DXMatrixIdentity(&transMat);
+		D3DXMatrixIdentity(&scaleMat);
+		D3DXMatrixIdentity(&rotMat);
+		D3DXMatrixIdentity(&worldMat);
+
+		for(auto &Buttons: player2_units)
+		{
+			if(thisButton == BLACKMAGEBUTTON)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
+				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x, Buttons.getPosition().y, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_blackMageIcon, 0, &D3DXVECTOR3(m_blackMageIconInfo.Width * 0.5f, m_blackMageIconInfo.Height * 0.5f, 0.0f),
+					0, D3DCOLOR_ARGB(255, 255, 255, 255));
+			}
+
+			if(thisButton == GOLEMBUTTON)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
+				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x, Buttons.getPosition().y, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_golemIcon, 0, &D3DXVECTOR3(m_golemIconInfo.Width * 0.5f, m_golemIconInfo.Height * 0.5f, 0.0f),
+					0, D3DCOLOR_ARGB(255, 255, 255, 255));
+			}
+
+			if(thisButton == BLACKMAGEABILITY2)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
+				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x, Buttons.getPosition().y, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_blackHoleIcon, 0, &D3DXVECTOR3(m_blackHoleIconInfo.Width * 0.5f, m_blackHoleIconInfo.Height * 0.5f, 0.0f),
+					0, D3DCOLOR_ARGB(255, 255, 255, 255));
+			}
 			thisButton +=1;
 		}
 	}

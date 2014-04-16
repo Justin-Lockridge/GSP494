@@ -22,6 +22,7 @@
 #include "Character.h"
 #include "BoardSpace.h"
 #include "Buttons.h"
+#include "Cursor.h"
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //  Direct3D headers && includes
 #include <d3d9.h>
@@ -50,7 +51,7 @@
 #define MAXBOARDHEIGHT 5
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Define for buttons used in battle
-#define MAX_BATTLE_BUTTONS 12
+#define MAX_BATTLE_BUTTONS 6
 
 class GameEngine{
 	//////////////////////////////////////////////////////////////////////////
@@ -85,14 +86,14 @@ class GameEngine{
 	// Sprite Variables
 	//////////////////////////////////////////////////////////////////////////
 	ID3DXSprite*		m_pD3DSprite;	// Sprite Object
-	IDirect3DTexture9*	m_battleBackgroundOne, *m_gamePiece, *m_archerCharacter, *m_blackMageCharacter, *m_playerUIBackground,
+	IDirect3DTexture9*	m_cursor,*m_battleBackgroundOne, *m_gamePiece, *m_archerCharacter, *m_blackMageCharacter, *m_playerUIBackground,
 						*m_goldMine, *m_archerUnit, *m_blackMageUnit, *m_arrow, *m_fireball, *m_archerArrow;		// Texture Object for a sprite
-	D3DXIMAGE_INFO		m_battleBackgroundOneInfo, m_gamePieceInfo, m_archerCharacterInfo, m_blackMageCharacterInfo, m_playerUIBackgroundInfo,
+	D3DXIMAGE_INFO		m_cursorInfo,m_battleBackgroundOneInfo, m_gamePieceInfo, m_archerCharacterInfo, m_blackMageCharacterInfo, m_playerUIBackgroundInfo,
 						m_goldMineInfo, m_archerUnitInfo, m_blackMageUnitInfo, m_arrowInfo, m_fireballInfo, m_archerArrowInfo;	// File details of a texture
 
 	//Clickable Button Icons
-	std::vector<Buttons> units_sprite_pos;
-
+	std::vector<Buttons> player1_units;
+	std::vector<Buttons> player2_units;
 	IDirect3DTexture9*	m_archerIcon, *m_golemIcon, *m_blackMageIcon, *m_thiefIcon, *m_wolfIcon, *m_blackHoleIcon, *m_wallIcon;
 	D3DXIMAGE_INFO		m_archerIconInfo, m_golemIconInfo, m_blackMageIconInfo, m_thiefIconInfo, m_wolfIconInfo, m_blackHoleIconInfo, m_wallIconInfo;
 
@@ -104,8 +105,12 @@ class GameEngine{
 	IDirectInputDevice8* m_pDIMouse;	// Mouse Device 
 
 	//////////////////////////////////////////////////////////////////////////
-	//  Mouse pos
+	//  Mouse Information
+	Cursor myMouse;
+	DIMOUSESTATE2 mouseState;
 	D3DXVECTOR2 cursor;
+	char buffer[256];
+	
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//  Audio Includes
@@ -183,6 +188,6 @@ class GameEngine{
 	void drawUIText();
 	void calcDeltaTime();
 
-	void drawIcons(int);
+	void drawIcons(int, Character);
 	
 };

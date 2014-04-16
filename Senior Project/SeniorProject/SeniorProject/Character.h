@@ -1,9 +1,10 @@
 #pragma once
 #include "DefinesAndEnums.h"
 class Character{
-	int characterType, playerNumber, currentHealth, maxHealth, currentSpecial, maxSpecial, gold;
+	int  playerNumber, currentHealth, maxHealth, currentSpecial, maxSpecial, gold;
 	bool activePlayer;
 public:
+	int characterType;
 	Character();
 	~Character();
 
