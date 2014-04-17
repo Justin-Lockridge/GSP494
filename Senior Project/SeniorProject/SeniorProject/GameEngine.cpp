@@ -468,7 +468,6 @@ void GameEngine::Update(float dt)
 					m_player[0].setActivePlayer(false);
 					m_player[1].setActivePlayer(true);
 				}
-				//m_gameBoard[4][14].setAnimationRect(m_gameBoard[4][14].getAnimationRect().top, m_gameBoard[4][14].getAnimationRect().left + 70, m_gameBoard[4][14].getAnimationRect().right + 70, m_gameBoard[4][14].getAnimationRect().bottom);
 			}
 		}
 		else
@@ -479,7 +478,6 @@ void GameEngine::Update(float dt)
 				m_gamePhase -= 1;
 				if(m_gamePhase < 0)
 					m_gamePhase = 3;
-				//m_gameBoard[4][14].setAnimationRect(m_gameBoard[4][14].getAnimationRect().top, m_gameBoard[4][14].getAnimationRect().left - 70, m_gameBoard[4][14].getAnimationRect().right - 70, m_gameBoard[4][14].getAnimationRect().bottom);
 			}
 		}
 		else
@@ -488,9 +486,6 @@ void GameEngine::Update(float dt)
 			if(!keyIsDown[DIK_UP]){
 				keyIsDown[DIK_UP] = true;
 				m_gamePhase = PLAYERTWO_EVENTPHASE;
-				//if(m_gamePhase < 0)
-				//m_gamePhase = 3;
-				//m_gameBoard[4][14].setAnimationRect(m_gameBoard[4][14].getAnimationRect().top, m_gameBoard[4][14].getAnimationRect().left - 70, m_gameBoard[4][14].getAnimationRect().right - 70, m_gameBoard[4][14].getAnimationRect().bottom);
 			}
 		}
 		else
@@ -501,7 +496,7 @@ void GameEngine::Update(float dt)
 		updateAnimations(dt);
 
 		//////////////////////////////////////////////////
-		//// Check for units icon hover over and pressing
+		// Check for units icon hover over and pressing
 		if(m_player[0].checkIfActivePlayer())
 		{
 			for(auto &Buttons: player1_units)
@@ -526,16 +521,10 @@ void GameEngine::Update(float dt)
 					switch(selected)
 					{
 					case 0: // first unit(s)
-						//m_gameBoard[2][4].setOccupiedBy(ARCHERUNIT);
-						//m_gameBoard[2][4].setAnimationRect(15, 10, 70, 70);
-						//m_gameBoard[2][4].setWhoUnitBelongsTo(PLAYERONE);
-						//m_gameBoard[2][4].setUnitCanTakeAction(true);
 						m_unit[2][4].addUnit( ARCHERUNIT, PLAYERONE );
 						break;
 					case 1: // second unit(s)
 						m_unit[3][4].addUnit( THIEF, PLAYERONE );
-						//m_gameBoard[3][4].setOccupiedBy(THIEF);
-						//m_gameBoard[3][4].setAnimationRect(15, 10, 70, 70);
 						break;
 					case 2: // third unit(s)
 						break;
@@ -552,7 +541,7 @@ void GameEngine::Update(float dt)
 			}
 		}
 
-		if(m_player[1].checkIfActivePlayer())
+		if(m_player[2].checkIfActivePlayer())
 		{
 			for(auto &Buttons: player2_units)
 			{
@@ -576,15 +565,9 @@ void GameEngine::Update(float dt)
 					switch(selected)
 					{
 					case 0: // first unit(s)
-						//m_gameBoard[2][10].setOccupiedBy(BLACKMAGEUNIT);
-						//m_gameBoard[2][10].setAnimationRect(75, 5, 70, 145);
-						//m_gameBoard[2][10].setWhoUnitBelongsTo(PLAYERTWO);
-						//m_gameBoard[2][10].setUnitCanTakeAction(true);
 						m_unit[2][10].addUnit( BLACKMAGEUNIT, PLAYERTWO );
 						break;
 					case 1: // second unit(s)
-						//m_gameBoard[3][8].setOccupiedBy(THIEF); // CHANGE THEIF
-						//m_gameBoard[3][8].setAnimationRect(15, 10, 70, 70);
 						break;
 					case 2: // third unit(s)
 						break;
@@ -988,7 +971,6 @@ void GameEngine::Render()
 				drawUIText();
 				break;
 			}
-
 			m_pD3DDevice->EndScene();
 		}
 		m_pD3DDevice->Present(0, 0, 0, 0);
@@ -1042,7 +1024,6 @@ void GameEngine::Shutdown()
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//  Releases Audio
 	fmodSystem->release();
-
 }
 
 void GameEngine::drawBackground(){
@@ -1451,8 +1432,10 @@ void GameEngine::drawIcons(int thisButton , Character thisPlayer)
 			}
 			thisButton += 1;
 		}
+		thisButton = 99;
 	}
-	else if( thisButton == 0  && thisPlayer.getPlayerNumber() == 1)
+	
+	if( thisButton == 0  && thisPlayer.getPlayerNumber() == 1)
 	{
 		for(auto &Buttons: player2_units)
 		{
@@ -1514,6 +1497,7 @@ void GameEngine::drawIcons(int thisButton , Character thisPlayer)
 			}
 			thisButton +=1;
 		}
+		thisButton = 99;
 	}
 
 	//BLACKMAGE UNIT BUTTONS
@@ -1567,8 +1551,10 @@ void GameEngine::drawIcons(int thisButton , Character thisPlayer)
 			}
 			thisButton +=1;
 		}
+		thisButton = 99;
 	}
-	else if(thisButton == 6 && thisPlayer.getPlayerNumber() == 1)
+
+	if(thisButton == 6 && thisPlayer.getPlayerNumber() == 1)
 	{
 		D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
 		D3DXMatrixIdentity(&transMat);
@@ -1618,5 +1604,6 @@ void GameEngine::drawIcons(int thisButton , Character thisPlayer)
 			}
 			thisButton +=1;
 		}
+		thisButton = 99;
 	}
 }
