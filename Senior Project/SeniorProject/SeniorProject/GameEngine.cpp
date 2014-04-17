@@ -1044,8 +1044,6 @@ void GameEngine::drawBackground(){
 
 };
 
-
-
 void GameEngine::drawGameBoard(){
 	//////////////////////////////////////////////////////////////////////////
 	// INFO:  Draws gameboard
@@ -1367,6 +1365,7 @@ void GameEngine::drawIcons(int thisButton , Character thisPlayer)
 		D3DXMatrixIdentity(&scaleMat);
 		D3DXMatrixIdentity(&rotMat);
 		D3DXMatrixIdentity(&worldMat);
+
 		for(auto &Buttons: player1_units)
 		{
 			if(thisButton == ARCHERBUTTON)
@@ -1422,8 +1421,10 @@ void GameEngine::drawIcons(int thisButton , Character thisPlayer)
 			}
 			thisButton += 1;
 		}
+		thisButton = 99;
 	}
-	else if( thisButton == 0  && thisPlayer.getPlayerNumber() == 1)
+	
+	if( thisButton == 0  && thisPlayer.getPlayerNumber() == 1)
 	{
 		for(auto &Buttons: player2_units)
 		{
@@ -1432,6 +1433,7 @@ void GameEngine::drawIcons(int thisButton , Character thisPlayer)
 			D3DXMatrixIdentity(&scaleMat);
 			D3DXMatrixIdentity(&rotMat);
 			D3DXMatrixIdentity(&worldMat);
+
 			if(thisButton == ARCHERBUTTON)
 			{
 				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
@@ -1483,8 +1485,9 @@ void GameEngine::drawIcons(int thisButton , Character thisPlayer)
 				m_pD3DSprite->Draw(m_wallIcon, 0, &D3DXVECTOR3(m_wallIconInfo.Width * 0.5f, m_wallIconInfo.Height * 0.5f, 0.0f),
 					0, D3DCOLOR_ARGB(255, 255, 255, 255));
 			}
-			thisButton +=1;
+			thisButton += 1;
 		}
+		thisButton = 99;
 	}
 
 	//BLACKMAGE UNIT BUTTONS
@@ -1536,10 +1539,12 @@ void GameEngine::drawIcons(int thisButton , Character thisPlayer)
 				m_pD3DSprite->Draw(m_blackHoleIcon, 0, &D3DXVECTOR3(m_blackHoleIconInfo.Width * 0.5f, m_blackHoleIconInfo.Height * 0.5f, 0.0f),
 					0, D3DCOLOR_ARGB(255, 255, 255, 255));
 			}
-			thisButton +=1;
+			thisButton += 1;
 		}
+		thisButton = 99;
 	}
-	else if(thisButton == 6 && thisPlayer.getPlayerNumber() == 1)
+	
+	if(thisButton == 6 && thisPlayer.getPlayerNumber() == 1)
 	{
 		D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
 		D3DXMatrixIdentity(&transMat);
@@ -1589,5 +1594,6 @@ void GameEngine::drawIcons(int thisButton , Character thisPlayer)
 			}
 			thisButton +=1;
 		}
+		thisButton = 99;
 	}
 }
