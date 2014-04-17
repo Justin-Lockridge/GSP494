@@ -251,34 +251,15 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	////////////////////////////////////////////////////////
 	//  INFO:  Changed the gamestate manually for testing
 	m_gameState = BATTLE;
-	m_gameBoard[1][5].setOccupiedBy(ARCHERUNIT);
-	m_gameBoard[1][5].setAnimationRect(15, 10, 70, 70);
-	m_gameBoard[1][5].setAnimationTimer(1.34);
-	m_gameBoard[1][5].setWhoUnitBelongsTo(PLAYERTWO);
-	m_gameBoard[1][5].setUnitCanTakeAction(true);
 
-	m_gameBoard[1][14].setOccupiedBy(ARCHERUNIT);
-	m_gameBoard[1][14].setAnimationRect(15, 10, 70, 70);
-	m_gameBoard[1][14].setAnimationTimer(0.25);
-	m_gameBoard[1][14].setWhoUnitBelongsTo(PLAYERONE);
-	m_gameBoard[1][14].setUnitCanTakeAction(true);
-
-	m_gameBoard[3][9].setOccupiedBy(ARCHERUNIT);
-	m_gameBoard[3][9].setAnimationRect(15, 10, 70, 70);
-	m_gameBoard[3][9].setAnimationTimer(0.10);
-	m_gameBoard[3][9].setWhoUnitBelongsTo(PLAYERONE);
-	m_gameBoard[3][9].setUnitCanTakeAction(true);
-
-	m_gameBoard[1][1].setOccupiedBy(BLACKMAGEUNIT);
-	m_gameBoard[1][1].setAnimationRect(75, 5, 70, 145);
-	m_gameBoard[1][1].setWhoUnitBelongsTo(PLAYERONE);
-	m_gameBoard[1][1].setUnitCanTakeAction(true);
-
-	m_gameBoard[2][6].setOccupiedBy(BLACKMAGEUNIT);
-	m_gameBoard[2][6].setAnimationRect(75, 5, 70, 145);
-	m_gameBoard[2][6].setWhoUnitBelongsTo(PLAYERONE);
-	m_gameBoard[2][6].setUnitCanTakeAction(true);
-
+	m_unit[3][6].addUnit( ARCHERUNIT, PLAYERONE );
+	m_unit[2][3].addUnit( BLACKMAGEUNIT, PLAYERONE );
+	m_unit[0][2].addUnit( ARCHERUNIT, PLAYERONE );
+	m_unit[0][12].addUnit( BLACKMAGEUNIT, PLAYERTWO );
+	m_unit[2][13].addUnit( ARCHERUNIT, PLAYERTWO );
+	m_unit[4][4].addUnit( BLACKMAGEUNIT, PLAYERONE );
+	m_unit[4][10].addUnit( ARCHERUNIT, PLAYERTWO );
+	m_unit[4][12].addUnit( BLACKMAGEUNIT, PLAYERTWO );
 }
 
 void GameEngine::InitGameBoard(){
@@ -288,9 +269,21 @@ void GameEngine::InitGameBoard(){
 			m_gameBoard[i][j].setPosY(190 + i * 50);
 			m_gameBoard[i][j].setSpaceNumber( i * MAXBOARDWIDTH + j );
 			m_gameBoard[i][j].setWhoUnitBelongsTo(-1);
+			
+			m_unit[i][j].setPosX(75 + j * 43 );
+			m_unit[i][j].setPosY( 190 + i * 50 );
+			m_unit[i][j].setType(NOUNIT);
+			m_unit[i][j].setWhoUnitBelongsTo(-1);
 			//////////////////////////////////////////////
 			//  INFO:  Sets the end game spaces to be occupied by gold mines
-			if(j == 0 || j == MAXBOARDWIDTH-1){
+			if(j == 0 ){
+				m_unit[i][j].addUnit(GOLDMINES, PLAYERONE);
+				m_gameBoard[i][j].setWhoUnitBelongsTo(PLAYERONE);
+				m_gameBoard[i][j].setOccupiedBy(GOLDMINES);
+			}
+			else if (j == MAXBOARDWIDTH-1 ){
+				m_unit[i][j].addUnit(GOLDMINES, PLAYERTWO);
+				m_gameBoard[i][j].setWhoUnitBelongsTo(PLAYERTWO);
 				m_gameBoard[i][j].setOccupiedBy(GOLDMINES);
 			}
 			int testerX, testerY;
@@ -382,12 +375,13 @@ void GameEngine::InitGameBoard(){
 	m_floatingTextRect.bottom		=		0.0f;
 	m_floatingRectTopMax			=		0.0f;
 	m_floatingRectTimer				=		0.0f;
+	m_damageType					=		-1;
 	////////////////////////////////////////////////////
 	//  INFO:  Set ownership of right side goldmines
-	m_gameBoard[0][15].setWhoUnitBelongsTo(PLAYERTWO);
-	m_gameBoard[1][15].setWhoUnitBelongsTo(PLAYERTWO);
-	m_gameBoard[2][15].setWhoUnitBelongsTo(PLAYERTWO);
-	m_gameBoard[3][15].setWhoUnitBelongsTo(PLAYERTWO);
+	//m_gameBoard[0][15].setWhoUnitBelongsTo(PLAYERTWO);
+	//m_gameBoard[1][15].setWhoUnitBelongsTo(PLAYERTWO);
+	//m_gameBoard[2][15].setWhoUnitBelongsTo(PLAYERTWO);
+	//m_gameBoard[3][15].setWhoUnitBelongsTo(PLAYERTWO);
 };
 
 void GameEngine::Update(float dt)
@@ -462,12 +456,17 @@ void GameEngine::Update(float dt)
 				keyIsDown[DIK_RIGHT] = true;
 				m_gamePhase += 1;
 				if(m_gamePhase > 3){
-					m_gameBoard[1][4].setUnitCanTakeAction(true);
-					m_gameBoard[1][14].setUnitCanTakeAction(true);
-					m_gameBoard[3][9].setUnitCanTakeAction(true);
-					m_gameBoard[0][1].setUnitCanTakeAction(true);
-					m_gameBoard[2][6].setUnitCanTakeAction(true);
 					m_gamePhase = 0;
+				}
+				if(m_gamePhase == PLAYERONE_PLAYPHASE || m_gamePhase == PLAYERONE_EVENTPHASE){
+					resetUnitActions(PLAYERONE);
+					m_player[1].setActivePlayer(false);
+					m_player[0].setActivePlayer(true);
+				}
+				else {
+					resetUnitActions(PLAYERTWO);
+					m_player[0].setActivePlayer(false);
+					m_player[1].setActivePlayer(true);
 				}
 				//m_gameBoard[4][14].setAnimationRect(m_gameBoard[4][14].getAnimationRect().top, m_gameBoard[4][14].getAnimationRect().left + 70, m_gameBoard[4][14].getAnimationRect().right + 70, m_gameBoard[4][14].getAnimationRect().bottom);
 			}
@@ -527,12 +526,16 @@ void GameEngine::Update(float dt)
 					switch(selected)
 					{
 					case 0: // first unit(s)
-						m_gameBoard[2][4].setOccupiedBy(ARCHERUNIT);
-						m_gameBoard[2][4].setAnimationRect(15, 10, 70, 70);
+						//m_gameBoard[2][4].setOccupiedBy(ARCHERUNIT);
+						//m_gameBoard[2][4].setAnimationRect(15, 10, 70, 70);
+						//m_gameBoard[2][4].setWhoUnitBelongsTo(PLAYERONE);
+						//m_gameBoard[2][4].setUnitCanTakeAction(true);
+						m_unit[2][4].addUnit( ARCHERUNIT, PLAYERONE );
 						break;
 					case 1: // second unit(s)
-						m_gameBoard[3][4].setOccupiedBy(THIEF);
-						m_gameBoard[3][4].setAnimationRect(15, 10, 70, 70);
+						m_unit[3][4].addUnit( THIEF, PLAYERONE );
+						//m_gameBoard[3][4].setOccupiedBy(THIEF);
+						//m_gameBoard[3][4].setAnimationRect(15, 10, 70, 70);
 						break;
 					case 2: // third unit(s)
 						break;
@@ -567,18 +570,21 @@ void GameEngine::Update(float dt)
 				{
 					int selected = 99;
 					for(int i = 0; i < 6; i++)
-						if(player1_units[i].isHighlighted())
+						if(player2_units[i].isHighlighted())
 							selected = i;
 					//Switch states accordingly
 					switch(selected)
 					{
 					case 0: // first unit(s)
-						m_gameBoard[2][10].setOccupiedBy(BLACKMAGEUNIT);
-						m_gameBoard[2][10].setAnimationRect(75, 5, 70, 145);
+						//m_gameBoard[2][10].setOccupiedBy(BLACKMAGEUNIT);
+						//m_gameBoard[2][10].setAnimationRect(75, 5, 70, 145);
+						//m_gameBoard[2][10].setWhoUnitBelongsTo(PLAYERTWO);
+						//m_gameBoard[2][10].setUnitCanTakeAction(true);
+						m_unit[2][10].addUnit( BLACKMAGEUNIT, PLAYERTWO );
 						break;
 					case 1: // second unit(s)
-						m_gameBoard[3][8].setOccupiedBy(THIEF); // CHANGE THEIF
-						m_gameBoard[3][8].setAnimationRect(15, 10, 70, 70);
+						//m_gameBoard[3][8].setOccupiedBy(THIEF); // CHANGE THEIF
+						//m_gameBoard[3][8].setAnimationRect(15, 10, 70, 70);
 						break;
 					case 2: // third unit(s)
 						break;
@@ -596,6 +602,7 @@ void GameEngine::Update(float dt)
 		}
 		break;
 	}
+	int tester = 0;
 }
 
 void GameEngine::updateAnimations(float dt){
@@ -603,62 +610,64 @@ void GameEngine::updateAnimations(float dt){
 	for(int i = 0; i < MAXBOARDHEIGHT; ++i){
 		for(int j = 0; j < MAXBOARDWIDTH; ++j){
 
-
-			//////////////////////////////////////////////////////////////////////////////////
-			//  INFO:  If the gamespace is occupied by a unit, draw that unit.  
-			//  DETAIL:  Each gamespace will have
-			switch(m_gameBoard[i][j].getOccupiedBy()){
-			case NOUNIT:
-				break;
-			case GOLDMINES:
-				break;
-			case WALL:
-				break;
-			case WARRIORUNIT:
-				break;
-			case MARKSMAN:
-				break;
-			case CAVALRY:
-				break;
-			case WOLF:
-				break;
-			case ARCHERUNIT:
-				m_gameBoard[i][j].adjustAnimationTimer(dt);
-				if(m_gameBoard[i][j].getAnimationTimer() > 0.15f){
-					m_gameBoard[i][j].setAnimationRect(m_gameBoard[i][j].getAnimationRect().top, m_gameBoard[i][j].getAnimationRect().left + 64, m_gameBoard[i][j].getAnimationRect().right + 64, m_gameBoard[i][j].getAnimationRect().bottom);
-					m_gameBoard[i][j].adjustAnimationTimer(-0.15f);
-					if(m_gameBoard[i][j].getAnimationRect().right > 250)
-						m_gameBoard[i][j].setAnimationRect(15, 10, 70, 70);
-				}
-				break;
-			case THIEF:
-				break;
-			case GOLEM:
-				break;
-			case BLACKMAGEUNIT:
-				m_gameBoard[i][j].adjustAnimationTimer(dt);
-				if(m_gameBoard[i][j].getAnimationTimer() > 0.15f){
-					m_gameBoard[i][j].adjustAnimationTimer(-0.15f);
-					switch(m_gameBoard[i][j].getAnimationRect().left){
-					case 5:
-						m_gameBoard[i][j].setAnimationRect(m_gameBoard[i][j].getAnimationRect().top, m_gameBoard[i][j].getAnimationRect().left + 70, m_gameBoard[i][j].getAnimationRect().right + 70, m_gameBoard[i][j].getAnimationRect().bottom);
-						break;
-					case 75:
-						m_gameBoard[i][j].setAnimationRect(m_gameBoard[i][j].getAnimationRect().top, m_gameBoard[i][j].getAnimationRect().left + 65, m_gameBoard[i][j].getAnimationRect().right + 65, m_gameBoard[i][j].getAnimationRect().bottom);
-						break;
-					case 140:
-						m_gameBoard[i][j].setAnimationRect(m_gameBoard[i][j].getAnimationRect().top, m_gameBoard[i][j].getAnimationRect().left + 65, m_gameBoard[i][j].getAnimationRect().right + 65, m_gameBoard[i][j].getAnimationRect().bottom);
-						break;
-					case 205:
-						m_gameBoard[i][j].setAnimationRect(75, 5, 70, 145);
-						break;
-					}
-
-				}
-				break;
-			case WARLOCK:
-				break;
+			if(m_unit[i][j].checkIfActive()){
+				m_unit[i][j].updateAnimations(dt);
 			}
+			////////////////////////////////////////////////////////////////////////////////////
+			////  INFO:  If the gamespace is occupied by a unit, draw that unit.  
+			////  DETAIL:  Each gamespace will have
+			//switch(m_gameBoard[i][j].getOccupiedBy()){
+			//case NOUNIT:
+			//	break;
+			//case GOLDMINES:
+			//	break;
+			//case WALL:
+			//	break;
+			//case WARRIORUNIT:
+			//	break;
+			//case MARKSMAN:
+			//	break;
+			//case CAVALRY:
+			//	break;
+			//case WOLF:
+			//	break;
+			//case ARCHERUNIT:
+			//	//m_gameBoard[i][j].adjustAnimationTimer(dt);
+			//	//if(m_gameBoard[i][j].getAnimationTimer() > 0.15f){
+			//	//	m_gameBoard[i][j].setAnimationRect(m_gameBoard[i][j].getAnimationRect().top, m_gameBoard[i][j].getAnimationRect().left + 64, m_gameBoard[i][j].getAnimationRect().right + 64, m_gameBoard[i][j].getAnimationRect().bottom);
+			//	//	m_gameBoard[i][j].adjustAnimationTimer(-0.15f);
+			//	//	if(m_gameBoard[i][j].getAnimationRect().right > 250)
+			//	//		m_gameBoard[i][j].setAnimationRect(15, 10, 70, 70);
+			//	//}
+			//	break;
+			//case THIEF:
+			//	break;
+			//case GOLEM:
+			//	break;
+			//case BLACKMAGEUNIT:
+			//	//m_gameBoard[i][j].adjustAnimationTimer(dt);
+			//	//if(m_gameBoard[i][j].getAnimationTimer() > 0.15f){
+			//	//	m_gameBoard[i][j].adjustAnimationTimer(-0.15f);
+			//	//	switch(m_gameBoard[i][j].getAnimationRect().left){
+			//	//	case 5:
+			//	//		m_gameBoard[i][j].setAnimationRect(m_gameBoard[i][j].getAnimationRect().top, m_gameBoard[i][j].getAnimationRect().left + 70, m_gameBoard[i][j].getAnimationRect().right + 70, m_gameBoard[i][j].getAnimationRect().bottom);
+			//	//		break;
+			//	//	case 75:
+			//	//		m_gameBoard[i][j].setAnimationRect(m_gameBoard[i][j].getAnimationRect().top, m_gameBoard[i][j].getAnimationRect().left + 65, m_gameBoard[i][j].getAnimationRect().right + 65, m_gameBoard[i][j].getAnimationRect().bottom);
+			//	//		break;
+			//	//	case 140:
+			//	//		m_gameBoard[i][j].setAnimationRect(m_gameBoard[i][j].getAnimationRect().top, m_gameBoard[i][j].getAnimationRect().left + 65, m_gameBoard[i][j].getAnimationRect().right + 65, m_gameBoard[i][j].getAnimationRect().bottom);
+			//	//		break;
+			//	//	case 205:
+			//	//		m_gameBoard[i][j].setAnimationRect(75, 5, 70, 145);
+			//	//		break;
+			//	//	}
+
+			//	//}
+			//	break;
+			//case WARLOCK:
+			//	break;
+			//}
 		}
 	}
 };
@@ -677,6 +686,7 @@ void GameEngine::updateEventPhase(float dt){
 			m_floatingTextRect.right	=		0.0f;
 			m_floatingTextRect.bottom	=		0.0f;
 			m_floatingTextActive = false;
+			m_damageType				=		-1;
 		}
 	}
 	////////////////////////////////////////////////////////////////////////////////////////////////
@@ -686,11 +696,11 @@ void GameEngine::updateEventPhase(float dt){
 			for(int i = 0; i < MAXBOARDHEIGHT; ++i){
 				int trial = 0;
 				for(int j = MAXBOARDWIDTH-1; j > 0; --j){
-					if(m_gameBoard[i][j].getWhoUnitBelongsTo() == PLAYERONE && m_gameBoard[i][j].canUnitTakeAction()){
+					if(m_unit[i][j].getWhoUnitBelongsTo() == PLAYERONE && m_unit[i][j].canUnitTakeAction() && m_unit[i][j].getType() > GOLDMINES){
 						m_unitCurrentlyAttacking = true;
 						m_arrowForAttackingUnitPosX	=	m_gameBoard[i][j].getPosX() + 10;
 						m_arrowForAttackingUnitPosY	=	m_gameBoard[i][j].getPosY() - 40;
-						switch(m_gameBoard[i][j].getOccupiedBy()){
+						switch(m_unit[i][j].getType()){
 						case NOUNIT:
 							break;
 						case GOLDMINES:
@@ -743,11 +753,11 @@ void GameEngine::updateEventPhase(float dt){
 			for(int i = 0; i < MAXBOARDHEIGHT; ++i){
 				int trial = 0;
 				for(int j = 0; j < MAXBOARDWIDTH; ++j){
-					if(m_gameBoard[i][j].getWhoUnitBelongsTo() == PLAYERTWO && m_gameBoard[i][j].canUnitTakeAction()){
+					if(m_unit[i][j].getWhoUnitBelongsTo() == PLAYERTWO && m_unit[i][j].canUnitTakeAction() && m_unit[i][j].getType() > GOLDMINES){
 						m_unitCurrentlyAttacking = true;
 						m_arrowForAttackingUnitPosX	=	m_gameBoard[i][j].getPosX() + 10;
 						m_arrowForAttackingUnitPosY	=	m_gameBoard[i][j].getPosY() - 40;
-						switch(m_gameBoard[i][j].getOccupiedBy()){
+						switch(m_unit[i][j].getType()){
 						case NOUNIT:
 							break;
 						case GOLDMINES:
@@ -826,6 +836,9 @@ void GameEngine::updateEventPhase(float dt){
 			////////////////////////////////////////////////////////////////
 			//  INFO:  Play sound effects based on collision
 			if(m_arrowActive ){//&& m_gameBoard[m_attackingSpaceX][m_attackingSpaceY].getOccupiedBy() == GOLDMINES){
+				m_damageType	=	m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage();
+				/////////////////////////////////////////////////////
+				//  INFO:  Set damage to arrow's damage stat
 				switch(m_gameBoard[m_attackingSpaceX][m_attackingSpaceY].getOccupiedBy()){
 				case GOLDMINES:
 					fmodSystem->playSound( FMOD_CHANNEL_FREE, hitMines, false, 0 );
@@ -839,9 +852,10 @@ void GameEngine::updateEventPhase(float dt){
 				}
 			}
 			else if(m_fireBallActive){
+				m_damageType	=	m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage();
 				fmodSystem->playSound( FMOD_CHANNEL_FREE, fireballHit, false, 0 );
 			}
-			m_gameBoard[m_attackingSpaceX][m_attackingSpaceY].setUnitCanTakeAction(false);
+			m_unit[m_attackingSpaceX][m_attackingSpaceY].setUnitCanTakeAction(false);
 			m_projectilePosX = 0;
 			m_projectilePosY = 0;
 			m_attackTargetSpaceX = 0;
@@ -879,7 +893,7 @@ void GameEngine::findNextTarget(int row){
 		//  INFO:  Finds the first available target and sets it, then returns
 		//for(int i = 0; i < MAXBOARDHEIGHT; ++i){
 		for(int i = 0; i < MAXBOARDWIDTH; ++i){
-			if(m_gameBoard[row][i].getWhoUnitBelongsTo() == PLAYERTWO){
+			if(m_unit[row][i].getWhoUnitBelongsTo() == PLAYERTWO){
 				m_attackTargetSpaceX = row;
 				m_attackTargetSpaceY = i;
 				break;
@@ -888,8 +902,11 @@ void GameEngine::findNextTarget(int row){
 	}
 	else if(m_gamePhase == PLAYERTWO_EVENTPHASE){
 		for(int i = MAXBOARDWIDTH; i > 0; --i){
-			if(m_gameBoard[row][i].getWhoUnitBelongsTo() == PLAYERONE){
-				if(i > m_attackingSpaceX )
+			if(m_unit[row][i].getWhoUnitBelongsTo() == PLAYERONE){
+				//////////////////////////////////////////////////////
+				//  INFO:  If the player is
+				//  TODO:  FIX this SOON.  m_attackingSpaceY SHOULD be m_attackingSpaceX and vice versa
+				if(i > m_attackingSpaceY )
 					continue;
 				m_attackTargetSpaceX = row;
 				m_attackTargetSpaceY = i;
@@ -898,6 +915,15 @@ void GameEngine::findNextTarget(int row){
 		}
 	}
 	//}
+};
+
+void GameEngine::resetUnitActions(int playerNumber){
+	for(int i = 0; i < MAXBOARDHEIGHT; ++i){
+		for(int j = 0; j < MAXBOARDWIDTH; ++j){
+			if(m_unit[i][j].getWhoUnitBelongsTo() == playerNumber && m_unit[i][j].getType() != GOLDMINES)
+				m_unit[i][j].setUnitCanTakeAction(true);
+		}
+	}
 };
 
 void GameEngine::Render()
@@ -924,8 +950,8 @@ void GameEngine::Render()
 					break;
 				case BATTLE:
 					drawBackground();
-					drawGameBoard();
 					drawPlayers();
+					drawGameBoard();
 					//Check which character player is
 					if(m_player[0].characterType == ARCHER)
 						drawIcons(0, m_player[0]);
@@ -1044,6 +1070,8 @@ void GameEngine::drawBackground(){
 
 };
 
+
+
 void GameEngine::drawGameBoard(){
 	//////////////////////////////////////////////////////////////////////////
 	// INFO:  Draws gameboard
@@ -1079,13 +1107,13 @@ void GameEngine::drawGameBoard(){
 
 			////////////////////////////////////////////////////////////////////////////////
 			//  INFO:  For inverting images for player 2
-			if(m_gameBoard[i][j].getWhoUnitBelongsTo() == 1)
+			if(!m_unit[i][j].isFacingRight())
 				flip *= -1;
 			int offset = 0;
 			//int testX, testY;
 			//////////////////////////////////////////////////////////////////////////////////
 			//  INFO:  If the gamespace is occupied by a unit, draw that unit.  
-			switch(m_gameBoard[i][j].getOccupiedBy()){
+			switch(m_unit[i][j].getType()){
 
 			case NOUNIT:
 				break;
@@ -1112,17 +1140,17 @@ void GameEngine::drawGameBoard(){
 			case ARCHERUNIT:
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////
 				//  INFO:  Adds an offset to draw unit in the center of the gamespace
-				if(m_gameBoard[i][j].getWhoUnitBelongsTo() == PLAYERONE )
+				if(m_unit[i][j].getWhoUnitBelongsTo() == PLAYERONE )
 					offset = 33;
-				if(m_gameBoard[i][j].getWhoUnitBelongsTo() == PLAYERTWO )
+				if(m_unit[i][j].getWhoUnitBelongsTo() == PLAYERTWO )
 					offset = -15;
 				D3DXMatrixScaling(&scaleMat, 0.75f * flip, 0.74f, 0.0f);			// Scaling
-				D3DXMatrixTranslation(&transMat, m_gameBoard[i][j].getPosX() + offset, m_gameBoard[i][j].getPosY()+33, 0.0f);			// Translation
+				D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX() + offset, m_unit[i][j].getPosY()+33, 0.0f);			// Translation
 				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
 				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
 				// Set Transform
 				m_pD3DSprite->SetTransform(&worldMat);
-				m_pD3DSprite->Draw(m_archerUnit, &m_gameBoard[i][j].getAnimationRect(), &D3DXVECTOR3(m_gameBoard[i][j].getAnimationRect().right - m_gameBoard[i][j].getAnimationRect().left, m_gameBoard[i][j].getAnimationRect().bottom - m_gameBoard[i][j].getAnimationRect().top, 0.0f),
+				m_pD3DSprite->Draw(m_archerUnit, &m_unit[i][j].getUnitRect(), &D3DXVECTOR3(m_unit[i][j].getUnitRect().right - m_unit[i][j].getUnitRect().left, m_unit[i][j].getUnitRect().bottom - m_unit[i][j].getUnitRect().top, 0.0f),
 					0, D3DCOLOR_ARGB(255, 255, 255, 255));
 				break;
 			case THIEF:
@@ -1132,17 +1160,17 @@ void GameEngine::drawGameBoard(){
 			case BLACKMAGEUNIT:
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////
 				//  INFO:  Adds an offset to draw unit in the center of the gamespace
-				if(m_gameBoard[i][j].getWhoUnitBelongsTo() == PLAYERONE)
+				if(m_unit[i][j].getWhoUnitBelongsTo() == PLAYERONE)
 					offset = 35;
-				if(m_gameBoard[i][j].getWhoUnitBelongsTo() == PLAYERTWO)
+				if(m_unit[i][j].getWhoUnitBelongsTo() == PLAYERTWO)
 					offset = -15;
 				D3DXMatrixScaling(&scaleMat, 0.75f * flip, 0.74f, 0.0f);			// Scaling
-				D3DXMatrixTranslation(&transMat, m_gameBoard[i][j].getPosX() + offset, m_gameBoard[i][j].getPosY()+35, 0.0f);			// Translation
+				D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX() + offset, m_unit[i][j].getPosY()+35, 0.0f);			// Translation
 				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
 				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
 				// Set Transform
 				m_pD3DSprite->SetTransform(&worldMat);
-				m_pD3DSprite->Draw(m_blackMageUnit, &m_gameBoard[i][j].getAnimationRect(), &D3DXVECTOR3(m_gameBoard[i][j].getAnimationRect().right - m_gameBoard[i][j].getAnimationRect().left, m_gameBoard[i][j].getAnimationRect().bottom - m_gameBoard[i][j].getAnimationRect().top, 0.0f),
+				m_pD3DSprite->Draw(m_blackMageUnit, &m_unit[i][j].getUnitRect(), &D3DXVECTOR3(m_unit[i][j].getUnitRect().right - m_unit[i][j].getUnitRect().left, m_unit[i][j].getUnitRect().bottom - m_unit[i][j].getUnitRect().top, 0.0f),
 					0, D3DCOLOR_ARGB(255, 255, 255, 255));
 				break;
 			case WARLOCK:
@@ -1166,8 +1194,10 @@ void GameEngine::drawGameBoard(){
 		/////////////////////////////////////////////////////////////
 		//  INFO:  For inverting images if they belong to player 2
 		int flip = 1;
+
 		if(m_gamePhase == PLAYERTWO_EVENTPHASE)
 			flip *= -1;
+
 		D3DXMatrixIdentity(&transMat);
 		D3DXMatrixIdentity(&scaleMat);
 		D3DXMatrixIdentity(&rotMat);
@@ -1179,6 +1209,7 @@ void GameEngine::drawGameBoard(){
 		m_pD3DSprite->SetTransform(&worldMat);
 		m_pD3DSprite->Draw(m_arrow, 0, &D3DXVECTOR3(m_arrowInfo.Width * 0.5f, m_arrowInfo.Height * 0.5f, 0.0f),
 			0, D3DCOLOR_ARGB(255, 255, 255, 255));
+
 		if(m_fireBallActive){
 			D3DXMatrixIdentity(&transMat);
 			D3DXMatrixIdentity(&scaleMat);
@@ -1335,7 +1366,7 @@ void GameEngine::drawUIText(){
 	m_pD3DFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
 
 	if(m_floatingTextActive){
-		swprintf_s(buffer, 128, L"%d", 20);
+		swprintf_s(buffer, 128, L"%d", m_damageType);
 		m_pD3DFont->DrawText(0, buffer, -1, &m_floatingTextRect, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 0, 0));
 	}
 
@@ -1365,7 +1396,6 @@ void GameEngine::drawIcons(int thisButton , Character thisPlayer)
 		D3DXMatrixIdentity(&scaleMat);
 		D3DXMatrixIdentity(&rotMat);
 		D3DXMatrixIdentity(&worldMat);
-
 		for(auto &Buttons: player1_units)
 		{
 			if(thisButton == ARCHERBUTTON)
@@ -1421,10 +1451,8 @@ void GameEngine::drawIcons(int thisButton , Character thisPlayer)
 			}
 			thisButton += 1;
 		}
-		thisButton = 99;
 	}
-	
-	if( thisButton == 0  && thisPlayer.getPlayerNumber() == 1)
+	else if( thisButton == 0  && thisPlayer.getPlayerNumber() == 1)
 	{
 		for(auto &Buttons: player2_units)
 		{
@@ -1433,7 +1461,6 @@ void GameEngine::drawIcons(int thisButton , Character thisPlayer)
 			D3DXMatrixIdentity(&scaleMat);
 			D3DXMatrixIdentity(&rotMat);
 			D3DXMatrixIdentity(&worldMat);
-
 			if(thisButton == ARCHERBUTTON)
 			{
 				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
@@ -1485,9 +1512,8 @@ void GameEngine::drawIcons(int thisButton , Character thisPlayer)
 				m_pD3DSprite->Draw(m_wallIcon, 0, &D3DXVECTOR3(m_wallIconInfo.Width * 0.5f, m_wallIconInfo.Height * 0.5f, 0.0f),
 					0, D3DCOLOR_ARGB(255, 255, 255, 255));
 			}
-			thisButton += 1;
+			thisButton +=1;
 		}
-		thisButton = 99;
 	}
 
 	//BLACKMAGE UNIT BUTTONS
@@ -1539,12 +1565,10 @@ void GameEngine::drawIcons(int thisButton , Character thisPlayer)
 				m_pD3DSprite->Draw(m_blackHoleIcon, 0, &D3DXVECTOR3(m_blackHoleIconInfo.Width * 0.5f, m_blackHoleIconInfo.Height * 0.5f, 0.0f),
 					0, D3DCOLOR_ARGB(255, 255, 255, 255));
 			}
-			thisButton += 1;
+			thisButton +=1;
 		}
-		thisButton = 99;
 	}
-	
-	if(thisButton == 6 && thisPlayer.getPlayerNumber() == 1)
+	else if(thisButton == 6 && thisPlayer.getPlayerNumber() == 1)
 	{
 		D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
 		D3DXMatrixIdentity(&transMat);
@@ -1594,6 +1618,5 @@ void GameEngine::drawIcons(int thisButton , Character thisPlayer)
 			}
 			thisButton +=1;
 		}
-		thisButton = 99;
 	}
 }

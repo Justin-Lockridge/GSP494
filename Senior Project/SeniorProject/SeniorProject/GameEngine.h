@@ -23,6 +23,8 @@
 #include "BoardSpace.h"
 #include "Buttons.h"
 #include "Cursor.h"
+#include "Unit.h"
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //  Direct3D headers && includes
 #include <d3d9.h>
@@ -126,9 +128,10 @@ class GameEngine{
 
 	///////////////////////////////////////////////////////////////////////////////////////////
 	//  INFO:  Game Data
-	int m_gameState;
+	int m_gameState, m_damageType;
 	Character m_player[2];
 	BoardSpace m_gameBoard[MAXBOARDHEIGHT][MAXBOARDWIDTH];
+	Unit		m_unit[MAXBOARDHEIGHT][MAXBOARDWIDTH];
 
 	public:
 	//////////////////////////////////////////////////////////////////////////
@@ -163,6 +166,7 @@ class GameEngine{
 	void updateAnimations(float dt);
 	void updateEventPhase(float dt);
 	void findNextTarget(int row);
+	void resetUnitActions(int playerNumber);
 	//////////////////////////////////////////////////////////////////////////
 	// Name:		Render
 	// Parameters:	float elapsedTime - Time that has elapsed since the last
