@@ -70,7 +70,7 @@ class GameEngine{
 	float				m_temporaryTimer;
 	int					m_attackingSpaceX, m_attackingSpaceY, m_attackTargetSpaceX, m_attackTargetSpaceY;
 	float				m_fireballRotation, m_floatingRectTopMax, m_floatingRectTimer;
-	RECT				m_floatingTextRect;
+	RECT				m_floatingTextRect, m_healthRect;
 
 	//////////////////////////////////////////////////////////////////////////
 	// Direct3D Variables
@@ -89,9 +89,9 @@ class GameEngine{
 	//////////////////////////////////////////////////////////////////////////
 	ID3DXSprite*		m_pD3DSprite;	// Sprite Object
 	IDirect3DTexture9*	m_cursor,*m_battleBackgroundOne, *m_gamePiece, *m_archerCharacter, *m_blackMageCharacter, *m_playerUIBackground,
-						*m_goldMine, *m_archerUnit, *m_blackMageUnit, *m_arrow, *m_fireball, *m_archerArrow;		// Texture Object for a sprite
+						*m_goldMine, *m_archerUnit, *m_blackMageUnit, *m_arrow, *m_fireball, *m_archerArrow, *m_healthBar;		// Texture Object for a sprite
 	D3DXIMAGE_INFO		m_cursorInfo,m_battleBackgroundOneInfo, m_gamePieceInfo, m_archerCharacterInfo, m_blackMageCharacterInfo, m_playerUIBackgroundInfo,
-						m_goldMineInfo, m_archerUnitInfo, m_blackMageUnitInfo, m_arrowInfo, m_fireballInfo, m_archerArrowInfo;	// File details of a texture
+						m_goldMineInfo, m_archerUnitInfo, m_blackMageUnitInfo, m_arrowInfo, m_fireballInfo, m_archerArrowInfo, m_healthBarInfo;	// File details of a texture
 
 	//Clickable Button Icons
 	std::vector<Buttons> player1_units;
