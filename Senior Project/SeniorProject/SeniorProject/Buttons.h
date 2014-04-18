@@ -15,7 +15,6 @@
 class Buttons
 {
 private:
-	D3DCOLOR color;
 	D3DXVECTOR3 position;
 
 	RECT rect;
@@ -23,6 +22,7 @@ private:
 	bool highlight;
 
 public:
+	D3DCOLOR color;
 	int width, height;
 	
 	Buttons();
@@ -35,6 +35,7 @@ public:
 
 	D3DXVECTOR3 getPosition();
 	RECT getRect(){return rect;}
+	D3DCOLOR getColor();
 
 	bool isHighlighted();
 	bool isOn(float, float, int);

@@ -273,7 +273,7 @@ void GameEngine::InitGameBoard(){
 			m_gameBoard[i][j].setPosY(190 + i * 50);
 			m_gameBoard[i][j].setSpaceNumber( i * MAXBOARDWIDTH + j );
 			m_gameBoard[i][j].setWhoUnitBelongsTo(-1);
-			
+
 			m_unit[i][j].setPosX(75 + j * 43 );
 			m_unit[i][j].setPosY( 190 + i * 50 );
 			m_unit[i][j].setType(NOUNIT);
@@ -333,12 +333,12 @@ void GameEngine::InitGameBoard(){
 
 	RectData temp_units_pos2[] =
 	{
-		{480, 120, 520, 160, 640, 500, false}, //player 2 unit 1
-		{480, 120, 520, 160, 590, 500, false}, //player 2 unit 2
-		{480, 120, 520, 160, 540, 500, false}, //player 2 unit 3
-		{480, 120, 520, 160, 490, 500, false}, //player 2 unit 4
-		{480, 120, 520, 160, 640, 560, false}, //player 2 ability 1
-		{480, 120, 520, 160, 590, 560, false}, //player 2 ability 2
+		{480, 620, 520, 660, 640, 500, false}, //player 2 unit 1
+		{480, 570, 520, 610, 590, 500, false}, //player 2 unit 2
+		{480, 520, 520, 560, 540, 500, false}, //player 2 unit 3
+		{480, 470, 520, 510, 490, 500, false}, //player 2 unit 4
+		{480, 620, 580, 660, 640, 560, false}, //player 2 ability 1
+		{480, 570, 580, 610, 590, 560, false}, //player 2 ability 2
 	};
 
 	for(int i = 0; i < MAX_BATTLE_BUTTONS; i++)
@@ -356,6 +356,43 @@ void GameEngine::InitGameBoard(){
 		temp.setRect(rect);
 
 		player2_units.push_back(temp);		
+	}
+
+	//////////////////////////////////////////////////////////
+	//  Grid Buttons
+	RectData temp_grid_pos_row1[] =
+	{
+		{185, 110,  225, 150, 130, 205, false}, //1
+		{185, 153,  225, 193, 173, 205, false}, // 2
+		{185, 196,  225, 236, 216, 205, false},// 3
+		{185, 239,  225, 279, 259, 205, false},// 4
+		{185, 282,  225, 322, 302, 205, false},// 5
+		{185, 325,  225, 365, 345, 205, false},// 6
+		{185, 368,  225, 408, 388, 205, false},//7
+		{185, 411,  225, 451, 431, 205, false},//8
+		{185, 454,  225, 494, 474, 205, false},// 9
+		{185, 497,  225, 537, 517, 205, false},// 10
+		{185, 540,  225, 580, 560, 205, false},// 11
+		{185, 583,  225, 623, 603, 205, false},// 12
+		{185, 626,  225, 666, 646, 205, false},// 13
+		{185, 669,  225, 709, 689, 205, false},// 14
+	};
+
+	for(int i = 0; i < MAX_ROW_BUTTONS; i++)
+	{
+		Buttons temp;
+		RECT rect;
+
+		rect.top = temp_grid_pos_row1[i].t;
+		rect.left = temp_grid_pos_row1[i].l;
+		rect.bottom = temp_grid_pos_row1[i].b;
+		rect.right = temp_grid_pos_row1[i].r;
+
+		temp.setPosition(temp_grid_pos_row1[i].x, temp_grid_pos_row1[i].y);
+		temp.setHighlight(temp_grid_pos_row1[i].highlight);
+		temp.setRect(rect);
+
+		map_grid_row1.push_back(temp);		
 	}
 
 	//////////////////////////////////////////////////////////
@@ -403,36 +440,32 @@ void GameEngine::Update(float dt)
 	fmodSystem->update();
 	//////////////////////////////////////////////////////////////////////////
 	// Get and Acquire Keyboard Input
-	//////////////////////////////////////////////////////////////////////////
 	// Get the input device state
 	HRESULT hr;
 	hr = m_pDIKeyboard->Acquire();
-	if( FAILED(hr) )							//if keyboard fails to acquire
+	if( FAILED(hr) )
 	{
-		ZeroMemory(buffer, sizeof(buffer) );	//clear keyboard buffer memory
-		hr = m_pDIKeyboard->Acquire();				//and re-acquire
-	}else										//else get the state of the keyboard
+		ZeroMemory(buffer, sizeof(buffer) );	
+		hr = m_pDIKeyboard->Acquire();				
+	}else									
 		hr = m_pDIKeyboard->GetDeviceState( sizeof(buffer),  (LPVOID)&buffer ); 
 
 	//////////////////////////////////////////////////////////////////////////
 	// Get and Acquire Mouse Input
-	//////////////////////////////////////////////////////////////////////////
 	hr = m_pDIMouse->Acquire();
-	//check for failure to acquire mouse
+
 	if( FAILED(hr) )
 	{
-		ZeroMemory(&mouseState, sizeof( DIMOUSESTATE2 ) );  //if mouse fails, clear the memory out
-		hr = m_pDIMouse->Acquire();								//and re-acquire
-	}else													//else get the state of the mouse
+		ZeroMemory(&mouseState, sizeof( DIMOUSESTATE2 ) ); 
+		hr = m_pDIMouse->Acquire();								
+	}else													
 		hr = m_pDIMouse->GetDeviceState( sizeof( DIMOUSESTATE2 ), &mouseState); 
-
 
 	calcDeltaTime();
 
 	fmodSystem->update();
 	//////////////////////////////////////////////////////////////////////////
 	// Mouse/Cursor updates
-	//////////////////////////////////////////////////////////////////////////
 	myMouse.update(mouseState.lX, mouseState.lY);
 	cursor.x = myMouse.cursorPos.x;
 	cursor.y = myMouse.cursorPos.y;
@@ -511,12 +544,13 @@ void GameEngine::Update(float dt)
 			{
 				if(Buttons.isOn(cursor.x, cursor.y, 3))
 				{
+					Buttons.setColor(D3DCOLOR_ARGB(255, 255, 255, 0));
 					Buttons.setHighlight(true);
-					Buttons.setColor(D3DCOLOR_ARGB(255, 255, 0, 0));
-				}else
+				}
+				else
 				{
-					Buttons.setHighlight(false);
 					Buttons.setColor(D3DCOLOR_ARGB(255, 255, 255, 255));
+					Buttons.setHighlight(false);
 				}
 
 				if(mouseState.rgbButtons[0])
@@ -549,18 +583,19 @@ void GameEngine::Update(float dt)
 			}
 		}
 
-		if(m_player[2].checkIfActivePlayer())
+		if(m_player[1].checkIfActivePlayer())
 		{
 			for(auto &Buttons: player2_units)
 			{
 				if(Buttons.isOn(cursor.x, cursor.y, 3))
 				{
+					Buttons.setColor(D3DCOLOR_ARGB(255, 255, 255, 0));
 					Buttons.setHighlight(true);
-					Buttons.setColor(D3DCOLOR_ARGB(255, 255, 0, 0));
-				}else
+				}
+				else
 				{
-					Buttons.setHighlight(false);
 					Buttons.setColor(D3DCOLOR_ARGB(255, 255, 255, 255));
+					Buttons.setHighlight(false);
 				}
 
 				if(mouseState.rgbButtons[0])
@@ -589,6 +624,19 @@ void GameEngine::Update(float dt)
 						break;
 					}
 				}
+			}
+		}
+		
+		for(auto& Buttons: map_grid_row1)
+		{
+			if(Buttons.isOn(cursor.x, cursor.y, 3))
+			{
+				Buttons.setColor(D3DCOLOR_ARGB(255, 0, 0, 255));
+				Buttons.setHighlight(true);
+			}else
+			{
+				Buttons.setColor(D3DCOLOR_ARGB(255, 255, 255, 255));
+				Buttons.setHighlight(false);
 			}
 		}
 		break;
@@ -932,7 +980,8 @@ void GameEngine::Render()
 			{
 				///////////////////////////////////////////////////
 				//  INFO:  For drawing graphics
-				switch(m_gameState){
+				switch(m_gameState)
+				{
 				case MENUMAIN:
 					break;
 				case MENUCHARACTERSELECT:
@@ -945,21 +994,53 @@ void GameEngine::Render()
 					drawBackground();
 					drawPlayers();
 					drawGameBoard();
-					//Check which character player is
-					if(m_player[0].characterType == ARCHER)
-						drawIcons(0, m_player[0]);
-					else if(m_player[0].characterType == BLACKMAGE)
-						drawIcons(6, m_player[0]);
-					else if(m_player[0].characterType == WARRIOR)
-						drawIcons(12, m_player[0]);
-
-					if(m_player[1].characterType == BLACKMAGE)
-						drawIcons(6, m_player[1]);
-					else if(m_player[1].characterType == WARRIOR)
-						drawIcons(12, m_player[1]);
-					else if(m_player[1].characterType == ARCHER)
-						drawIcons(0, m_player[1]);
-
+					// Player 1 character options for buttons
+					int number = 0;
+					for(auto& Buttons: player1_units)
+					{
+						if(m_player[0].characterType == ARCHER)
+						{
+							drawIcons(number, m_player[0], D3DXVECTOR3(Buttons.getPosition().x, Buttons.getPosition().y, 0.0f), Buttons.getColor());
+							number += 1;
+						}
+					}
+					number = 6;
+					for(auto& Buttons: player1_units)
+					{
+						if(m_player[0].characterType == BLACKMAGE)
+							drawIcons(number, m_player[0],D3DXVECTOR3(Buttons.getPosition().x, Buttons.getPosition().y, 0.0f), Buttons.getColor());
+							number += 1;
+					}
+					number = 12;
+					for(auto& Buttons: player1_units)
+					{
+						if(m_player[0].characterType == WARRIOR)
+							drawIcons(number, m_player[0],D3DXVECTOR3(Buttons.getPosition().x, Buttons.getPosition().y, 0.0f), Buttons.getColor());
+							number += 1;
+					}
+					
+					//Player 2 character options for buttons
+					number = 0;
+					for(auto& Buttons: player2_units)
+					{
+						if(m_player[0].characterType == ARCHER)
+							drawIcons(number, m_player[1], D3DXVECTOR3(Buttons.getPosition().x, Buttons.getPosition().y, 0.0f), Buttons.getColor());
+							number += 1;
+					}
+					number = 6;
+					for(auto& Buttons: player2_units)
+					{
+						if(m_player[1].characterType == BLACKMAGE)
+							drawIcons(number, m_player[1], D3DXVECTOR3(Buttons.getPosition().x, Buttons.getPosition().y, 0.0f), Buttons.getColor());
+							number += 1;
+					}
+					number = 12;
+					for(auto& Buttons: player1_units)
+					{
+						if(m_player[0].characterType == WARRIOR)
+							drawIcons(number, m_player[1], D3DXVECTOR3(Buttons.getPosition().x, Buttons.getPosition().y, 0.0f), Buttons.getColor());
+							number += 1;
+					}
 					break;
 				}
 				myMouse.render(m_pD3DSprite, m_cursor, m_cursorInfo);
@@ -999,7 +1080,6 @@ void GameEngine::Render()
 	{
 		++fpsCounter;
 	}
-
 }
 
 void GameEngine::Shutdown()
@@ -1056,24 +1136,24 @@ void GameEngine::drawBackground(){
 	// Set Transform
 	m_pD3DSprite->SetTransform(&worldMat);
 
-
 	m_pD3DSprite->Draw(m_battleBackgroundOne, 0, &D3DXVECTOR3(m_battleBackgroundOneInfo.Width * 0.5f, m_battleBackgroundOneInfo.Height * 0.5f, 0.0f),
 		0, D3DCOLOR_ARGB(255, 255, 255, 255));
-
 };
 
-
-
-void GameEngine::drawGameBoard(){
-		float healthPercentage = 0;
+void GameEngine::drawGameBoard()
+{
+	float healthPercentage = 0;
 	int   healthPercentageRight = 0;
 	//////////////////////////////////////////////////////////////////////////
 	// INFO:  Draws gameboard
-	//////////////////////////////////////////////////////////////////////////
 	D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
-	for(int i = 0; i < MAXBOARDHEIGHT; ++i){
+	for(int i = 0; i < MAXBOARDHEIGHT; ++i)
+	{
 		int flip = 1;
-		for(int j = 0; j < MAXBOARDWIDTH; ++j){
+		for(int j = 0; j < MAXBOARDWIDTH; ++j)
+		{
+			//for(auto& Buttons: map_grid_row1)
+			//{
 			/////////////////////////////////////////////////////////
 			//  INFO:  For inverting images for 2nd player
 			flip = 1;
@@ -1082,17 +1162,17 @@ void GameEngine::drawGameBoard(){
 			D3DXMatrixIdentity(&rotMat);
 			D3DXMatrixIdentity(&worldMat);
 
-			D3DXMatrixScaling(&scaleMat, 0.7f, 0.80f, 0.0f);			// Scaling
-			D3DXMatrixTranslation(&transMat, m_gameBoard[i][j].getPosX(), m_gameBoard[i][j].getPosY(), 0.0f);			// Translation
-			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
-			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+			D3DXMatrixScaling(&scaleMat, 0.7f, 0.80f, 0.0f);
+			D3DXMatrixTranslation(&transMat, m_gameBoard[i][j].getPosX(), m_gameBoard[i][j].getPosY(), 0.0f);
+			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
 
 			// Set Transform
 			m_pD3DSprite->SetTransform(&worldMat);
 
-
 			m_pD3DSprite->Draw(m_gamePiece, 0, &D3DXVECTOR3(m_gamePieceInfo.Width * 0.5f, m_gamePieceInfo.Height * 0.5f, 0.0f),
 				0, D3DCOLOR_ARGB(255, 255, 255, 255));
+			//}
 
 			D3DXMatrixIdentity(&transMat);
 			D3DXMatrixIdentity(&scaleMat);
@@ -1145,11 +1225,10 @@ void GameEngine::drawGameBoard(){
 				D3DXMatrixIdentity(&rotMat);
 				D3DXMatrixIdentity(&worldMat);
 
-				D3DXMatrixScaling(&scaleMat, 0.33f, 0.35f, 0.0f);			// Scaling
-				
+				D3DXMatrixScaling(&scaleMat, 0.33f, 0.35f, 0.0f);
 				D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX()+25, m_unit[i][j].getPosY()+42, 0.0f);
-				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
-				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
 				m_pD3DSprite->SetTransform(&worldMat);
 
 
@@ -1165,11 +1244,10 @@ void GameEngine::drawGameBoard(){
 				D3DXMatrixIdentity(&rotMat);
 				D3DXMatrixIdentity(&worldMat);
 
-				D3DXMatrixScaling(&scaleMat, 0.33f, 0.35f, 0.0f);			// Scaling
-				
+				D3DXMatrixScaling(&scaleMat, 0.33f, 0.35f, 0.0f);
 				D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX()+25, m_unit[i][j].getPosY()+42, 0.0f);
-				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
-				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
 				m_pD3DSprite->SetTransform(&worldMat);
 
 				m_healthRect.left += 120;
@@ -1211,20 +1289,21 @@ void GameEngine::drawGameBoard(){
 				m_pD3DSprite->SetTransform(&worldMat);
 				m_pD3DSprite->Draw(m_archerUnit, &m_unit[i][j].getUnitRect(), &D3DXVECTOR3(m_unit[i][j].getUnitRect().right - m_unit[i][j].getUnitRect().left, m_unit[i][j].getUnitRect().bottom - m_unit[i][j].getUnitRect().top, 0.0f),
 					0, D3DCOLOR_ARGB(255, 255, 255, 255));
-								//////////////////////////////////////////////////////////////////////////////
+				//////////////////////////////////////////////////////////////////////////////
 				//  INFO:  Draws black background for health bar
 				D3DXMatrixIdentity(&transMat);
 				D3DXMatrixIdentity(&scaleMat);
 				D3DXMatrixIdentity(&rotMat);
 				D3DXMatrixIdentity(&worldMat);
+
 				D3DXMatrixScaling(&scaleMat, 0.45f, 0.55f, 0.0f);			// Scaling
 				D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX()+35, m_unit[i][j].getPosY()+48, 0.0f);
 				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
 				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+
 				m_pD3DSprite->SetTransform(&worldMat);
 				m_pD3DSprite->Draw(m_healthBar, &m_healthRect, &D3DXVECTOR3(m_healthBarInfo.Width * 0.5f, m_healthBarInfo.Height * 0.5f, 0.0f),
 					0, D3DCOLOR_ARGB(255, 0, 0, 0));
-
 
 				//////////////////////////////////////////////////////////////////////////////
 				//  INFO:  Draws red background for health bar
@@ -1234,12 +1313,11 @@ void GameEngine::drawGameBoard(){
 				D3DXMatrixIdentity(&worldMat);
 
 				D3DXMatrixScaling(&scaleMat, 0.33f, 0.35f, 0.0f);			// Scaling
-				
 				D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX()+25, m_unit[i][j].getPosY()+42, 0.0f);
 				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
 				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
-				m_pD3DSprite->SetTransform(&worldMat);
 
+				m_pD3DSprite->SetTransform(&worldMat);
 
 				m_healthRect.right += 13;
 				m_pD3DSprite->Draw(m_healthBar, &m_healthRect, &D3DXVECTOR3(m_healthBarInfo.Width * 0.5f, m_healthBarInfo.Height * 0.5f, 0.0f),
@@ -1254,7 +1332,6 @@ void GameEngine::drawGameBoard(){
 				D3DXMatrixIdentity(&worldMat);
 
 				D3DXMatrixScaling(&scaleMat, 0.33f, 0.35f, 0.0f);			// Scaling
-				
 				D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX()+25, m_unit[i][j].getPosY()+42, 0.0f);
 				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
 				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
@@ -1293,7 +1370,7 @@ void GameEngine::drawGameBoard(){
 				m_pD3DSprite->SetTransform(&worldMat);
 				m_pD3DSprite->Draw(m_blackMageUnit, &m_unit[i][j].getUnitRect(), &D3DXVECTOR3(m_unit[i][j].getUnitRect().right - m_unit[i][j].getUnitRect().left, m_unit[i][j].getUnitRect().bottom - m_unit[i][j].getUnitRect().top, 0.0f),
 					0, D3DCOLOR_ARGB(255, 255, 255, 255));
-								//////////////////////////////////////////////////////////////////////////////
+				//////////////////////////////////////////////////////////////////////////////
 				//  INFO:  Draws black background for health bar
 				D3DXMatrixIdentity(&transMat);
 				D3DXMatrixIdentity(&scaleMat);
@@ -1316,7 +1393,7 @@ void GameEngine::drawGameBoard(){
 				D3DXMatrixIdentity(&worldMat);
 
 				D3DXMatrixScaling(&scaleMat, 0.33f, 0.35f, 0.0f);			// Scaling
-				
+
 				D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX()+25, m_unit[i][j].getPosY()+42, 0.0f);
 				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
 				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
@@ -1336,7 +1413,7 @@ void GameEngine::drawGameBoard(){
 				D3DXMatrixIdentity(&worldMat);
 
 				D3DXMatrixScaling(&scaleMat, 0.33f, 0.35f, 0.0f);			// Scaling
-				
+
 				D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX()+25, m_unit[i][j].getPosY()+42, 0.0f);
 				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
 				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
@@ -1429,165 +1506,165 @@ void GameEngine::drawGameBoard(){
 	int   healthPercentageRight = 0;
 	D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
 	for(int i = 0; i < MAXBOARDHEIGHT; ++i){
-		int flip = 1;
-		for(int j = 0; j < MAXBOARDWIDTH; ++j){
-			/////////////////////////////////////////////////////////
-			//  INFO:  For inverting images for 2nd player
-			flip = 1;
-			D3DXMatrixIdentity(&transMat);
-			D3DXMatrixIdentity(&scaleMat);
-			D3DXMatrixIdentity(&rotMat);
-			D3DXMatrixIdentity(&worldMat);
+	int flip = 1;
+	for(int j = 0; j < MAXBOARDWIDTH; ++j){
+	/////////////////////////////////////////////////////////
+	//  INFO:  For inverting images for 2nd player
+	flip = 1;
+	D3DXMatrixIdentity(&transMat);
+	D3DXMatrixIdentity(&scaleMat);
+	D3DXMatrixIdentity(&rotMat);
+	D3DXMatrixIdentity(&worldMat);
 
-			D3DXMatrixScaling(&scaleMat, 0.7f, 0.80f, 0.0f);			// Scaling
-			D3DXMatrixTranslation(&transMat, m_gameBoard[i][j].getPosX(), m_gameBoard[i][j].getPosY(), 0.0f);			// Translation
-			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
-			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+	D3DXMatrixScaling(&scaleMat, 0.7f, 0.80f, 0.0f);			// Scaling
+	D3DXMatrixTranslation(&transMat, m_gameBoard[i][j].getPosX(), m_gameBoard[i][j].getPosY(), 0.0f);			// Translation
+	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
 
-			// Set Transform
-			m_pD3DSprite->SetTransform(&worldMat);
-
-
-			m_pD3DSprite->Draw(m_gamePiece, 0, &D3DXVECTOR3(m_gamePieceInfo.Width * 0.5f, m_gamePieceInfo.Height * 0.5f, 0.0f),
-				0, D3DCOLOR_ARGB(255, 255, 255, 255));
-
-			D3DXMatrixIdentity(&transMat);
-			D3DXMatrixIdentity(&scaleMat);
-			D3DXMatrixIdentity(&rotMat);
-			D3DXMatrixIdentity(&worldMat);
-
-			////////////////////////////////////////////////////////////////////////////////
-			//  INFO:  For inverting images for player 2
-			if(!m_unit[i][j].isFacingRight())
-				flip *= -1;
-			int offset = 0;
-			//int testX, testY;
-			//////////////////////////////////////////////////////////////////////////////////
-			//  INFO:  If the gamespace is occupied by a unit, draw that unit.  
-			switch(m_unit[i][j].getType()){
-
-			case NOUNIT:
-				break;
-			case GOLDMINES:
-				D3DXMatrixScaling(&scaleMat, 0.33f, 0.35f, 0.0f);			// Scaling
-				D3DXMatrixTranslation(&transMat, m_gameBoard[i][j].getPosX()+4, m_gameBoard[i][j].getPosY(), 0.0f);			// Translation
-				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
-				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
-				// Set Transform
-				m_pD3DSprite->SetTransform(&worldMat);
-				m_pD3DSprite->Draw(m_goldMine, 0, &D3DXVECTOR3(m_goldMineInfo.Width * 0.5f, m_goldMineInfo.Height * 0.5f, 0.0f),
-					0, D3DCOLOR_ARGB(255, 255, 255, 255));
-				break;
-			case WALL:
-				break;
-			case WARRIORUNIT:
-				break;
-			case MARKSMAN:
-				break;
-			case CAVALRY:
-				break;
-			case WOLF:
-				break;
-			case ARCHERUNIT:
-				//////////////////////////////////////////////////////////////////////////////////////////////////////////
-				//  INFO:  Adds an offset to draw unit in the center of the gamespace
-				if(m_unit[i][j].getWhoUnitBelongsTo() == PLAYERONE )
-					offset = 33;
-				if(m_unit[i][j].getWhoUnitBelongsTo() == PLAYERTWO )
-					offset = -15;
-				D3DXMatrixScaling(&scaleMat, 0.75f * flip, 0.74f, 0.0f);			// Scaling
-				D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX() + offset, m_unit[i][j].getPosY()+33, 0.0f);			// Translation
-				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
-				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
-				// Set Transform
-				m_pD3DSprite->SetTransform(&worldMat);
-				m_pD3DSprite->Draw(m_archerUnit, &m_unit[i][j].getUnitRect(), &D3DXVECTOR3(m_unit[i][j].getUnitRect().right - m_unit[i][j].getUnitRect().left, m_unit[i][j].getUnitRect().bottom - m_unit[i][j].getUnitRect().top, 0.0f),
-					0, D3DCOLOR_ARGB(255, 255, 255, 255));
-				break;
-			case THIEF:
-				break;
-			case GOLEM:
-				break;
-			case BLACKMAGEUNIT:
-				//////////////////////////////////////////////////////////////////////////////////////////////////////////
-				//  INFO:  Adds an offset to draw unit in the center of the gamespace
-				if(m_unit[i][j].getWhoUnitBelongsTo() == PLAYERONE)
-					offset = 35;
-				if(m_unit[i][j].getWhoUnitBelongsTo() == PLAYERTWO)
-					offset = -15;
-				D3DXMatrixScaling(&scaleMat, 0.75f * flip, 0.74f, 0.0f);			// Scaling
-				D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX() + offset, m_unit[i][j].getPosY()+35, 0.0f);			// Translation
-				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
-				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
-				// Set Transform
-				m_pD3DSprite->SetTransform(&worldMat);
-				m_pD3DSprite->Draw(m_blackMageUnit, &m_unit[i][j].getUnitRect(), &D3DXVECTOR3(m_unit[i][j].getUnitRect().right - m_unit[i][j].getUnitRect().left, m_unit[i][j].getUnitRect().bottom - m_unit[i][j].getUnitRect().top, 0.0f),
-					0, D3DCOLOR_ARGB(255, 255, 255, 255));
-				break;
-			case WARLOCK:
-				break;
-			}
-			//D3DXMatrixScaling(&scaleMat, 0.7f, 0.80f, 0.0f);			// Scaling
-			////D3DXMatrixRotationZ(&rotMat, D3DXToRadian(90.0f));		// Rotation on Z axis, value in radians, converting from degrees
-			//D3DXMatrixTranslation(&transMat, 75 + (j * 43), 190 + i * 50, 0.0f);			// Translation
-			//D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
-			//D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
-
-			//// Set Transform
-			//m_pD3DSprite->SetTransform(&worldMat);
+	// Set Transform
+	m_pD3DSprite->SetTransform(&worldMat);
 
 
-			//m_pD3DSprite->Draw(m_gamePiece, 0, &D3DXVECTOR3(m_gamePieceInfo.Width * 0.5f, m_gamePieceInfo.Height * 0.5f, 0.0f),
-			//	0, D3DCOLOR_ARGB(255, 255, 255, 255));
-		}
+	m_pD3DSprite->Draw(m_gamePiece, 0, &D3DXVECTOR3(m_gamePieceInfo.Width * 0.5f, m_gamePieceInfo.Height * 0.5f, 0.0f),
+	0, D3DCOLOR_ARGB(255, 255, 255, 255));
+
+	D3DXMatrixIdentity(&transMat);
+	D3DXMatrixIdentity(&scaleMat);
+	D3DXMatrixIdentity(&rotMat);
+	D3DXMatrixIdentity(&worldMat);
+
+	////////////////////////////////////////////////////////////////////////////////
+	//  INFO:  For inverting images for player 2
+	if(!m_unit[i][j].isFacingRight())
+	flip *= -1;
+	int offset = 0;
+	//int testX, testY;
+	//////////////////////////////////////////////////////////////////////////////////
+	//  INFO:  If the gamespace is occupied by a unit, draw that unit.  
+	switch(m_unit[i][j].getType()){
+
+	case NOUNIT:
+	break;
+	case GOLDMINES:
+	D3DXMatrixScaling(&scaleMat, 0.33f, 0.35f, 0.0f);			// Scaling
+	D3DXMatrixTranslation(&transMat, m_gameBoard[i][j].getPosX()+4, m_gameBoard[i][j].getPosY(), 0.0f);			// Translation
+	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+	// Set Transform
+	m_pD3DSprite->SetTransform(&worldMat);
+	m_pD3DSprite->Draw(m_goldMine, 0, &D3DXVECTOR3(m_goldMineInfo.Width * 0.5f, m_goldMineInfo.Height * 0.5f, 0.0f),
+	0, D3DCOLOR_ARGB(255, 255, 255, 255));
+	break;
+	case WALL:
+	break;
+	case WARRIORUNIT:
+	break;
+	case MARKSMAN:
+	break;
+	case CAVALRY:
+	break;
+	case WOLF:
+	break;
+	case ARCHERUNIT:
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//  INFO:  Adds an offset to draw unit in the center of the gamespace
+	if(m_unit[i][j].getWhoUnitBelongsTo() == PLAYERONE )
+	offset = 33;
+	if(m_unit[i][j].getWhoUnitBelongsTo() == PLAYERTWO )
+	offset = -15;
+	D3DXMatrixScaling(&scaleMat, 0.75f * flip, 0.74f, 0.0f);			// Scaling
+	D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX() + offset, m_unit[i][j].getPosY()+33, 0.0f);			// Translation
+	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+	// Set Transform
+	m_pD3DSprite->SetTransform(&worldMat);
+	m_pD3DSprite->Draw(m_archerUnit, &m_unit[i][j].getUnitRect(), &D3DXVECTOR3(m_unit[i][j].getUnitRect().right - m_unit[i][j].getUnitRect().left, m_unit[i][j].getUnitRect().bottom - m_unit[i][j].getUnitRect().top, 0.0f),
+	0, D3DCOLOR_ARGB(255, 255, 255, 255));
+	break;
+	case THIEF:
+	break;
+	case GOLEM:
+	break;
+	case BLACKMAGEUNIT:
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//  INFO:  Adds an offset to draw unit in the center of the gamespace
+	if(m_unit[i][j].getWhoUnitBelongsTo() == PLAYERONE)
+	offset = 35;
+	if(m_unit[i][j].getWhoUnitBelongsTo() == PLAYERTWO)
+	offset = -15;
+	D3DXMatrixScaling(&scaleMat, 0.75f * flip, 0.74f, 0.0f);			// Scaling
+	D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX() + offset, m_unit[i][j].getPosY()+35, 0.0f);			// Translation
+	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+	// Set Transform
+	m_pD3DSprite->SetTransform(&worldMat);
+	m_pD3DSprite->Draw(m_blackMageUnit, &m_unit[i][j].getUnitRect(), &D3DXVECTOR3(m_unit[i][j].getUnitRect().right - m_unit[i][j].getUnitRect().left, m_unit[i][j].getUnitRect().bottom - m_unit[i][j].getUnitRect().top, 0.0f),
+	0, D3DCOLOR_ARGB(255, 255, 255, 255));
+	break;
+	case WARLOCK:
+	break;
+	}
+	//D3DXMatrixScaling(&scaleMat, 0.7f, 0.80f, 0.0f);			// Scaling
+	////D3DXMatrixRotationZ(&rotMat, D3DXToRadian(90.0f));		// Rotation on Z axis, value in radians, converting from degrees
+	//D3DXMatrixTranslation(&transMat, 75 + (j * 43), 190 + i * 50, 0.0f);			// Translation
+	//D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+	//D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+
+	//// Set Transform
+	//m_pD3DSprite->SetTransform(&worldMat);
+
+
+	//m_pD3DSprite->Draw(m_gamePiece, 0, &D3DXVECTOR3(m_gamePieceInfo.Width * 0.5f, m_gamePieceInfo.Height * 0.5f, 0.0f),
+	//	0, D3DCOLOR_ARGB(255, 255, 255, 255));
+	}
 	}
 	if(m_unitCurrentlyAttacking){
-		/////////////////////////////////////////////////////////////
-		//  INFO:  For inverting images if they belong to player 2
-		int flip = 1;
+	/////////////////////////////////////////////////////////////
+	//  INFO:  For inverting images if they belong to player 2
+	int flip = 1;
 
-		if(m_gamePhase == PLAYERTWO_EVENTPHASE)
-			flip *= -1;
+	if(m_gamePhase == PLAYERTWO_EVENTPHASE)
+	flip *= -1;
 
-		D3DXMatrixIdentity(&transMat);
-		D3DXMatrixIdentity(&scaleMat);
-		D3DXMatrixIdentity(&rotMat);
-		D3DXMatrixIdentity(&worldMat);
-		D3DXMatrixScaling(&scaleMat, 0.03f, 0.03f, 0.0f);			// Scaling
-		D3DXMatrixTranslation(&transMat, m_arrowForAttackingUnitPosX, m_arrowForAttackingUnitPosY, 0.0f);			// Translation
-		D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
-		D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
-		m_pD3DSprite->SetTransform(&worldMat);
-		m_pD3DSprite->Draw(m_arrow, 0, &D3DXVECTOR3(m_arrowInfo.Width * 0.5f, m_arrowInfo.Height * 0.5f, 0.0f),
-			0, D3DCOLOR_ARGB(255, 255, 255, 255));
+	D3DXMatrixIdentity(&transMat);
+	D3DXMatrixIdentity(&scaleMat);
+	D3DXMatrixIdentity(&rotMat);
+	D3DXMatrixIdentity(&worldMat);
+	D3DXMatrixScaling(&scaleMat, 0.03f, 0.03f, 0.0f);			// Scaling
+	D3DXMatrixTranslation(&transMat, m_arrowForAttackingUnitPosX, m_arrowForAttackingUnitPosY, 0.0f);			// Translation
+	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+	m_pD3DSprite->SetTransform(&worldMat);
+	m_pD3DSprite->Draw(m_arrow, 0, &D3DXVECTOR3(m_arrowInfo.Width * 0.5f, m_arrowInfo.Height * 0.5f, 0.0f),
+	0, D3DCOLOR_ARGB(255, 255, 255, 255));
 
-		if(m_fireBallActive){
-			D3DXMatrixIdentity(&transMat);
-			D3DXMatrixIdentity(&scaleMat);
-			D3DXMatrixIdentity(&rotMat);
-			D3DXMatrixIdentity(&worldMat);
-			D3DXMatrixScaling(&scaleMat, 0.05f * flip, 0.04f, 0.0f);			// Scaling
-			D3DXMatrixTranslation(&transMat, m_projectilePosX, m_projectilePosY, 0.0f);			// Translation
-			D3DXMatrixRotationZ(&rotMat, D3DXToRadian(m_fireballRotation));		// Rotation on Z axis, value in radians, converting from degrees
-			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
-			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
-			m_pD3DSprite->SetTransform(&worldMat);
-			m_pD3DSprite->Draw(m_fireball, 0, &D3DXVECTOR3(m_fireballInfo.Width * 0.5f, m_fireballInfo.Height * 0.5f, 0.0f),
-				0, D3DCOLOR_ARGB(255, 255, 255, 255));
-		}
-		if(m_arrowActive){
-			D3DXMatrixIdentity(&transMat);
-			D3DXMatrixIdentity(&scaleMat);
-			D3DXMatrixIdentity(&rotMat);
-			D3DXMatrixIdentity(&worldMat);
-			D3DXMatrixScaling(&scaleMat, 1.0f * flip, 1.0f, 1.0f);			// Scaling
-			D3DXMatrixTranslation(&transMat, m_projectilePosX, m_projectilePosY, 0.0f);			// Translation
-			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
-			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
-			m_pD3DSprite->SetTransform(&worldMat);
-			m_pD3DSprite->Draw(m_archerArrow, 0, &D3DXVECTOR3(m_archerArrowInfo.Width * 0.5f, m_archerArrowInfo.Height * 0.5f, 0.0f),
-				0, D3DCOLOR_ARGB(255, 255, 255, 255));
-		}
+	if(m_fireBallActive){
+	D3DXMatrixIdentity(&transMat);
+	D3DXMatrixIdentity(&scaleMat);
+	D3DXMatrixIdentity(&rotMat);
+	D3DXMatrixIdentity(&worldMat);
+	D3DXMatrixScaling(&scaleMat, 0.05f * flip, 0.04f, 0.0f);			// Scaling
+	D3DXMatrixTranslation(&transMat, m_projectilePosX, m_projectilePosY, 0.0f);			// Translation
+	D3DXMatrixRotationZ(&rotMat, D3DXToRadian(m_fireballRotation));		// Rotation on Z axis, value in radians, converting from degrees
+	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+	m_pD3DSprite->SetTransform(&worldMat);
+	m_pD3DSprite->Draw(m_fireball, 0, &D3DXVECTOR3(m_fireballInfo.Width * 0.5f, m_fireballInfo.Height * 0.5f, 0.0f),
+	0, D3DCOLOR_ARGB(255, 255, 255, 255));
+	}
+	if(m_arrowActive){
+	D3DXMatrixIdentity(&transMat);
+	D3DXMatrixIdentity(&scaleMat);
+	D3DXMatrixIdentity(&rotMat);
+	D3DXMatrixIdentity(&worldMat);
+	D3DXMatrixScaling(&scaleMat, 1.0f * flip, 1.0f, 1.0f);			// Scaling
+	D3DXMatrixTranslation(&transMat, m_projectilePosX, m_projectilePosY, 0.0f);			// Translation
+	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+	m_pD3DSprite->SetTransform(&worldMat);
+	m_pD3DSprite->Draw(m_archerArrow, 0, &D3DXVECTOR3(m_archerArrowInfo.Width * 0.5f, m_archerArrowInfo.Height * 0.5f, 0.0f),
+	0, D3DCOLOR_ARGB(255, 255, 255, 255));
+	}
 	}
 	*/
 };
@@ -1738,243 +1815,222 @@ void GameEngine::calcDeltaTime(){
 	m_deltaTime = difftime(time(0), start);
 };
 
-void GameEngine::drawIcons(int thisButton , Character thisPlayer)
+void GameEngine::drawIcons(int thisButton , Character thisPlayer, D3DXVECTOR3 position,D3DCOLOR a_color)
 {
 	//ARCHER UNIT BUTTONS
-	if(thisButton == 0 && thisPlayer.getPlayerNumber() == 0)
+	if(thisPlayer.getPlayerNumber() == 0 && thisPlayer.characterType == ARCHER)
 	{
 		D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
 		D3DXMatrixIdentity(&transMat);
 		D3DXMatrixIdentity(&scaleMat);
 		D3DXMatrixIdentity(&rotMat);
 		D3DXMatrixIdentity(&worldMat);
-		for(auto &Buttons: player1_units)
+
+		if(thisButton == ARCHERBUTTON)
 		{
-			if(thisButton == ARCHERBUTTON)
-			{
-				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
-				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x, Buttons.getPosition().y, 0.0f);
-				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
-				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+			D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
+			D3DXMatrixTranslation(&transMat, position.x, position.y, 0.0f);
+			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
 
-				m_pD3DSprite->SetTransform(&worldMat);
+			m_pD3DSprite->SetTransform(&worldMat);
 
-				m_pD3DSprite->Draw(m_archerIcon, 0, &D3DXVECTOR3(m_archerIconInfo.Width * 0.5f, m_archerIconInfo.Height * 0.5f, 0.0f),
-					0, D3DCOLOR_ARGB(255, 255, 255, 255));
-			}
-
-			if(thisButton == THIEFBUTTON)
-			{
-				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
-				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x, Buttons.getPosition().y, 0.0f);
-				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
-				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
-
-				m_pD3DSprite->SetTransform(&worldMat);
-
-				m_pD3DSprite->Draw(m_thiefIcon, 0, &D3DXVECTOR3(m_thiefIconInfo.Width * 0.5f, m_thiefIconInfo.Height * 0.5f, 0.0f),
-					0, D3DCOLOR_ARGB(255, 255, 255, 255));
-			}
-
-			if(thisButton == WOLFBUTTON)
-			{
-				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
-				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x, Buttons.getPosition().y, 0.0f);
-				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
-				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
-
-				m_pD3DSprite->SetTransform(&worldMat);
-
-				m_pD3DSprite->Draw(m_wolfIcon, 0, &D3DXVECTOR3(m_wolfIconInfo.Width * 0.5f, m_wolfIconInfo.Height * 0.5f, 0.0f),
-					0, D3DCOLOR_ARGB(255, 255, 255, 255));
-			}
-
-			if(thisButton == WALLBUTTON)
-			{
-				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
-				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x, Buttons.getPosition().y, 0.0f);
-				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
-				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
-
-				m_pD3DSprite->SetTransform(&worldMat);
-
-				m_pD3DSprite->Draw(m_wallIcon, 0, &D3DXVECTOR3(m_wallIconInfo.Width * 0.5f, m_wallIconInfo.Height * 0.5f, 0.0f),
-					0, D3DCOLOR_ARGB(255, 255, 255, 255));
-			}
-			thisButton += 1;
+			m_pD3DSprite->Draw(m_archerIcon, 0, &D3DXVECTOR3(m_archerIconInfo.Width * 0.5f, m_archerIconInfo.Height * 0.5f, 0.0f),
+				0, a_color);
 		}
-		thisButton = 99;
+
+		if(thisButton == THIEFBUTTON)
+		{
+			D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
+			D3DXMatrixTranslation(&transMat, position.x, position.y, 0.0f);
+			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+			m_pD3DSprite->SetTransform(&worldMat);
+
+			m_pD3DSprite->Draw(m_thiefIcon, 0, &D3DXVECTOR3(m_thiefIconInfo.Width * 0.5f, m_thiefIconInfo.Height * 0.5f, 0.0f),
+				0, a_color);
+		}
+
+		if(thisButton == WOLFBUTTON)
+		{
+			D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
+			D3DXMatrixTranslation(&transMat, position.x, position.y, 0.0f);
+			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+			m_pD3DSprite->SetTransform(&worldMat);
+
+			m_pD3DSprite->Draw(m_wolfIcon, 0, &D3DXVECTOR3(m_wolfIconInfo.Width * 0.5f, m_wolfIconInfo.Height * 0.5f, 0.0f),
+				0, a_color);
+		}
+
+		if(thisButton == WALLBUTTON)
+		{
+			D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
+			D3DXMatrixTranslation(&transMat, position.x, position.y, 0.0f);
+			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+			m_pD3DSprite->SetTransform(&worldMat);
+
+			m_pD3DSprite->Draw(m_wallIcon, 0, &D3DXVECTOR3(m_wallIconInfo.Width * 0.5f, m_wallIconInfo.Height * 0.5f, 0.0f),
+				0, a_color);
+		}
 	}
-	
-	if( thisButton == 0  && thisPlayer.getPlayerNumber() == 1)
+
+	if(thisPlayer.getPlayerNumber() == 1 && thisPlayer.characterType == ARCHER)
 	{
-		for(auto &Buttons: player2_units)
+		D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
+		D3DXMatrixIdentity(&transMat);
+		D3DXMatrixIdentity(&scaleMat);
+		D3DXMatrixIdentity(&rotMat);
+		D3DXMatrixIdentity(&worldMat);
+		if(thisButton == ARCHERBUTTON)
 		{
-			D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
-			D3DXMatrixIdentity(&transMat);
-			D3DXMatrixIdentity(&scaleMat);
-			D3DXMatrixIdentity(&rotMat);
-			D3DXMatrixIdentity(&worldMat);
-			if(thisButton == ARCHERBUTTON)
-			{
-				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
-				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x, Buttons.getPosition().y, 0.0f);
-				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
-				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+			D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
+			D3DXMatrixTranslation(&transMat, position.x, position.y, 0.0f);
+			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
 
-				m_pD3DSprite->SetTransform(&worldMat);
+			m_pD3DSprite->SetTransform(&worldMat);
 
-				m_pD3DSprite->Draw(m_archerIcon, 0, &D3DXVECTOR3(m_archerIconInfo.Width * 0.5f, m_archerIconInfo.Height * 0.5f, 0.0f),
-					0, D3DCOLOR_ARGB(255, 255, 255, 255));
-			}
-
-			if(thisButton == THIEFBUTTON)
-			{
-				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
-				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x, Buttons.getPosition().y, 0.0f);
-				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
-				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
-
-				m_pD3DSprite->SetTransform(&worldMat);
-
-				m_pD3DSprite->Draw(m_thiefIcon, 0, &D3DXVECTOR3(m_thiefIconInfo.Width * 0.5f, m_thiefIconInfo.Height * 0.5f, 0.0f),
-					0, D3DCOLOR_ARGB(255, 255, 255, 255));
-			}
-
-			if(thisButton == WOLFBUTTON)
-			{
-				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
-				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x, Buttons.getPosition().y, 0.0f);
-				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
-				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
-
-				m_pD3DSprite->SetTransform(&worldMat);
-
-				m_pD3DSprite->Draw(m_wolfIcon, 0, &D3DXVECTOR3(m_wolfIconInfo.Width * 0.5f, m_wolfIconInfo.Height * 0.5f, 0.0f),
-					0, D3DCOLOR_ARGB(255, 255, 255, 255));
-			}
-
-			if(thisButton == WALLBUTTON)
-			{
-				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
-				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x, Buttons.getPosition().y, 0.0f);
-				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
-				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
-
-				m_pD3DSprite->SetTransform(&worldMat);
-
-				m_pD3DSprite->Draw(m_wallIcon, 0, &D3DXVECTOR3(m_wallIconInfo.Width * 0.5f, m_wallIconInfo.Height * 0.5f, 0.0f),
-					0, D3DCOLOR_ARGB(255, 255, 255, 255));
-			}
-			thisButton +=1;
+			m_pD3DSprite->Draw(m_archerIcon, 0, &D3DXVECTOR3(m_archerIconInfo.Width * 0.5f, m_archerIconInfo.Height * 0.5f, 0.0f),
+				0, a_color);
 		}
-		thisButton = 99;
+
+		if(thisButton== THIEFBUTTON)
+		{
+			D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
+			D3DXMatrixTranslation(&transMat, position.x, position.y, 0.0f);
+			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+			m_pD3DSprite->SetTransform(&worldMat);
+
+			m_pD3DSprite->Draw(m_thiefIcon, 0, &D3DXVECTOR3(m_thiefIconInfo.Width * 0.5f, m_thiefIconInfo.Height * 0.5f, 0.0f),
+				0, a_color);
+		}
+
+		if(thisButton == WOLFBUTTON)
+		{
+			D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
+			D3DXMatrixTranslation(&transMat,position.x, position.y, 0.0f);
+			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+			m_pD3DSprite->SetTransform(&worldMat);
+
+			m_pD3DSprite->Draw(m_wolfIcon, 0, &D3DXVECTOR3(m_wolfIconInfo.Width * 0.5f, m_wolfIconInfo.Height * 0.5f, 0.0f),
+				0, a_color);
+		}
+
+		if(thisButton == WALLBUTTON)
+		{
+			D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
+			D3DXMatrixTranslation(&transMat, position.x, position.y, 0.0f);
+			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+			m_pD3DSprite->SetTransform(&worldMat);
+
+			m_pD3DSprite->Draw(m_wallIcon, 0, &D3DXVECTOR3(m_wallIconInfo.Width * 0.5f, m_wallIconInfo.Height * 0.5f, 0.0f),
+				0, a_color);
+		}
 	}
 
 	//BLACKMAGE UNIT BUTTONS
-	if(thisButton == 6 && thisPlayer.getPlayerNumber() == 0)
+	if(thisPlayer.getPlayerNumber() == 0 && thisPlayer.characterType == BLACKMAGE)
 	{
 		D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
 		D3DXMatrixIdentity(&transMat);
 		D3DXMatrixIdentity(&scaleMat);
 		D3DXMatrixIdentity(&rotMat);
 		D3DXMatrixIdentity(&worldMat);
-
-		for(auto &Buttons: player1_units)
+		if(thisButton == BLACKMAGEBUTTON)
 		{
-			if(thisButton == BLACKMAGEBUTTON)
-			{
-				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
-				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x, Buttons.getPosition().y, 0.0f);
-				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
-				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+			D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
+			D3DXMatrixTranslation(&transMat, position.x, position.y, 0.0f);
+			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
 
-				m_pD3DSprite->SetTransform(&worldMat);
+			m_pD3DSprite->SetTransform(&worldMat);
 
-				m_pD3DSprite->Draw(m_blackMageIcon, 0, &D3DXVECTOR3(m_blackMageIconInfo.Width * 0.5f, m_blackMageIconInfo.Height * 0.5f, 0.0f),
-					0, D3DCOLOR_ARGB(255, 255, 255, 255));
-			}
-
-			if(thisButton == GOLEMBUTTON)
-			{
-				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
-				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x, Buttons.getPosition().y, 0.0f);
-				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
-				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
-
-				m_pD3DSprite->SetTransform(&worldMat);
-
-				m_pD3DSprite->Draw(m_golemIcon, 0, &D3DXVECTOR3(m_golemIconInfo.Width * 0.5f, m_golemIconInfo.Height * 0.5f, 0.0f),
-					0, D3DCOLOR_ARGB(255, 255, 255, 255));
-			}
-
-			if(thisButton == BLACKMAGEABILITY2)
-			{
-				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
-				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x, Buttons.getPosition().y, 0.0f);
-				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
-				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
-
-				m_pD3DSprite->SetTransform(&worldMat);
-
-				m_pD3DSprite->Draw(m_blackHoleIcon, 0, &D3DXVECTOR3(m_blackHoleIconInfo.Width * 0.5f, m_blackHoleIconInfo.Height * 0.5f, 0.0f),
-					0, D3DCOLOR_ARGB(255, 255, 255, 255));
-			}
-			thisButton +=1;
+			m_pD3DSprite->Draw(m_blackMageIcon, 0, &D3DXVECTOR3(m_blackMageIconInfo.Width * 0.5f, m_blackMageIconInfo.Height * 0.5f, 0.0f),
+				0, a_color);
 		}
-		thisButton = 99;
+
+		if(thisButton == GOLEMBUTTON)
+		{
+			D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
+			D3DXMatrixTranslation(&transMat, position.x, position.y, 0.0f);
+			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+			m_pD3DSprite->SetTransform(&worldMat);
+
+			m_pD3DSprite->Draw(m_golemIcon, 0, &D3DXVECTOR3(m_golemIconInfo.Width * 0.5f, m_golemIconInfo.Height * 0.5f, 0.0f),
+				0, a_color);
+		}
+
+		if(thisButton == BLACKMAGEABILITY2)
+		{
+			D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
+			D3DXMatrixTranslation(&transMat, position.x, position.y, 0.0f);
+			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+			m_pD3DSprite->SetTransform(&worldMat);
+
+			m_pD3DSprite->Draw(m_blackHoleIcon, 0, &D3DXVECTOR3(m_blackHoleIconInfo.Width * 0.5f, m_blackHoleIconInfo.Height * 0.5f, 0.0f),
+				0, a_color);
+		}
 	}
 
-	if(thisButton == 6 && thisPlayer.getPlayerNumber() == 1)
+	if(thisPlayer.getPlayerNumber() == 1 && thisPlayer.characterType == BLACKMAGE)
 	{
 		D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
 		D3DXMatrixIdentity(&transMat);
 		D3DXMatrixIdentity(&scaleMat);
 		D3DXMatrixIdentity(&rotMat);
 		D3DXMatrixIdentity(&worldMat);
-
-		for(auto &Buttons: player2_units)
+		if(thisButton == BLACKMAGEBUTTON)
 		{
-			if(thisButton == BLACKMAGEBUTTON)
-			{
-				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
-				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x, Buttons.getPosition().y, 0.0f);
-				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
-				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+			D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
+			D3DXMatrixTranslation(&transMat, position.x, position.y, 0.0f);
+			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
 
-				m_pD3DSprite->SetTransform(&worldMat);
+			m_pD3DSprite->SetTransform(&worldMat);
 
-				m_pD3DSprite->Draw(m_blackMageIcon, 0, &D3DXVECTOR3(m_blackMageIconInfo.Width * 0.5f, m_blackMageIconInfo.Height * 0.5f, 0.0f),
-					0, D3DCOLOR_ARGB(255, 255, 255, 255));
-			}
-
-			if(thisButton == GOLEMBUTTON)
-			{
-				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
-				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x, Buttons.getPosition().y, 0.0f);
-				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
-				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
-
-				m_pD3DSprite->SetTransform(&worldMat);
-
-				m_pD3DSprite->Draw(m_golemIcon, 0, &D3DXVECTOR3(m_golemIconInfo.Width * 0.5f, m_golemIconInfo.Height * 0.5f, 0.0f),
-					0, D3DCOLOR_ARGB(255, 255, 255, 255));
-			}
-
-			if(thisButton == BLACKMAGEABILITY2)
-			{
-				D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
-				D3DXMatrixTranslation(&transMat, Buttons.getPosition().x, Buttons.getPosition().y, 0.0f);
-				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
-				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
-
-				m_pD3DSprite->SetTransform(&worldMat);
-
-				m_pD3DSprite->Draw(m_blackHoleIcon, 0, &D3DXVECTOR3(m_blackHoleIconInfo.Width * 0.5f, m_blackHoleIconInfo.Height * 0.5f, 0.0f),
-					0, D3DCOLOR_ARGB(255, 255, 255, 255));
-			}
-			thisButton +=1;
+			m_pD3DSprite->Draw(m_blackMageIcon, 0, &D3DXVECTOR3(m_blackMageIconInfo.Width * 0.5f, m_blackMageIconInfo.Height * 0.5f, 0.0f),
+				0, a_color);
 		}
-		thisButton = 99;
+
+		if(thisButton == GOLEMBUTTON)
+		{
+			D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
+			D3DXMatrixTranslation(&transMat, position.x, position.y, 0.0f);
+			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+			m_pD3DSprite->SetTransform(&worldMat);
+
+			m_pD3DSprite->Draw(m_golemIcon, 0, &D3DXVECTOR3(m_golemIconInfo.Width * 0.5f, m_golemIconInfo.Height * 0.5f, 0.0f),
+				0, a_color);
+		}
+
+		if(thisButton == BLACKMAGEABILITY2)
+		{
+			D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
+			D3DXMatrixTranslation(&transMat, position.x, position.y, 0.0f);
+			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+			m_pD3DSprite->SetTransform(&worldMat);
+
+			m_pD3DSprite->Draw(m_blackHoleIcon, 0, &D3DXVECTOR3(m_blackHoleIconInfo.Width * 0.5f, m_blackHoleIconInfo.Height * 0.5f, 0.0f),
+				0, a_color);
+		}
 	}
 }

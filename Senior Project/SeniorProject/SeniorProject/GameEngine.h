@@ -54,23 +54,24 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Define for buttons used in battle
 #define MAX_BATTLE_BUTTONS 6
+#define MAX_ROW_BUTTONS 14
 
 class GameEngine{
 	//////////////////////////////////////////////////////////////////////////
 	// Application Variables
 	//////////////////////////////////////////////////////////////////////////
-	HWND				m_hWnd;					// Handle to the window
+	HWND			m_hWnd;					// Handle to the window
 	bool				m_bVsync;				// Boolean for vertical syncing
 	float				m_currTime;				// Time to render current frame
 	float				m_prevTime, m_deltaTime, m_frameTime;				// Time to render previous frame
-	int					m_FPS;			// Frames per second  
-	int					m_gamePhase;
+	int				m_FPS;			// Frames per second  
+	int				m_gamePhase;
 	bool				m_unitCurrentlyAttacking, m_fireBallActive, m_arrowActive, m_floatingTextActive;
 	float				m_projectilePosX, m_projectilePosY, m_arrowForAttackingUnitPosX, m_arrowForAttackingUnitPosY;
 	float				m_temporaryTimer;
-	int					m_attackingSpaceX, m_attackingSpaceY, m_attackTargetSpaceX, m_attackTargetSpaceY;
+	int				m_attackingSpaceX, m_attackingSpaceY, m_attackTargetSpaceX, m_attackTargetSpaceY;
 	float				m_fireballRotation, m_floatingRectTopMax, m_floatingRectTimer;
-	RECT				m_floatingTextRect, m_healthRect;
+	RECT			m_floatingTextRect, m_healthRect;
 
 	//////////////////////////////////////////////////////////////////////////
 	// Direct3D Variables
@@ -87,22 +88,24 @@ class GameEngine{
 	//////////////////////////////////////////////////////////////////////////
 	// Sprite Variables
 	//////////////////////////////////////////////////////////////////////////
-	ID3DXSprite*		m_pD3DSprite;	// Sprite Object
+	ID3DXSprite*			m_pD3DSprite;	// Sprite Object
 	IDirect3DTexture9*	m_cursor,*m_battleBackgroundOne, *m_gamePiece, *m_archerCharacter, *m_blackMageCharacter, *m_playerUIBackground,
-						*m_goldMine, *m_archerUnit, *m_blackMageUnit, *m_arrow, *m_fireball, *m_archerArrow, *m_healthBar;		// Texture Object for a sprite
+		*m_goldMine, *m_archerUnit, *m_blackMageUnit, *m_arrow, *m_fireball, *m_archerArrow, *m_healthBar;		// Texture Object for a sprite
 	D3DXIMAGE_INFO		m_cursorInfo,m_battleBackgroundOneInfo, m_gamePieceInfo, m_archerCharacterInfo, m_blackMageCharacterInfo, m_playerUIBackgroundInfo,
-						m_goldMineInfo, m_archerUnitInfo, m_blackMageUnitInfo, m_arrowInfo, m_fireballInfo, m_archerArrowInfo, m_healthBarInfo;	// File details of a texture
+		m_goldMineInfo, m_archerUnitInfo, m_blackMageUnitInfo, m_arrowInfo, m_fireballInfo, m_archerArrowInfo, m_healthBarInfo;	// File details of a texture
 
 	//Clickable Button Icons
 	std::vector<Buttons> player1_units;
 	std::vector<Buttons> player2_units;
+	std::vector<Buttons> map_grid_row1;
 	IDirect3DTexture9*	m_archerIcon, *m_golemIcon, *m_blackMageIcon, *m_thiefIcon, *m_wolfIcon, *m_blackHoleIcon, *m_wallIcon;
 	D3DXIMAGE_INFO		m_archerIconInfo, m_golemIconInfo, m_blackMageIconInfo, m_thiefIconInfo, m_wolfIconInfo, m_blackHoleIconInfo, m_wallIconInfo;
+	D3DCOLOR buttonColor;
 
 	//////////////////////////////////////////////////////////////////////////
 	// DirectInput
 	//////////////////////////////////////////////////////////////////////////
-	IDirectInput8*		 m_pDIObject;	// DirectInput Object
+	IDirectInput8*			  m_pDIObject;	// DirectInput Object
 	IDirectInputDevice8* m_pDIKeyboard;	// Keyboard Device
 	IDirectInputDevice8* m_pDIMouse;	// Mouse Device 
 
@@ -112,7 +115,6 @@ class GameEngine{
 	DIMOUSESTATE2 mouseState;
 	D3DXVECTOR2 cursor;
 	char buffer[256];
-	
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//  Audio Includes
@@ -125,7 +127,7 @@ class GameEngine{
 	bool keyIsDown[255];
 
 	time_t start;
-
+public:
 	///////////////////////////////////////////////////////////////////////////////////////////
 	//  INFO:  Game Data
 	int m_gameState, m_damageType;
@@ -133,7 +135,6 @@ class GameEngine{
 	BoardSpace m_gameBoard[MAXBOARDHEIGHT][MAXBOARDWIDTH];
 	Unit		m_unit[MAXBOARDHEIGHT][MAXBOARDWIDTH];
 
-	public:
 	//////////////////////////////////////////////////////////////////////////
 	// Init and Shutdown are preferred to constructors and destructor,
 	// due to having more control when to explicitly call them when global.
@@ -192,6 +193,5 @@ class GameEngine{
 	void drawUIText();
 	void calcDeltaTime();
 
-	void drawIcons(int, Character);
-	
+	void drawIcons(int, Character, D3DXVECTOR3, D3DCOLOR);
 };
