@@ -44,6 +44,11 @@ D3DXVECTOR3 Buttons::getPosition()
 	return position;
 }
 
+D3DCOLOR Buttons::getColor()
+{
+	return color;
+}
+
 bool Buttons::isHighlighted()
 {
 	return highlight;
