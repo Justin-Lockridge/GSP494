@@ -192,6 +192,10 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
 		D3DCOLOR_XRGB(255, 0, 255), &m_healthBarInfo, 0, &m_healthBar);
 
+	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"EarthElementalSheet.png", 0, 0, 0, 0, 
+		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
+		D3DCOLOR_XRGB(255, 0, 255), &m_golemUnitInfo, 0, &m_golemUnit);
+
 	// Seed rand() with time
 	srand(timeGetTime());
 
@@ -258,12 +262,18 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 
 	m_unit[3][6].addUnit( ARCHERUNIT, PLAYERONE );
 	m_unit[2][3].addUnit( BLACKMAGEUNIT, PLAYERONE );
-	m_unit[0][2].addUnit( ARCHERUNIT, PLAYERONE );
+	m_unit[0][10].addUnit( GOLEM, PLAYERONE );
 	m_unit[0][12].addUnit( BLACKMAGEUNIT, PLAYERTWO );
-	m_unit[2][13].addUnit( ARCHERUNIT, PLAYERTWO );
+	m_unit[3][10].addUnit( GOLEM, PLAYERTWO );
+	m_unit[4][8].addUnit( BLACKMAGEUNIT, PLAYERTWO );
+	m_unit[4][9].addUnit( ARCHERUNIT, PLAYERTWO );
+	m_unit[4][12].addUnit( BLACKMAGEUNIT, PLAYERTWO );
+
+	m_unit[1][4].addUnit( GOLEM, PLAYERONE );
+	m_unit[1][10].addUnit( GOLEM, PLAYERTWO );
+
 	m_unit[4][4].addUnit( BLACKMAGEUNIT, PLAYERONE );
 	m_unit[4][10].addUnit( ARCHERUNIT, PLAYERTWO );
-	m_unit[4][12].addUnit( BLACKMAGEUNIT, PLAYERTWO );
 }
 
 void GameEngine::InitGameBoard(){
@@ -282,13 +292,13 @@ void GameEngine::InitGameBoard(){
 			//  INFO:  Sets the end game spaces to be occupied by gold mines
 			if(j == 0 ){
 				m_unit[i][j].addUnit(GOLDMINES, PLAYERONE);
-				m_gameBoard[i][j].setWhoUnitBelongsTo(PLAYERONE);
-				m_gameBoard[i][j].setOccupiedBy(GOLDMINES);
+				m_unit[i][j].setWhoUnitBelongsTo(PLAYERONE);
+				m_unit[i][j].setType(GOLDMINES);
 			}
 			else if (j == MAXBOARDWIDTH-1 ){
 				m_unit[i][j].addUnit(GOLDMINES, PLAYERTWO);
-				m_gameBoard[i][j].setWhoUnitBelongsTo(PLAYERTWO);
-				m_gameBoard[i][j].setOccupiedBy(GOLDMINES);
+				m_unit[i][j].setWhoUnitBelongsTo(PLAYERTWO);
+				m_unit[i][j].setType(GOLDMINES);
 			}
 			int testerX, testerY;
 			if(i == 0 && j == 14){
@@ -364,6 +374,7 @@ void GameEngine::InitGameBoard(){
 	m_fireBallActive				=		false;
 	m_arrowActive					=		false;
 	m_floatingTextActive			=		false;
+	m_unitCurrentlyMoving			=		false;
 	m_projectilePosX				=		0.0f;
 	m_projectilePosY				=		0.0f;
 	m_arrowForAttackingUnitPosX		=		0.0f;
@@ -373,6 +384,7 @@ void GameEngine::InitGameBoard(){
 	m_attackingSpaceY				=		0;
 	m_attackTargetSpaceX			=		0;
 	m_attackTargetSpaceY			=		0;
+	m_moveToTarget					=		0;
 	m_floatingTextRect.top			=		0.1f;
 	m_floatingTextRect.left			=		0.0f;
 	m_floatingTextRect.right		=		0.0f;
@@ -678,11 +690,12 @@ void GameEngine::updateEventPhase(float dt){
 			m_floatingTextRect.bottom	=		0.0f;
 			m_floatingTextActive = false;
 			m_damageType				=		-1;
+			m_unitCurrentlyAttacking	=		false;
 		}
 	}
 	////////////////////////////////////////////////////////////////////////////////////////////////
-	//  INFO:  If no unit is attacking, find the next unit to take action
-	if(!m_unitCurrentlyAttacking){
+	//  INFO:  If no unit is attacking or moving, find the next unit to take action
+	if(!m_unitCurrentlyAttacking && !m_unitCurrentlyMoving && !m_floatingTextActive){
 		if(m_gamePhase == PLAYERONE_EVENTPHASE){
 			for(int i = 0; i < MAXBOARDHEIGHT; ++i){
 				int trial = 0;
@@ -713,13 +726,17 @@ void GameEngine::updateEventPhase(float dt){
 							m_projectilePosX = m_gameBoard[i][j].getPosX()+5;
 							m_projectilePosY = m_gameBoard[i][j].getPosY()+10;
 							m_arrowActive = true;
-							findNextTarget(i);
+							findNextTarget( i, j );
 							fmodSystem->playSound( FMOD_CHANNEL_FREE, shootArrow, false, 0 );
 							return;
 							//break;
 						case THIEF:
 							break;
 						case GOLEM:
+							m_attackingSpaceX	=	i;
+							m_attackingSpaceY	=	j;
+							findNextTarget( i, j );
+							return;
 							break;
 						case BLACKMAGEUNIT:
 							m_attackingSpaceX	=	i;
@@ -728,7 +745,7 @@ void GameEngine::updateEventPhase(float dt){
 							m_projectilePosX = m_gameBoard[i][j].getPosX()+5;
 							m_projectilePosY = m_gameBoard[i][j].getPosY()+10;
 							m_fireBallActive = true;
-							findNextTarget(i);
+							findNextTarget( i, j );
 							fmodSystem->playSound( FMOD_CHANNEL_FREE, castFireball, false, 0);
 							return;
 							//break;
@@ -770,13 +787,17 @@ void GameEngine::updateEventPhase(float dt){
 							m_projectilePosX = m_gameBoard[i][j].getPosX()+5;
 							m_projectilePosY = m_gameBoard[i][j].getPosY()+10;
 							m_arrowActive = true;
-							findNextTarget(i);
+							findNextTarget( i, j );
 							fmodSystem->playSound( FMOD_CHANNEL_FREE, shootArrow, false, 0 );
 							return;
 							//break;
 						case THIEF:
 							break;
 						case GOLEM:
+							m_attackingSpaceX	=	i;
+							m_attackingSpaceY	=	j;
+							findNextTarget( i, j );
+							return;
 							break;
 						case BLACKMAGEUNIT:
 							m_attackingSpaceX	=	i;
@@ -785,7 +806,7 @@ void GameEngine::updateEventPhase(float dt){
 							m_projectilePosX = m_gameBoard[i][j].getPosX()+5;
 							m_projectilePosY = m_gameBoard[i][j].getPosY()+10;
 							m_fireBallActive = true;
-							findNextTarget(i);
+							findNextTarget( i, j );
 							fmodSystem->playSound( FMOD_CHANNEL_FREE, castFireball, false, 0);
 							return;
 							//break;
@@ -798,22 +819,22 @@ void GameEngine::updateEventPhase(float dt){
 			}
 		}
 	}
-	else{
+	else if ( !m_unitCurrentlyMoving && !m_floatingTextActive ) {
 		m_temporaryTimer += dt;
 		int flip = 1;
 		if(m_arrowActive){
 			if(m_gamePhase == PLAYERTWO_EVENTPHASE)
 				flip *= -1;
-			m_projectilePosX += 100 * dt * flip;
+			m_projectilePosX += 170 * dt * flip;
 		}
 		else if(m_fireBallActive){
 			if(m_gamePhase == PLAYERTWO_EVENTPHASE)
 				flip *= -1;
-			m_projectilePosX += 100 * dt * flip;
-			m_fireballRotation += 800 * dt;
+			m_projectilePosX += 170 * dt * flip;
+			m_fireballRotation += 800 * dt * flip;
 		}
 		//	if(m_temporaryTimer > 2.0 ){
-		if( ( ( m_projectilePosX > m_gameBoard[m_attackTargetSpaceX][m_attackTargetSpaceY].getPosX() - 5 ) && ( m_projectilePosX < m_gameBoard[m_attackTargetSpaceX][m_attackTargetSpaceY].getPosX() + 5 ) ) || m_projectilePosX > 700 ){
+		if( ( ( m_projectilePosX > m_gameBoard[m_attackTargetSpaceX][m_attackTargetSpaceY].getPosX() - 5 ) && ( m_projectilePosX < m_gameBoard[m_attackTargetSpaceX][m_attackTargetSpaceY].getPosX() + 5 ) ) || m_projectilePosX > 700 || m_projectilePosX < -200 ){
 
 			////////////////////////////////////////////////////////////////
 			//  INFO:  Set data for floating text
@@ -827,8 +848,18 @@ void GameEngine::updateEventPhase(float dt){
 			////////////////////////////////////////////////////////////////
 			//  INFO:  Play sound effects based on collision
 			if(m_arrowActive ){//&& m_gameBoard[m_attackingSpaceX][m_attackingSpaceY].getOccupiedBy() == GOLDMINES){
+				if( m_attackTargetSpaceY >= 0 ){
 				m_damageType	=	m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage();
 				m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].adjustCurrentHealth(-m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage());
+				}
+				else{
+					m_player[0].adjustCurrentHealth(-m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage());
+					m_attackTargetSpaceY	=	0;
+				}
+				//////////////////////////////////////////////////////////////////////
+				//  INFO:  Remove attacked unit if health < 1
+				if( m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getCurrentHealth() < 1 )
+					m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].removeUnit();
 				/////////////////////////////////////////////////////
 				//  INFO:  Set damage to arrow's damage stat
 				switch(m_unit[m_attackingSpaceX][m_attackingSpaceY].getType()){
@@ -844,9 +875,19 @@ void GameEngine::updateEventPhase(float dt){
 				}
 			}
 			else if(m_fireBallActive){
+				if( m_attackTargetSpaceY >= 0 ) {
 				m_damageType	=	m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage();
 				m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].adjustCurrentHealth(-m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage());
+				}
+				else{
+					m_player[0].adjustCurrentHealth(-m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage());
+					m_attackTargetSpaceY	=	0;
+				}
 				fmodSystem->playSound( FMOD_CHANNEL_FREE, fireballHit, false, 0 );
+				//////////////////////////////////////////////////////////////////////
+				//  INFO:  Remove attacked unit if health < 1
+				if( m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getCurrentHealth() < 1 )
+					m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].removeUnit();
 			}
 			m_unit[m_attackingSpaceX][m_attackingSpaceY].setUnitCanTakeAction(false);
 			m_projectilePosX = 0;
@@ -862,48 +903,136 @@ void GameEngine::updateEventPhase(float dt){
 		}
 		//}
 	}
+	else if ( m_unitCurrentlyMoving ){///////////  INFO:  Melee Unit is moving
+		/////////////////////////////////////////////////////////////////////
+		//  INFO:  If m_moveToTarget > 0, then an enemy is not in front of this melee unit
+		if( m_moveToTarget > 0 ) {
+			if( m_unit[m_attackingSpaceX][m_attackingSpaceY].getWhoUnitBelongsTo() == PLAYERONE ){
+				m_unit[m_attackingSpaceX][m_attackingSpaceY].adjustPosX( 40 * dt );
+				m_arrowForAttackingUnitPosX	=	m_unit[m_attackingSpaceX][m_attackingSpaceY].getPosX() + 10;
+				m_arrowForAttackingUnitPosY	=	m_unit[m_attackingSpaceX][m_attackingSpaceX].getPosY() - 40;
+				if( m_unit[m_attackingSpaceX][m_attackingSpaceY].getPosX() > m_unit[m_attackingSpaceX][m_moveToTarget].getPosX()){
+					moveUnit();
+				}
+			}
+			else {
+				m_unit[m_attackingSpaceX][m_attackingSpaceY].adjustPosX( -40 * dt );
+				m_arrowForAttackingUnitPosX	=	m_unit[m_attackingSpaceX][m_attackingSpaceY].getPosX() + 10;
+				m_arrowForAttackingUnitPosY	=	m_unit[m_attackingSpaceX][m_attackingSpaceX].getPosY() - 40;
+				if( m_unit[m_attackingSpaceX][m_attackingSpaceY].getPosX() < m_unit[m_attackingSpaceX][m_moveToTarget].getPosX()){
+					moveUnit();
+				}
+			}
+		}
+		else{
+			////////////////////////////////////////////////////////////////
+			//  INFO:  Set data for floating text
+			if( !m_floatingTextActive ){
+			m_floatingTextActive = true;
+			m_floatingRectTopMax	=	m_gameBoard[m_attackingSpaceX][m_attackingSpaceY].getPosY() - 35;
+			m_floatingTextRect.top = m_gameBoard[m_attackingSpaceX][m_attackTargetSpaceY].getPosY() - 10;
+			m_floatingTextRect.left = m_gameBoard[m_attackingSpaceX][m_attackTargetSpaceY].getPosX() - 10;
+			m_floatingTextRect.right = m_gameBoard[m_attackingSpaceX][m_attackTargetSpaceY].getPosX() + 10;
+			m_floatingTextRect.bottom = m_gameBoard[m_attackingSpaceX][m_attackTargetSpaceY].getPosY() + 10;
+			m_damageType	=	m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage();
+			m_arrowForAttackingUnitPosX	=	m_unit[m_attackingSpaceX][m_attackingSpaceY].getPosX() + 10;
+			m_arrowForAttackingUnitPosY	=	m_unit[m_attackingSpaceX][m_attackingSpaceY].getPosY() - 40;
+			//m_arrowForAttackingUnitPosX	=	m_unit[m_attackingSpaceX][m_attackingSpaceY].getPosX() + 10;
+			//m_arrowForAttackingUnitPosY	=	m_unit[m_attackingSpaceX][m_attackingSpaceY].getPosY() - 40;
+			m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].adjustCurrentHealth(-m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage());
+			m_unitCurrentlyMoving	=	false;
+			m_unitCurrentlyAttacking	=	true;
+			m_unit[m_attackingSpaceX][m_attackingSpaceY].setUnitCanTakeAction(false);
+			m_unit[m_attackingSpaceX][m_moveToTarget].setUnitCanTakeAction(false);
+			//m_attackingSpaceX	=	-1;
+			//m_attackingSpaceY	=	-1;
+			//m_moveToTarget		=	-1;
+			}
+		}
+	}
 	int test;
 	if(m_gamePhase == PLAYERTWO_EVENTPHASE)
 		test = 0;
 };
 
-void GameEngine::findNextTarget(int row){
-	//if(m_gamePhase == PLAYERONE_EVENTPHASE){
-	//	///////////////////////////////////////////////////////////////////////////////////
-	//	//  INFO:  Finds the first available target and sets it, then returns
-	//	for(int i = 0; i < MAXBOARDHEIGHT; ++i){
-	//		for(int j = 0; j < MAXBOARDWIDTH; ++j){
-	//			if(m_gameBoard[i][j].getWhoUnitBelongsTo() == PLAYERTWO){
-	//				m_attackTargetSpaceX = i;
-	//				m_attackTargetSpaceY = j;
-	//				return;
-	//			}
-	//		}
-	//	}
-	//}
+void GameEngine::findNextTarget( int row, int col ){
+	if ( col == 12 )
+		col = 12;
 	if(m_gamePhase == PLAYERONE_EVENTPHASE){
 		///////////////////////////////////////////////////////////////////////////////////
 		//  INFO:  Finds the first available target and sets it, then returns
-		//for(int i = 0; i < MAXBOARDHEIGHT; ++i){
-		for(int i = 0; i < MAXBOARDWIDTH; ++i){
-			if(m_unit[row][i].getWhoUnitBelongsTo() == PLAYERTWO){
-				m_attackTargetSpaceX = row;
-				m_attackTargetSpaceY = i;
-				break;
+		if( m_unit[row][col].checkIfRanged() ){
+			for(int i = col; i < MAXBOARDWIDTH; ++i){
+				if(m_unit[row][i].getWhoUnitBelongsTo() == PLAYERTWO){
+					m_attackTargetSpaceX = row;
+					m_attackTargetSpaceY = i;
+					break;
+				}
+			}
+		}
+		else{
+			if( ( col + 1 ) > MAXBOARDWIDTH )
+				return;
+			if( m_unit[row][col + 1].getWhoUnitBelongsTo() == PLAYERTWO ){
+				m_attackTargetSpaceX	=	row;
+				m_attackTargetSpaceY	=	col + 1;
+				m_unitCurrentlyMoving	=	true;
+			}
+			else {
+				m_unitCurrentlyMoving	=	true;
+				for( int i = 1; i <= m_unit[row][col].getSpeed(); ++i ){
+					if( i == MAXBOARDWIDTH )
+						break;
+					if(m_unit[row][col + i ].getWhoUnitBelongsTo() < PLAYERONE ){
+						//m_attackTargetSpaceX	=	row;
+						//m_attackTargetSpaceY	=	col;
+						m_moveToTarget = col + i;
+					}
+				}
+				//m_unit[row][col].
 			}
 		}
 	}
 	else if(m_gamePhase == PLAYERTWO_EVENTPHASE){
-		for(int i = MAXBOARDWIDTH; i > 0; --i){
-			if(m_unit[row][i].getWhoUnitBelongsTo() == PLAYERONE){
-				//////////////////////////////////////////////////////
-				//  INFO:  If the player is
-				//  TODO:  FIX this SOON.  m_attackingSpaceY SHOULD be m_attackingSpaceX and vice versa
-				if(i > m_attackingSpaceY )
-					continue;
-				m_attackTargetSpaceX = row;
-				m_attackTargetSpaceY = i;
-				break;
+		if(m_unit[row][col].checkIfRanged()){
+			m_attackTargetSpaceY	=	-1;
+			for(int i = MAXBOARDWIDTH-1; i >= 0; --i){
+				if(m_unit[row][i].getWhoUnitBelongsTo() == PLAYERONE){
+					//////////////////////////////////////////////////////
+					//  INFO:  If the player is
+					//  TODO:  FIX this SOON.  m_attackingSpaceY SHOULD be m_attackingSpaceX and vice versa
+					if(i > m_attackingSpaceY )
+						continue;
+					m_attackTargetSpaceX = row;
+					m_attackTargetSpaceY = i;
+					break;
+				}
+			}
+			//if( m_attackTargetSpaceY == -1 ){
+				//m_player[0].adjustCurrentHealth( - 30 );
+				//m_attackTargetSpaceY	=	0;
+		//	}
+		}
+		else{
+			if( ( col - 1 ) < 0 )
+				return;
+			if( m_unit[row][col - 1].getWhoUnitBelongsTo() == PLAYERONE ){
+				m_attackTargetSpaceX	=	row;
+				m_attackTargetSpaceY	=	col - 1;
+				m_unitCurrentlyMoving	=	true;
+			}
+			else {
+				m_unitCurrentlyMoving	=	true;
+				for( int i = 1; i <= m_unit[row][col].getSpeed(); ++i ){
+					if( ( col - i ) < 0 )
+						break;
+					if(m_unit[row][col - i ].getWhoUnitBelongsTo() < PLAYERONE ){
+						//m_attackTargetSpaceX	=	row;
+						//m_attackTargetSpaceY	=	col;
+						m_moveToTarget = col - i;
+					}
+				}
+				//m_unit[row][col].
 			}
 		}
 	}
@@ -917,6 +1046,21 @@ void GameEngine::resetUnitActions(int playerNumber){
 				m_unit[i][j].setUnitCanTakeAction(true);
 		}
 	}
+};
+
+void GameEngine::moveUnit(){
+	m_unit[m_attackingSpaceX][m_moveToTarget].addUnit( m_unit[m_attackingSpaceX][m_attackingSpaceY].getType(), m_unit[m_attackingSpaceX][m_attackingSpaceY].getWhoUnitBelongsTo() );
+	m_unit[m_attackingSpaceX][m_moveToTarget].setCurrentHealth( m_unit[m_attackingSpaceX][m_attackingSpaceY].getCurrentHealth() );
+	m_unit[m_attackingSpaceX][m_moveToTarget].setMaxHealth( m_unit[m_attackingSpaceX][m_attackingSpaceY].getMaxHealth() );
+	m_unit[m_attackingSpaceX][m_attackingSpaceY].removeUnit();
+	m_unitCurrentlyMoving = false;
+	m_unitCurrentlyAttacking	=	false;
+	m_unit[m_attackingSpaceX][m_attackingSpaceY].setUnitCanTakeAction(false);
+	m_unit[m_attackingSpaceX][m_moveToTarget].setUnitCanTakeAction(false);
+	m_attackingSpaceX	=	-1;
+	m_attackingSpaceY	=	-1;
+	m_moveToTarget		=	-1;
+
 };
 
 void GameEngine::Render()
@@ -1005,6 +1149,7 @@ void GameEngine::Render()
 void GameEngine::Shutdown()
 {
 	// Release COM objects in the opposite order they were created in
+	SAFE_RELEASE(m_golemUnit);
 	SAFE_RELEASE(m_healthBar);
 	SAFE_RELEASE(m_archerArrow);
 	SAFE_RELEASE(m_fireball);
@@ -1065,7 +1210,7 @@ void GameEngine::drawBackground(){
 
 
 void GameEngine::drawGameBoard(){
-		float healthPercentage = 0;
+	float healthPercentage = 0;
 	int   healthPercentageRight = 0;
 	//////////////////////////////////////////////////////////////////////////
 	// INFO:  Draws gameboard
@@ -1094,7 +1239,366 @@ void GameEngine::drawGameBoard(){
 			m_pD3DSprite->Draw(m_gamePiece, 0, &D3DXVECTOR3(m_gamePieceInfo.Width * 0.5f, m_gamePieceInfo.Height * 0.5f, 0.0f),
 				0, D3DCOLOR_ARGB(255, 255, 255, 255));
 
-			D3DXMatrixIdentity(&transMat);
+			//D3DXMatrixIdentity(&transMat);
+			//D3DXMatrixIdentity(&scaleMat);
+			//D3DXMatrixIdentity(&rotMat);
+			//D3DXMatrixIdentity(&worldMat);
+
+			//////////////////////////////////////////////////////////////////////////////////
+			////  INFO:  For inverting images for player 2
+			//if(!m_unit[i][j].isFacingRight())
+			//	flip *= -1;
+			//int offset = 0;
+			////int testX, testY;
+			////////////////////////////////////////////////////////////////////////////////////
+			////  INFO:  If the gamespace is occupied by a unit, draw that unit.  
+			//switch(m_unit[i][j].getType()){
+
+			//case NOUNIT:
+			//	break;
+			//case GOLDMINES:
+			//	//////////////////////////////////////////////////////////////////////////////
+			//	//  INFO:  Draws Goldmines
+			//	D3DXMatrixScaling(&scaleMat, 0.33f, 0.35f, 0.0f);			// Scaling
+			//	D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX()+4, m_unit[i][j].getPosY(), 0.0f);			// Translation
+			//	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+			//	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+			//	// Set Transform
+			//	m_pD3DSprite->SetTransform(&worldMat);
+			//	m_pD3DSprite->Draw(m_goldMine, 0, &D3DXVECTOR3(m_goldMineInfo.Width * 0.5f, m_goldMineInfo.Height * 0.5f, 0.0f),
+			//		0, D3DCOLOR_ARGB(255, 255, 255, 255));
+
+			//	//////////////////////////////////////////////////////////////////////////////
+			//	//  INFO:  Draws black background for health bar
+			//	D3DXMatrixIdentity(&transMat);
+			//	D3DXMatrixIdentity(&scaleMat);
+			//	D3DXMatrixIdentity(&rotMat);
+			//	D3DXMatrixIdentity(&worldMat);
+			//	D3DXMatrixScaling(&scaleMat, 0.45f, 0.55f, 0.0f);			// Scaling
+			//	D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX()+35, m_unit[i][j].getPosY()+48, 0.0f);
+			//	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+			//	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+			//	m_pD3DSprite->SetTransform(&worldMat);
+			//	m_pD3DSprite->Draw(m_healthBar, &m_healthRect, &D3DXVECTOR3(m_healthBarInfo.Width * 0.5f, m_healthBarInfo.Height * 0.5f, 0.0f),
+			//		0, D3DCOLOR_ARGB(255, 0, 0, 0));
+
+
+			//	//////////////////////////////////////////////////////////////////////////////
+			//	//  INFO:  Draws red background for health bar
+			//	D3DXMatrixIdentity(&transMat);
+			//	D3DXMatrixIdentity(&scaleMat);
+			//	D3DXMatrixIdentity(&rotMat);
+			//	D3DXMatrixIdentity(&worldMat);
+
+			//	D3DXMatrixScaling(&scaleMat, 0.33f, 0.35f, 0.0f);			// Scaling
+			//	
+			//	D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX()+25, m_unit[i][j].getPosY()+42, 0.0f);
+			//	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+			//	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+			//	m_pD3DSprite->SetTransform(&worldMat);
+
+
+			//	m_healthRect.right += 13;
+			//	m_pD3DSprite->Draw(m_healthBar, &m_healthRect, &D3DXVECTOR3(m_healthBarInfo.Width * 0.5f, m_healthBarInfo.Height * 0.5f, 0.0f),
+			//		0, D3DCOLOR_ARGB(255, 255, 255, 255));
+
+			//	m_healthRect.right -= 13;
+			//	///////////////////////////////////////////////////////////////////////////////
+			//	//  INFO:  Draws green health bar based on remaining health
+			//	D3DXMatrixIdentity(&transMat);
+			//	D3DXMatrixIdentity(&scaleMat);
+			//	D3DXMatrixIdentity(&rotMat);
+			//	D3DXMatrixIdentity(&worldMat);
+
+			//	D3DXMatrixScaling(&scaleMat, 0.33f, 0.35f, 0.0f);			// Scaling
+			//	
+			//	D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX()+25, m_unit[i][j].getPosY()+42, 0.0f);
+			//	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+			//	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+			//	m_pD3DSprite->SetTransform(&worldMat);
+
+			//	m_healthRect.left += 120;
+			//	m_healthRect.right += 133;
+			//	///////////////////////////////////////////////////////////////////////
+			//	//  INFO:  Shrinks green health bar based on missing health
+			//	healthPercentage = ( (float) m_unit[i][j].getCurrentHealth() / m_unit[i][j].getMaxHealth() );
+			//	while(healthPercentage < 1.0f){
+			//		healthPercentage += 0.05f;
+			//		m_healthRect.right -= 5;
+			//	}
+			//	m_pD3DSprite->Draw(m_healthBar, &m_healthRect, &D3DXVECTOR3(m_healthBarInfo.Width * 0.5f, m_healthBarInfo.Height * 0.5f, 0.0f),
+			//		0, D3DCOLOR_ARGB(255, 255, 255, 255));
+			//	m_healthRect.left -= 120;
+			//	m_healthRect.right = 90;
+			//	break;
+			//case WALL:
+			//	break;
+			//case WARRIORUNIT:
+			//	break;
+			//case MARKSMAN:
+			//	break;
+			//case CAVALRY:
+			//	break;
+			//case WOLF:
+			//	break;
+			//case ARCHERUNIT:
+			//	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+			//	//  INFO:  Adds an offset to draw unit in the center of the gamespace
+			//	if(m_unit[i][j].getWhoUnitBelongsTo() == PLAYERONE )
+			//		offset = 33;
+			//	if(m_unit[i][j].getWhoUnitBelongsTo() == PLAYERTWO )
+			//		offset = -15;
+			//	D3DXMatrixScaling(&scaleMat, 0.75f * flip, 0.74f, 0.0f);			// Scaling
+			//	D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX() + offset, m_unit[i][j].getPosY()+33, 0.0f);			// Translation
+			//	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+			//	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+			//	// Set Transform
+			//	m_pD3DSprite->SetTransform(&worldMat);
+			//	m_pD3DSprite->Draw(m_archerUnit, &m_unit[i][j].getUnitRect(), &D3DXVECTOR3(m_unit[i][j].getUnitRect().right - m_unit[i][j].getUnitRect().left, m_unit[i][j].getUnitRect().bottom - m_unit[i][j].getUnitRect().top, 0.0f),
+			//		0, D3DCOLOR_ARGB(255, 255, 255, 255));
+			//					//////////////////////////////////////////////////////////////////////////////
+			//	//  INFO:  Draws black background for health bar
+			//	D3DXMatrixIdentity(&transMat);
+			//	D3DXMatrixIdentity(&scaleMat);
+			//	D3DXMatrixIdentity(&rotMat);
+			//	D3DXMatrixIdentity(&worldMat);
+			//	D3DXMatrixScaling(&scaleMat, 0.45f, 0.55f, 0.0f);			// Scaling
+			//	D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX()+35, m_unit[i][j].getPosY()+48, 0.0f);
+			//	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+			//	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+			//	m_pD3DSprite->SetTransform(&worldMat);
+			//	m_pD3DSprite->Draw(m_healthBar, &m_healthRect, &D3DXVECTOR3(m_healthBarInfo.Width * 0.5f, m_healthBarInfo.Height * 0.5f, 0.0f),
+			//		0, D3DCOLOR_ARGB(255, 0, 0, 0));
+
+
+			//	//////////////////////////////////////////////////////////////////////////////
+			//	//  INFO:  Draws red background for health bar
+			//	D3DXMatrixIdentity(&transMat);
+			//	D3DXMatrixIdentity(&scaleMat);
+			//	D3DXMatrixIdentity(&rotMat);
+			//	D3DXMatrixIdentity(&worldMat);
+
+			//	D3DXMatrixScaling(&scaleMat, 0.33f, 0.35f, 0.0f);			// Scaling
+			//	
+			//	D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX()+25, m_unit[i][j].getPosY()+42, 0.0f);
+			//	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+			//	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+			//	m_pD3DSprite->SetTransform(&worldMat);
+
+
+			//	m_healthRect.right += 13;
+			//	m_pD3DSprite->Draw(m_healthBar, &m_healthRect, &D3DXVECTOR3(m_healthBarInfo.Width * 0.5f, m_healthBarInfo.Height * 0.5f, 0.0f),
+			//		0, D3DCOLOR_ARGB(255, 255, 255, 255));
+
+			//	m_healthRect.right -= 13;
+			//	///////////////////////////////////////////////////////////////////////////////
+			//	//  INFO:  Draws green health bar based on remaining health
+			//	D3DXMatrixIdentity(&transMat);
+			//	D3DXMatrixIdentity(&scaleMat);
+			//	D3DXMatrixIdentity(&rotMat);
+			//	D3DXMatrixIdentity(&worldMat);
+
+			//	D3DXMatrixScaling(&scaleMat, 0.33f, 0.35f, 0.0f);			// Scaling
+			//	
+			//	D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX()+25, m_unit[i][j].getPosY()+42, 0.0f);
+			//	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+			//	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+			//	m_pD3DSprite->SetTransform(&worldMat);
+
+			//	m_healthRect.left += 120;
+			//	m_healthRect.right += 133;
+			//	///////////////////////////////////////////////////////////////////////
+			//	//  INFO:  Shrinks green health bar based on missing health
+			//	healthPercentage = ( (float) m_unit[i][j].getCurrentHealth() / m_unit[i][j].getMaxHealth() );
+			//	while(healthPercentage < 1.0f){
+			//		healthPercentage += 0.05f;
+			//		m_healthRect.right -= 5;
+			//	}
+			//	m_pD3DSprite->Draw(m_healthBar, &m_healthRect, &D3DXVECTOR3(m_healthBarInfo.Width * 0.5f, m_healthBarInfo.Height * 0.5f, 0.0f),
+			//		0, D3DCOLOR_ARGB(255, 255, 255, 255));
+			//	m_healthRect.left -= 120;
+			//	m_healthRect.right = 90;
+			//	break;
+			//case THIEF:
+			//	break;
+			//case GOLEM:
+			//	if(m_unit[i][j].getWhoUnitBelongsTo() == PLAYERONE )
+			//		offset = 24;
+			//	if(m_unit[i][j].getWhoUnitBelongsTo() == PLAYERTWO )
+			//		offset = -15;
+			//	D3DXMatrixScaling(&scaleMat, 0.55f, 0.40f, 0.0f);			// Scaling
+			//	m_gameBoard[i][j].setPosX(m_gameBoard[i][j].getPosX());
+			//	D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX() + offset, m_unit[i][j].getPosY() + 50, 0.0f);			// Translation
+			//	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+			//	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+			//	// Set Transform
+			//	m_pD3DSprite->SetTransform(&worldMat);
+			//	m_pD3DSprite->Draw(m_golemUnit, &m_unit[i][j].getUnitRect(), &D3DXVECTOR3(m_unit[i][j].getUnitRect().right - m_unit[i][j].getUnitRect().left, m_unit[i][j].getUnitRect().bottom - m_unit[i][j].getUnitRect().top, 0.0f),
+			//		0, D3DCOLOR_ARGB(255, 255, 255, 255));
+
+			//	//////////////////////////////////////////////////////////////////////////////
+			//	//  INFO:  Draws black background for health bar
+			//	D3DXMatrixIdentity(&transMat);
+			//	D3DXMatrixIdentity(&scaleMat);
+			//	D3DXMatrixIdentity(&rotMat);
+			//	D3DXMatrixIdentity(&worldMat);
+			//	D3DXMatrixScaling(&scaleMat, 0.45f, 0.55f, 0.0f);			// Scaling
+			//	D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX()+35, m_unit[i][j].getPosY()+48, 0.0f);
+			//	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+			//	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+			//	m_pD3DSprite->SetTransform(&worldMat);
+			//	m_pD3DSprite->Draw(m_healthBar, &m_healthRect, &D3DXVECTOR3(m_healthBarInfo.Width * 0.5f, m_healthBarInfo.Height * 0.5f, 0.0f),
+			//		0, D3DCOLOR_ARGB(255, 0, 0, 0));
+
+
+			//	//////////////////////////////////////////////////////////////////////////////
+			//	//  INFO:  Draws red background for health bar
+			//	D3DXMatrixIdentity(&transMat);
+			//	D3DXMatrixIdentity(&scaleMat);
+			//	D3DXMatrixIdentity(&rotMat);
+			//	D3DXMatrixIdentity(&worldMat);
+
+			//	D3DXMatrixScaling(&scaleMat, 0.33f, 0.35f, 0.0f);			// Scaling
+			//	
+			//	D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX()+25, m_unit[i][j].getPosY()+42, 0.0f);
+			//	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+			//	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+			//	m_pD3DSprite->SetTransform(&worldMat);
+
+
+			//	m_healthRect.right += 13;
+			//	m_pD3DSprite->Draw(m_healthBar, &m_healthRect, &D3DXVECTOR3(m_healthBarInfo.Width * 0.5f, m_healthBarInfo.Height * 0.5f, 0.0f),
+			//		0, D3DCOLOR_ARGB(255, 255, 255, 255));
+
+			//	m_healthRect.right -= 13;
+			//	///////////////////////////////////////////////////////////////////////////////
+			//	//  INFO:  Draws green health bar based on remaining health
+			//	D3DXMatrixIdentity(&transMat);
+			//	D3DXMatrixIdentity(&scaleMat);
+			//	D3DXMatrixIdentity(&rotMat);
+			//	D3DXMatrixIdentity(&worldMat);
+
+			//	D3DXMatrixScaling(&scaleMat, 0.33f, 0.35f, 0.0f);			// Scaling
+			//	
+			//	D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX()+25, m_unit[i][j].getPosY()+42, 0.0f);
+			//	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+			//	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+			//	m_pD3DSprite->SetTransform(&worldMat);
+
+			//	m_healthRect.left += 120;
+			//	m_healthRect.right += 133;
+			//	///////////////////////////////////////////////////////////////////////
+			//	//  INFO:  Shrinks green health bar based on missing health
+			//	healthPercentage = ( (float) m_unit[i][j].getCurrentHealth() / m_unit[i][j].getMaxHealth() );
+			//	while(healthPercentage < 1.0f){
+			//		healthPercentage += 0.05f;
+			//		m_healthRect.right -= 5;
+			//	}
+			//	m_pD3DSprite->Draw(m_healthBar, &m_healthRect, &D3DXVECTOR3(m_healthBarInfo.Width * 0.5f, m_healthBarInfo.Height * 0.5f, 0.0f),
+			//		0, D3DCOLOR_ARGB(255, 255, 255, 255));
+			//	m_healthRect.left -= 120;
+			//	m_healthRect.right = 90;
+			//	break;
+			//case BLACKMAGEUNIT:
+			//	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+			//	//  INFO:  Adds an offset to draw unit in the center of the gamespace
+			//	if(m_unit[i][j].getWhoUnitBelongsTo() == PLAYERONE)
+			//		offset = 35;
+			//	if(m_unit[i][j].getWhoUnitBelongsTo() == PLAYERTWO)
+			//		offset = -15;
+			//	D3DXMatrixScaling(&scaleMat, 0.75f * flip, 0.74f, 0.0f);			// Scaling
+			//	D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX() + offset, m_unit[i][j].getPosY()+35, 0.0f);			// Translation
+			//	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+			//	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+			//	// Set Transform
+			//	m_pD3DSprite->SetTransform(&worldMat);
+			//	m_pD3DSprite->Draw(m_blackMageUnit, &m_unit[i][j].getUnitRect(), &D3DXVECTOR3(m_unit[i][j].getUnitRect().right - m_unit[i][j].getUnitRect().left, m_unit[i][j].getUnitRect().bottom - m_unit[i][j].getUnitRect().top, 0.0f),
+			//		0, D3DCOLOR_ARGB(255, 255, 255, 255));
+			//					//////////////////////////////////////////////////////////////////////////////
+			//	//  INFO:  Draws black background for health bar
+			//	D3DXMatrixIdentity(&transMat);
+			//	D3DXMatrixIdentity(&scaleMat);
+			//	D3DXMatrixIdentity(&rotMat);
+			//	D3DXMatrixIdentity(&worldMat);
+			//	D3DXMatrixScaling(&scaleMat, 0.45f, 0.55f, 0.0f);			// Scaling
+			//	D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX()+35, m_unit[i][j].getPosY()+48, 0.0f);
+			//	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+			//	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+			//	m_pD3DSprite->SetTransform(&worldMat);
+			//	m_pD3DSprite->Draw(m_healthBar, &m_healthRect, &D3DXVECTOR3(m_healthBarInfo.Width * 0.5f, m_healthBarInfo.Height * 0.5f, 0.0f),
+			//		0, D3DCOLOR_ARGB(255, 0, 0, 0));
+
+
+			//	//////////////////////////////////////////////////////////////////////////////
+			//	//  INFO:  Draws red background for health bar
+			//	D3DXMatrixIdentity(&transMat);
+			//	D3DXMatrixIdentity(&scaleMat);
+			//	D3DXMatrixIdentity(&rotMat);
+			//	D3DXMatrixIdentity(&worldMat);
+
+			//	D3DXMatrixScaling(&scaleMat, 0.33f, 0.35f, 0.0f);			// Scaling
+			//	
+			//	D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX()+25, m_unit[i][j].getPosY()+42, 0.0f);
+			//	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+			//	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+			//	m_pD3DSprite->SetTransform(&worldMat);
+
+
+			//	m_healthRect.right += 13;
+			//	m_pD3DSprite->Draw(m_healthBar, &m_healthRect, &D3DXVECTOR3(m_healthBarInfo.Width * 0.5f, m_healthBarInfo.Height * 0.5f, 0.0f),
+			//		0, D3DCOLOR_ARGB(255, 255, 255, 255));
+
+			//	m_healthRect.right -= 13;
+			//	///////////////////////////////////////////////////////////////////////////////
+			//	//  INFO:  Draws green health bar based on remaining health
+			//	D3DXMatrixIdentity(&transMat);
+			//	D3DXMatrixIdentity(&scaleMat);
+			//	D3DXMatrixIdentity(&rotMat);
+			//	D3DXMatrixIdentity(&worldMat);
+
+			//	D3DXMatrixScaling(&scaleMat, 0.33f, 0.35f, 0.0f);			// Scaling
+			//	
+			//	D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX()+25, m_unit[i][j].getPosY()+42, 0.0f);
+			//	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+			//	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+			//	m_pD3DSprite->SetTransform(&worldMat);
+
+			//	m_healthRect.left += 120;
+			//	m_healthRect.right += 133;
+			//	///////////////////////////////////////////////////////////////////////
+			//	//  INFO:  Shrinks green health bar based on missing health
+			//	healthPercentage = ( (float) m_unit[i][j].getCurrentHealth() / m_unit[i][j].getMaxHealth() );
+			//	while(healthPercentage < 1.0f){
+			//		healthPercentage += 0.05f;
+			//		m_healthRect.right -= 5;
+			//	}
+			//	m_pD3DSprite->Draw(m_healthBar, &m_healthRect, &D3DXVECTOR3(m_healthBarInfo.Width * 0.5f, m_healthBarInfo.Height * 0.5f, 0.0f),
+			//		0, D3DCOLOR_ARGB(255, 255, 255, 255));
+			//	m_healthRect.left -= 120;
+			//	m_healthRect.right = 90;
+			//	break;
+			//case WARLOCK:
+			//	break;
+			//}
+			//D3DXMatrixScaling(&scaleMat, 0.7f, 0.80f, 0.0f);			// Scaling
+			////D3DXMatrixRotationZ(&rotMat, D3DXToRadian(90.0f));		// Rotation on Z axis, value in radians, converting from degrees
+			//D3DXMatrixTranslation(&transMat, 75 + (j * 43), 190 + i * 50, 0.0f);			// Translation
+			//D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+			//D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+
+			//// Set Transform
+			//m_pD3DSprite->SetTransform(&worldMat);
+
+
+			//m_pD3DSprite->Draw(m_gamePiece, 0, &D3DXVECTOR3(m_gamePieceInfo.Width * 0.5f, m_gamePieceInfo.Height * 0.5f, 0.0f),
+			//	0, D3DCOLOR_ARGB(255, 255, 255, 255));
+		}
+	}
+	for(int i = 0; i < MAXBOARDHEIGHT; ++i){
+		int flip = 1;
+		for(int j = 0; j < MAXBOARDWIDTH; ++j){
+			flip = 1;
+				D3DXMatrixIdentity(&transMat);
 			D3DXMatrixIdentity(&scaleMat);
 			D3DXMatrixIdentity(&rotMat);
 			D3DXMatrixIdentity(&worldMat);
@@ -1277,6 +1781,81 @@ void GameEngine::drawGameBoard(){
 			case THIEF:
 				break;
 			case GOLEM:
+				offset = 5;
+				if( flip < 0 )
+					offset += 5;
+				D3DXMatrixScaling(&scaleMat, 0.55f * flip, 0.40f, 0.0f);			// Scaling
+				m_gameBoard[i][j].setPosX(m_gameBoard[i][j].getPosX());
+				D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX() + offset, m_unit[i][j].getPosY() + 15, 0.0f);			// Translation
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+				// Set Transform
+				m_pD3DSprite->SetTransform(&worldMat);
+				m_pD3DSprite->Draw(m_golemUnit, &m_unit[i][j].getUnitRect(), &D3DXVECTOR3( ( m_unit[i][j].getUnitRect().right - m_unit[i][j].getUnitRect().left ) * 0.5f, ( m_unit[i][j].getUnitRect().bottom - m_unit[i][j].getUnitRect().top ) * 0.5f, 0.0f),
+					0, D3DCOLOR_ARGB(255, 255, 255, 255));
+
+				//////////////////////////////////////////////////////////////////////////////
+				//  INFO:  Draws black background for health bar
+				D3DXMatrixIdentity(&transMat);
+				D3DXMatrixIdentity(&scaleMat);
+				D3DXMatrixIdentity(&rotMat);
+				D3DXMatrixIdentity(&worldMat);
+				D3DXMatrixScaling(&scaleMat, 0.45f, 0.55f, 0.0f);			// Scaling
+				D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX()+35, m_unit[i][j].getPosY()+48, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+				m_pD3DSprite->SetTransform(&worldMat);
+				m_pD3DSprite->Draw(m_healthBar, &m_healthRect, &D3DXVECTOR3(m_healthBarInfo.Width * 0.5f, m_healthBarInfo.Height * 0.5f, 0.0f),
+					0, D3DCOLOR_ARGB(255, 0, 0, 0));
+
+
+				//////////////////////////////////////////////////////////////////////////////
+				//  INFO:  Draws red background for health bar
+				D3DXMatrixIdentity(&transMat);
+				D3DXMatrixIdentity(&scaleMat);
+				D3DXMatrixIdentity(&rotMat);
+				D3DXMatrixIdentity(&worldMat);
+
+				D3DXMatrixScaling(&scaleMat, 0.33f, 0.35f, 0.0f);			// Scaling
+				
+				D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX()+25, m_unit[i][j].getPosY()+42, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+				m_pD3DSprite->SetTransform(&worldMat);
+
+
+				m_healthRect.right += 13;
+				m_pD3DSprite->Draw(m_healthBar, &m_healthRect, &D3DXVECTOR3(m_healthBarInfo.Width * 0.5f, m_healthBarInfo.Height * 0.5f, 0.0f),
+					0, D3DCOLOR_ARGB(255, 255, 255, 255));
+
+				m_healthRect.right -= 13;
+				///////////////////////////////////////////////////////////////////////////////
+				//  INFO:  Draws green health bar based on remaining health
+				D3DXMatrixIdentity(&transMat);
+				D3DXMatrixIdentity(&scaleMat);
+				D3DXMatrixIdentity(&rotMat);
+				D3DXMatrixIdentity(&worldMat);
+
+				D3DXMatrixScaling(&scaleMat, 0.33f, 0.35f, 0.0f);			// Scaling
+				
+				D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX()+25, m_unit[i][j].getPosY()+42, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_healthRect.left += 120;
+				m_healthRect.right += 133;
+				///////////////////////////////////////////////////////////////////////
+				//  INFO:  Shrinks green health bar based on missing health
+				healthPercentage = ( (float) m_unit[i][j].getCurrentHealth() / m_unit[i][j].getMaxHealth() );
+				while(healthPercentage < 1.0f){
+					healthPercentage += 0.05f;
+					m_healthRect.right -= 5;
+				}
+				m_pD3DSprite->Draw(m_healthBar, &m_healthRect, &D3DXVECTOR3(m_healthBarInfo.Width * 0.5f, m_healthBarInfo.Height * 0.5f, 0.0f),
+					0, D3DCOLOR_ARGB(255, 255, 255, 255));
+				m_healthRect.left -= 120;
+				m_healthRect.right = 90;
 				break;
 			case BLACKMAGEUNIT:
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1359,20 +1938,9 @@ void GameEngine::drawGameBoard(){
 			case WARLOCK:
 				break;
 			}
-			//D3DXMatrixScaling(&scaleMat, 0.7f, 0.80f, 0.0f);			// Scaling
-			////D3DXMatrixRotationZ(&rotMat, D3DXToRadian(90.0f));		// Rotation on Z axis, value in radians, converting from degrees
-			//D3DXMatrixTranslation(&transMat, 75 + (j * 43), 190 + i * 50, 0.0f);			// Translation
-			//D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
-			//D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
-
-			//// Set Transform
-			//m_pD3DSprite->SetTransform(&worldMat);
-
-
-			//m_pD3DSprite->Draw(m_gamePiece, 0, &D3DXVECTOR3(m_gamePieceInfo.Width * 0.5f, m_gamePieceInfo.Height * 0.5f, 0.0f),
-			//	0, D3DCOLOR_ARGB(255, 255, 255, 255));
+			}
 		}
-	}
+	//}
 	if(m_unitCurrentlyAttacking){
 		/////////////////////////////////////////////////////////////
 		//  INFO:  For inverting images if they belong to player 2

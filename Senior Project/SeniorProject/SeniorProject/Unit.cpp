@@ -15,6 +15,7 @@ Unit::Unit(){
 	facingRight			=	false;
 	isActive			=	false;
 	unitCanTakeAction	=	false;
+	isRanged			=	false;
 };
 
 void Unit::addUnit(int t, int playerNumber){
@@ -25,6 +26,8 @@ void Unit::addUnit(int t, int playerNumber){
 		facingRight = true;
 	isActive			=	true;
 	unitCanTakeAction	=	true;
+	isRanged			=	false;
+	speed				=	0;
 	whoUnitBelongsTo	=	playerNumber;
 	switch(t){
 	case NOUNIT:
@@ -69,10 +72,22 @@ void Unit::addUnit(int t, int playerNumber){
 		unitRect.left		=	10;
 		unitRect.right		=	70;
 		unitRect.bottom		=	70;
+		isRanged			=	true;
 		break;
 	case THIEF:
 		break;
 	case GOLEM:
+		type				=	GOLEM;
+		damage				=	25;
+		currentHealth		=	160;
+		maxHealth			=	160;
+		animationTimer		=	0.0f;
+		unitRect.top		=	25;
+		unitRect.left		=	0;
+		unitRect.right		=	50;
+		unitRect.bottom		=	180;
+		isRanged			=	false;
+		speed				=	2;
 		break;
 	case BLACKMAGEUNIT:
 		type				=	BLACKMAGEUNIT;
@@ -84,10 +99,31 @@ void Unit::addUnit(int t, int playerNumber){
 		unitRect.left		=	5;
 		unitRect.right		=	70;
 		unitRect.bottom		=	145;
+		isRanged			=	true;
 		break;
 	case WARLOCK:
 		break;
 	};
+};
+
+void Unit::removeUnit(){
+
+	facingRight = false;
+	isActive			=	false;
+	unitCanTakeAction	=	false;
+	isRanged			=	false;
+	speed				=	0;
+	whoUnitBelongsTo	=	-1;
+	type				=	NOUNIT;
+	damage				=	0;
+	currentHealth		=	0;
+	maxHealth			=	0;
+	animationTimer		=	0.0f;
+	unitRect.top		=	0;
+	unitRect.left		=	0;
+	unitRect.right		=	0;
+	unitRect.bottom		=	0;
+
 };
 
 void Unit::updateAnimations( float dt ){
@@ -196,6 +232,14 @@ int Unit::getWhoUnitBelongsTo(){
 	return whoUnitBelongsTo;
 }
 
+void Unit::setSpeed( int s ){
+	speed = s;
+}
+
+int Unit::getSpeed(){
+	return speed;
+}
+
 void Unit::setPosX( float x ){
 	posX	=	x;
 }
@@ -255,3 +299,10 @@ bool Unit::canUnitTakeAction(){
 	return unitCanTakeAction;
 }
 
+void Unit::setRanged( bool b ){
+	isRanged = b;
+};
+
+bool Unit::checkIfRanged(){
+	return isRanged;
+};

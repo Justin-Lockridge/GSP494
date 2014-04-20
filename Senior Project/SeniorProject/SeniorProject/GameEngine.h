@@ -65,10 +65,10 @@ class GameEngine{
 	float				m_prevTime, m_deltaTime, m_frameTime;				// Time to render previous frame
 	int					m_FPS;			// Frames per second  
 	int					m_gamePhase;
-	bool				m_unitCurrentlyAttacking, m_fireBallActive, m_arrowActive, m_floatingTextActive;
+	bool				m_unitCurrentlyAttacking, m_fireBallActive, m_arrowActive, m_floatingTextActive, m_unitCurrentlyMoving;
 	float				m_projectilePosX, m_projectilePosY, m_arrowForAttackingUnitPosX, m_arrowForAttackingUnitPosY;
 	float				m_temporaryTimer;
-	int					m_attackingSpaceX, m_attackingSpaceY, m_attackTargetSpaceX, m_attackTargetSpaceY;
+	int					m_attackingSpaceX, m_attackingSpaceY, m_attackTargetSpaceX, m_attackTargetSpaceY, m_moveToTarget;
 	float				m_fireballRotation, m_floatingRectTopMax, m_floatingRectTimer;
 	RECT				m_floatingTextRect, m_healthRect;
 
@@ -89,9 +89,9 @@ class GameEngine{
 	//////////////////////////////////////////////////////////////////////////
 	ID3DXSprite*		m_pD3DSprite;	// Sprite Object
 	IDirect3DTexture9*	m_cursor,*m_battleBackgroundOne, *m_gamePiece, *m_archerCharacter, *m_blackMageCharacter, *m_playerUIBackground,
-						*m_goldMine, *m_archerUnit, *m_blackMageUnit, *m_arrow, *m_fireball, *m_archerArrow, *m_healthBar;		// Texture Object for a sprite
+						*m_goldMine, *m_archerUnit, *m_blackMageUnit, *m_arrow, *m_fireball, *m_archerArrow, *m_healthBar, *m_golemUnit;		// Texture Object for a sprite
 	D3DXIMAGE_INFO		m_cursorInfo,m_battleBackgroundOneInfo, m_gamePieceInfo, m_archerCharacterInfo, m_blackMageCharacterInfo, m_playerUIBackgroundInfo,
-						m_goldMineInfo, m_archerUnitInfo, m_blackMageUnitInfo, m_arrowInfo, m_fireballInfo, m_archerArrowInfo, m_healthBarInfo;	// File details of a texture
+						m_goldMineInfo, m_archerUnitInfo, m_blackMageUnitInfo, m_arrowInfo, m_fireballInfo, m_archerArrowInfo, m_healthBarInfo, m_golemUnitInfo;	// File details of a texture
 
 	//Clickable Button Icons
 	std::vector<Buttons> player1_units;
@@ -165,8 +165,9 @@ class GameEngine{
 	void Update(float dt);
 	void updateAnimations(float dt);
 	void updateEventPhase(float dt);
-	void findNextTarget(int row);
+	void findNextTarget(int row, int col);
 	void resetUnitActions(int playerNumber);
+	void moveUnit();
 	//////////////////////////////////////////////////////////////////////////
 	// Name:		Render
 	// Parameters:	float elapsedTime - Time that has elapsed since the last

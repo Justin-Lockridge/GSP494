@@ -9,17 +9,20 @@
 #include "DefinesAndEnums.h"
 
 class Unit{
-	int type, damage, currentHealth, maxHealth, whoUnitBelongsTo;
+	int type, damage, currentHealth, maxHealth, whoUnitBelongsTo, speed;
 	float posX, posY, animationTimer;
 
 	RECT unitRect;
-	bool facingRight, isActive, unitCanTakeAction;
+	bool facingRight, isActive, unitCanTakeAction, isRanged;
 public:
 	Unit();
 
 	void	addUnit(int t, int playerNumber);
+	void	removeUnit();
 	void	updateAnimations( float dt );
-	
+	void	setNewColumn( int c );
+	//////////////////////////////////////////////////////////
+	//  INFO:  Setters, getters, and adjustments
 	void	setType(int t);
 	int		getType();
 	void	setDamage(int d);
@@ -31,6 +34,8 @@ public:
 	int		getMaxHealth();
 	void	setWhoUnitBelongsTo( int player );
 	int		getWhoUnitBelongsTo();
+	void	setSpeed( int s );
+	int		getSpeed();
 	void	setPosX(float x);
 	void	adjustPosX(float x);
 	float	getPosX();
@@ -45,4 +50,6 @@ public:
 	bool	checkIfActive();
 	void	setUnitCanTakeAction(bool b);
 	bool	canUnitTakeAction();
+	void	setRanged(bool b);
+	bool	checkIfRanged();
 };
