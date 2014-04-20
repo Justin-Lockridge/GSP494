@@ -92,15 +92,11 @@ class GameEngine{
 	//////////////////////////////////////////////////////////////////////////
 	ID3DXSprite*			m_pD3DSprite;	// Sprite Object
 	IDirect3DTexture9*	m_cursor,*m_battleBackgroundOne, *m_gamePiece, *m_archerCharacter, *m_blackMageCharacter, *m_playerUIBackground,
-<<<<<<< HEAD
+
 						*m_goldMine, *m_archerUnit, *m_blackMageUnit, *m_arrow, *m_fireball, *m_archerArrow, *m_healthBar, *m_golemUnit;		// Texture Object for a sprite
 	D3DXIMAGE_INFO		m_cursorInfo,m_battleBackgroundOneInfo, m_gamePieceInfo, m_archerCharacterInfo, m_blackMageCharacterInfo, m_playerUIBackgroundInfo,
 						m_goldMineInfo, m_archerUnitInfo, m_blackMageUnitInfo, m_arrowInfo, m_fireballInfo, m_archerArrowInfo, m_healthBarInfo, m_golemUnitInfo;	// File details of a texture
-=======
-		*m_goldMine, *m_archerUnit, *m_blackMageUnit, *m_arrow, *m_fireball, *m_archerArrow, *m_healthBar;		// Texture Object for a sprite
-	D3DXIMAGE_INFO		m_cursorInfo,m_battleBackgroundOneInfo, m_gamePieceInfo, m_archerCharacterInfo, m_blackMageCharacterInfo, m_playerUIBackgroundInfo,
-		m_goldMineInfo, m_archerUnitInfo, m_blackMageUnitInfo, m_arrowInfo, m_fireballInfo, m_archerArrowInfo, m_healthBarInfo;	// File details of a texture
->>>>>>> 5cfefc77dd96879565be97a4ab86d60bbde5f38b
+
 
 	//Clickable Button Icons
 	std::vector<Buttons> player1_units;
