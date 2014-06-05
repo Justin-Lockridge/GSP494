@@ -1,6 +1,7 @@
 #include "Character.h"
 
-Character::Character(){
+Character::Character()
+{
 	//////////////////////////////////////////////////////////
 	//  INFO:  All character data initialized to -1.
 	//			Stats will change after player chooses
@@ -19,12 +20,14 @@ Character::~Character(){
 
 };
 
-void Character::setCharacterType(int type){
+void Character::setCharacterType(int type)
+{
 	characterType = type;		
 	currentSpecial = 0;
 	maxSpecial = 100;
-	gold = 150;
-	switch(characterType){
+	gold = 500;
+	switch(characterType)
+	{
 	case WARRIOR:
 		currentHealth	=		500;
 		maxHealth		=		500;
@@ -44,37 +47,45 @@ void Character::setCharacterType(int type){
 	};
 };
 
-int Character::getCharacterType(){
+int Character::getCharacterType()
+{
 	return characterType;
 };
 
-void Character::setPlayerNumber(int number){
+void Character::setPlayerNumber(int number)
+{
 	playerNumber = number;
 };
 
-int Character::getPlayerNumber(){
+int Character::getPlayerNumber()
+{
 	return playerNumber;
 };
 
-void Character::setCurrentHealth(int health){
+void Character::setCurrentHealth(int health)
+{
 	currentHealth = health;
 };
 
-void Character::adjustCurrentHealth(int adjustment){
+void Character::adjustCurrentHealth(int adjustment)
+{
 	currentHealth += adjustment;
 	if(currentHealth > maxHealth)
 		currentHealth = maxHealth;
 };
 
-int Character::getCurrentHealth(){
+int Character::getCurrentHealth()
+{
 	return currentHealth;
 };
 
-void Character::setMaxHealth(int health){
+void Character::setMaxHealth(int health)
+{
 	maxHealth = health;
 };
 
-int Character::getMaxHealth(){
+int Character::getMaxHealth()
+{
 	return maxHealth;
 };
 
@@ -104,7 +115,8 @@ void Character::setGold(int amount){
 	gold = amount;
 };
 
-void Character::adjustGold(int adjustment){
+void Character::adjustGold(int adjustment)
+{
 	gold += adjustment;
 };
 

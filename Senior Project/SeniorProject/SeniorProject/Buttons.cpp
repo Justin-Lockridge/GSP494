@@ -6,6 +6,7 @@ Buttons::Buttons()
 	position.x = 0;
 	position.y = 0;
 	position.z = 0;
+	occupied = false;
 }
 
 Buttons::~Buttons()
@@ -37,6 +38,16 @@ void Buttons::setRect(RECT thisRect)
 void Buttons::setColor(D3DCOLOR thisColor)
 {
 	color = thisColor;
+}
+
+void Buttons::setRow(int a_row)
+{
+	row = a_row;
+}
+
+void Buttons::setCol(int a_col)
+{
+	col = a_col;
 }
 
 D3DXVECTOR3 Buttons::getPosition()

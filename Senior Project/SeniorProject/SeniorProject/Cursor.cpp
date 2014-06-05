@@ -17,7 +17,7 @@ void Cursor::init()
 	rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 }
 
-void Cursor::update(float x, float y)
+void Cursor::update(long x, long y)
 {
 	cursorPos.x += x;
 	cursorPos.y += y;

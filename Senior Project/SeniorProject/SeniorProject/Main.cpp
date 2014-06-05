@@ -8,13 +8,10 @@
 //  Updates:
 //  []
 
-
 #include <iostream>
 using namespace std;
 #include <windows.h>
 #define VC_EXTRALEAN
-
-
 
 //////////////////////////////////////////////////////////////////////////
 // Global Variables
@@ -112,7 +109,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLi
 		prevTimeStamp = currTimeStamp;
 		// This is where you call your DirectX/Game render/update calls
 		g_DX.Update(dt);
-		g_DX.Render();
+		g_DX.Render(dt);
 	}
 
 	//Shutdown DirectX/Game here
@@ -158,5 +155,3 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wparam, LPARAM lparam)
 	// pass to default handler
 	return DefWindowProc(hWnd, message, wparam, lparam);
 }
-
-

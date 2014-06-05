@@ -19,6 +19,6 @@ public:
 	D3DXVECTOR2		cursorPos;
 
 	void init();
-	void update(float x, float y);
+	void update(long x, long y);
 	void render(ID3DXSprite*, IDirect3DTexture9*, D3DXIMAGE_INFO);
 };

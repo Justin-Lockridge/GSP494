@@ -7,10 +7,11 @@
 #pragma comment(lib, "d3dx9.lib")
 
 class BoardSpace{
-	int posX, posY, spaceNumber, occupiedBy;
+	int  spaceNumber, occupiedBy;
 	bool highlighted, unitCanTakeAction;
-	float animationTimer;
+	float  posX, posY;
 	int unitBelongsTo;
+	double animationTimer;
 	//////////////////////////////////////////
 	//  INFO:  Each game space holds the rect
 	//			for drawing the occupied unit
@@ -18,11 +19,11 @@ class BoardSpace{
 public:
 	BoardSpace();
 
-	void setPosX(int pX);
-	int  getPosX();
+	void setPosX(float pX);
+	float  getPosX();
 
-	void setPosY(int pY);
-	int  getPosY();
+	void setPosY(float pY);
+	float  getPosY();
 
 	void setSpaceNumber(int space);
 	int  getSpaceNumber();
@@ -38,7 +39,7 @@ public:
 
 	void   setAnimationTimer(double time);
 	void   adjustAnimationTimer(double time);
-	float getAnimationTimer();
+	double getAnimationTimer();
 
 	void setAnimationRect(int t, int l, int r, int b);
 	RECT getAnimationRect();

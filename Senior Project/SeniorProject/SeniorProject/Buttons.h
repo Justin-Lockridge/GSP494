@@ -19,11 +19,11 @@ private:
 
 	RECT rect;
 
-	bool highlight;
+	bool highlight, occupied;
 
 public:
 	D3DCOLOR color;
-	int width, height;
+	int width, height, row, col;
 	
 	Buttons();
 	~Buttons();
@@ -32,6 +32,8 @@ public:
 	void setPosition(float, float);
 	void setRect(RECT);
 	void setColor(D3DCOLOR);
+	void setRow(int);
+	void setCol(int);
 
 	D3DXVECTOR3 getPosition();
 	RECT getRect(){return rect;}
@@ -46,4 +48,5 @@ struct RectData
 	int t, l, b, r;
 	float x, y;
 	bool highlight;
+	int row, col;
 };

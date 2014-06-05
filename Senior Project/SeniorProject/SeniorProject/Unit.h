@@ -8,13 +8,15 @@
 #pragma comment(lib, "d3dx9.lib")
 #include "DefinesAndEnums.h"
 
-class Unit{
-	int type, damage, currentHealth, maxHealth, whoUnitBelongsTo, speed;
+class Unit
+{
+	int type, damage, currentHealth, maxHealth, whoUnitBelongsTo, speed, state;
 	float posX, posY, animationTimer;
 
 	RECT unitRect;
-	bool facingRight, isActive, unitCanTakeAction, isRanged;
+	bool facingRight, isActive, unitCanTakeAction, isRanged, unitCanUseAbility;
 public:
+	bool occupied;
 	Unit();
 
 	void	addUnit(int t, int playerNumber);
@@ -36,6 +38,8 @@ public:
 	int		getWhoUnitBelongsTo();
 	void	setSpeed( int s );
 	int		getSpeed();
+	void	setState( int s );
+	int		getState();
 	void	setPosX(float x);
 	void	adjustPosX(float x);
 	float	getPosX();
@@ -52,4 +56,6 @@ public:
 	bool	canUnitTakeAction();
 	void	setRanged(bool b);
 	bool	checkIfRanged();
+	void	setUnitCanUseAbility( bool b );
+	bool	canUnitUseAbility();
 };
