@@ -19,6 +19,7 @@
 #include "Buttons.h"
 #include "Cursor.h"
 #include "Unit.h"
+#include "ClassAbilityAnimator.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //  Direct3D headers && includes
@@ -94,10 +95,12 @@ class GameEngine
 	ID3DXSprite*			m_pD3DSprite;
 	IDirect3DTexture9   * m_menuButtons,* m_menuBG,*	m_cursor,*m_battleBackgroundOne, *m_gamePiece, *m_archerCharacter, *m_blackMageCharacter, *m_playerUIBackground,
 									*m_goldMine, *m_archerUnit, *m_blackMageUnit, *m_arrow, *m_fireball, *m_archerArrow, *m_healthBar, *m_golemUnit, *m_warlock,
-									*m_lightning, *m_wolf, *m_thief, *m_warriorCharacter, *m_warriorUnitIcon, *m_marksmanUnit, *m_minotaurUnit;
+									*m_lightning, *m_wolf, *m_thief, *m_warriorCharacter, *m_warriorUnitIcon, *m_marksmanUnit, *m_minotaurUnit, *m_blackHoleAbility,
+									*m_flameStrikeAbility;
 	D3DXIMAGE_INFO		m_menuButtonsInfo,m_menuBGInfo,m_cursorInfo,m_battleBackgroundOneInfo, m_gamePieceInfo, m_archerCharacterInfo, m_blackMageCharacterInfo, m_playerUIBackgroundInfo,
 									m_goldMineInfo, m_archerUnitInfo, m_blackMageUnitInfo, m_arrowInfo, m_fireballInfo, m_archerArrowInfo, m_healthBarInfo, m_golemUnitInfo,
-									m_warlockInfo, m_lightningInfo, m_wolfInfo, m_thiefInfo, m_warriorCharacterInfo, m_warriorUnitIconInfo, m_marksmanUnitInfo, m_minotaurUnitInfo;
+									m_warlockInfo, m_lightningInfo, m_wolfInfo, m_thiefInfo, m_warriorCharacterInfo, m_warriorUnitIconInfo, m_marksmanUnitInfo, m_minotaurUnitInfo,
+									m_blackHoleAbilityInfo, m_flameStrikeAbilityInfo;
 
 	//Clickable Button Icons
 	std::vector<Buttons>	player1_units;
@@ -153,7 +156,7 @@ public:
 	Character		m_player[2];
 	BoardSpace m_gameBoard[MAXBOARDHEIGHT][MAXBOARDWIDTH];
 	Unit				m_unit[MAXBOARDHEIGHT][MAXBOARDWIDTH];
-
+	ClassAbilityAnimator	m_classAbilityAnimator;
 	//////////////////////////////////////////////////////////////////////////
 	// Init and Shutdown are preferred to constructors and destructor,
 	// due to having more control when to explicitly call them when global.
@@ -223,4 +226,5 @@ public:
 	void drawWinner(Character);
 	void drawEndTurn(D3DXVECTOR3, D3DCOLOR, RECT &);
 	void drawHoverInfo(int, Character, D3DXVECTOR3, D3DCOLOR, int, float dt);
+	void drawAbilityAnimations();
 };

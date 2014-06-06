@@ -304,6 +304,14 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
 		D3DCOLOR_XRGB(255, 0, 255), &m_minotaurUnitInfo, 0, &m_minotaurUnit);
 
+	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"BlackHoleSheet.png", 0, 0, 0, 0, 
+		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
+		D3DCOLOR_XRGB(255, 0, 255), &m_blackHoleAbilityInfo, 0, &m_blackHoleAbility);
+
+	
+	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"Flames.png", 0, 0, 0, 0, 
+		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
+		D3DCOLOR_XRGB(255, 0, 255), &m_flameStrikeAbilityInfo, 0, &m_flameStrikeAbility);
 	// Seed rand() with time
 	srand(timeGetTime());
 
@@ -376,14 +384,14 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	m_gameState = BATTLE;
 	//m_unit[2][2].addUnit(MINOTAUR, PLAYERONE);
 	//m_unit[3][3].addUnit(THIEF, PLAYERONE);
-	m_unit[2][6].addUnit( WARLOCK, PLAYERTWO );
-	m_unit[3][7].addUnit( WARRIORUNIT, PLAYERTWO );
+	m_unit[2][6].addUnit( WARLOCK, PLAYERONE );
+	m_unit[3][7].addUnit( WARLOCK, PLAYERTWO );
 
 	//m_unit[1][1].addUnit( WARLOCK, PLAYERONE );
-	m_unit[1][6].addUnit( WALL, PLAYERTWO );
-	m_unit[0][10].addUnit( THIEF, PLAYERTWO );
+	m_unit[1][6].addUnit( WARLOCK, PLAYERONE );
+	m_unit[0][10].addUnit( WARLOCK, PLAYERTWO );
 	//m_unit[0][5].addUnit( MINOTAUR, PLAYERONE );
-	m_unit[2][12].addUnit( MARKSMAN, PLAYERTWO );
+	m_unit[2][12].addUnit( WARLOCK, PLAYERTWO );
 	m_unit[1][4].addUnit( MARKSMAN, PLAYERONE );
 
 	m_player[0].adjustCurrentSpecial(100);
@@ -686,8 +694,8 @@ void GameEngine::Update(float dt)
 {
 	///////////////////////////////////////////////////////////////////////////////
 	//  INFO:  Used with tools to get animations working, leave this in
-	int animationOffsetLeft = 140;
-	int animationOffsetRight = 142;
+	int animationOffsetLeft = 47;
+	int animationOffsetRight = 48;
 	//////////////////////////////////////////////////////////////////////////
 	// Get and Acquire Keyboard Input
 	// Get the input device state
@@ -828,11 +836,13 @@ void GameEngine::Update(float dt)
 		switch(m_gamePhase)
 		{
 		case PLAYERONE_PLAYPHASE:
+			m_classAbilityAnimator.updateClassAbilityAnimation( dt );
 			break;
 		case PLAYERONE_EVENTPHASE:
 			updateEventPhase(dt);
 			break;
 		case PLAYERTWO_PLAYPHASE:
+			m_classAbilityAnimator.updateClassAbilityAnimation( dt );
 			break;
 		case PLAYERTWO_EVENTPHASE:
 			updateEventPhase(dt);
@@ -845,11 +855,18 @@ void GameEngine::Update(float dt)
 		{
 			if( !keyIsDown[DIK_RIGHT] )
 			{
+				m_classAbilityAnimator.setAnimationActive( true );
+				
+				
 				keyIsDown[DIK_RIGHT] = true;
 				m_tester++;
 				switch(m_tester)
 				{
+				case 1:
+					m_classAbilityAnimator.setClassAbilityAnimation( FLAMESTRIKE , m_gameBoard[0][0].getPosX(), m_gameBoard[0][0].getPosY() );
+					break;
 				default:
+					m_classAbilityAnimator.adjustAnimationRectLeftRight( animationOffsetLeft, animationOffsetRight );
 					animationOffsetLeft	=	140;
 					animationOffsetRight	=	142;
 					break;
@@ -869,10 +886,13 @@ void GameEngine::Update(float dt)
 		{
 			if( !keyIsDown[DIK_LEFT] )
 			{
+				m_classAbilityAnimator.setAnimationActive( false );
+				
 				keyIsDown[DIK_LEFT] = true;
 				m_tester--;
 				switch(m_tester){
 				default:
+					m_classAbilityAnimator.adjustAnimationRectLeftRight( -animationOffsetLeft, -animationOffsetRight );
 					animationOffsetLeft		=	140;
 					animationOffsetRight	=	142;
 					break;
@@ -1384,6 +1404,8 @@ void GameEngine::Update(float dt)
 
 								if(m_player[1].getCharacterType() == BLACKMAGE) // Black hole
 								{
+									m_classAbilityAnimator.setAnimationActive( true );
+									m_classAbilityAnimator.setClassAbilityAnimation( BLACKHOLE , m_unit[row][col].getPosX() + 32, m_unit[row][col].getPosY() + 32 );
 									if(row != 4 && col != 14)
 									{
 										if(m_unit[row][col].occupied)
@@ -1479,8 +1501,11 @@ void GameEngine::Update(float dt)
 									//Kill everyone in same row including gold mines
 									for(int i = 0; i < 16; i++)
 										m_unit[row][i].removeUnit();
-
-									m_player[1].adjustCurrentSpecial(-100);
+									m_classAbilityAnimator.setAnimationActive( true );
+									m_classAbilityAnimator.setClassAbilityAnimation( FLAMESTRIKE , m_unit[row][col].getPosX() +8 , m_unit[row][col].getPosY() - 12 );
+									m_attackTargetSpaceX = row;
+									//m_classAbilityAnimator.setPosX( m_unit[row][0].getPosX() );
+								//	m_player[1].adjustCurrentSpecial(-100);
 								}
 
 								/*	if(row == 0)
@@ -1982,8 +2007,8 @@ void GameEngine::updateEventPhase(float dt)
 								m_damageType	=	m_unit[i][j].getDamage();
 								m_floatingTextActive = true;
 								m_damageType	=	15;
-								m_player[1].adjustCurrentHealth( - 5 );
-								m_player[0].adjustCurrentHealth( 5 );
+								m_player[0].adjustCurrentHealth( - 5 );
+								m_player[1].adjustCurrentHealth( 5 );
 								fmodSystem->playSound( FMOD_CHANNEL_FREE, warlockSpell, false, 0 );
 							}
 							else
@@ -2806,6 +2831,12 @@ void GameEngine::Render(float dt)
 					}
 					break;
 				}
+				/////////////////////////////////////////////////////////////////////
+				//  INFO:  If an ability is active, draw it.
+				if( m_classAbilityAnimator.getAnimationActive() ){
+					drawAbilityAnimations();
+				}
+
 				myMouse.render(m_pD3DSprite, m_cursor, m_cursorInfo);
 
 				m_pD3DSprite->End();
@@ -2866,6 +2897,8 @@ void GameEngine::Render(float dt)
 void GameEngine::Shutdown()
 {
 	// Release COM objects in the opposite order they were created in
+	SAFE_RELEASE(m_flameStrikeAbility);
+	SAFE_RELEASE(m_blackHoleAbility);
 	SAFE_RELEASE(m_minotaurUnit);
 	SAFE_RELEASE(m_marksmanUnit);
 	SAFE_RELEASE(m_warriorUnitIcon);
@@ -4858,3 +4891,42 @@ void GameEngine::drawHoverInfo(int thisButton , Character thisPlayer, D3DXVECTOR
 
 
 }
+
+void GameEngine::drawAbilityAnimations(){
+	D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
+
+	D3DXMatrixIdentity(&transMat);
+	D3DXMatrixIdentity(&scaleMat);
+	D3DXMatrixIdentity(&rotMat);
+	D3DXMatrixIdentity(&worldMat);
+
+
+
+	D3DXMatrixScaling(&scaleMat, m_classAbilityAnimator.getScaleX(), m_classAbilityAnimator.getScaleY(), 0.0f);		
+	D3DXMatrixTranslation(&transMat, m_classAbilityAnimator.getPosX(), m_classAbilityAnimator.getPosY(), 0.0f);			
+	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);	
+	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);	
+
+	m_pD3DSprite->SetTransform(&worldMat);
+
+	switch( m_classAbilityAnimator.getType() ){
+	case BLACKHOLE:
+		m_pD3DSprite->Draw(m_blackHoleAbility, &m_classAbilityAnimator.getAnimationRect(), &D3DXVECTOR3( ( m_classAbilityAnimator.getAnimationRect().right - m_classAbilityAnimator.getAnimationRect().left ) * 0.5f,
+			( m_classAbilityAnimator.getAnimationRect().bottom - m_classAbilityAnimator.getAnimationRect().top ) * 0.5f, 0.0f),
+			0, D3DCOLOR_ARGB(255, 255, 255, 255));
+		break;
+	case FLAMESTRIKE:
+		for( int i = 0; i < MAXBOARDWIDTH; ++i ){
+			D3DXMatrixIdentity(&transMat);
+			D3DXMatrixTranslation(&transMat, m_unit[m_attackTargetSpaceX][i].getPosX() + 8, m_unit[m_attackTargetSpaceX][i].getPosY() - 12, 0.0f);			
+			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);	
+			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);	
+
+			m_pD3DSprite->SetTransform(&worldMat);
+			m_pD3DSprite->Draw(m_flameStrikeAbility, &m_classAbilityAnimator.getAnimationRect(), &D3DXVECTOR3( ( m_classAbilityAnimator.getAnimationRect().right - m_classAbilityAnimator.getAnimationRect().left ) * 0.5f,
+				( m_classAbilityAnimator.getAnimationRect().bottom - m_classAbilityAnimator.getAnimationRect().top ) * 0.5f, 0.0f),
+				0, D3DCOLOR_ARGB(255, 255, 255, 255));
+		}
+		break;
+	}
+};
