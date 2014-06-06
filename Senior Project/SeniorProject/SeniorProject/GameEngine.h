@@ -108,10 +108,11 @@ class GameEngine
 	std::vector<Buttons>	map_grid_row1;
 	std::vector<Buttons>	endTurnButton;
 	IDirect3DTexture9		*m_archerIcon, *m_golemIcon, *m_blackMageIcon, *m_thiefIcon, *m_wolfIcon, *m_blackHoleIcon, *m_wallIcon, *m_warlockIcon, *m_endTurn, *m_flameStrikeIcon,
-										*m_snipeIcon, *m_splitShotIcon, *m_wallIcon2, *m_archerHover, *m_wolfHover, *m_thiefHover, *m_wallHover, *m_blackMageHover, *m_golemHover, *m_warlockHover;
+										*m_snipeIcon, *m_splitShotIcon, *m_wallIcon2, *m_archerHover, *m_wolfHover, *m_thiefHover, *m_wallHover, *m_blackMageHover, *m_golemHover, *m_warlockHover, 
+										*m_warriorIcon, * m_marksmanIcon, *m_minotaurIcon;
 	D3DXIMAGE_INFO			m_archerIconInfo, m_golemIconInfo, m_blackMageIconInfo, m_thiefIconInfo, m_wolfIconInfo, m_blackHoleIconInfo, m_wallIconInfo,m_warlockIconInfo, m_endTurnInfo,
 										m_flameStrikeIconInfo, m_snipeIconInfo, m_splitShotIconInfo, m_wallIconInfo2,m_archerHoverInfo, m_wolfHoverInfo, m_thiefHoverInfo, m_wallHoverInfo, m_blackMageHoverInfo,
-										m_golemHoverInfo, m_warlockHoverInfo;
+										m_golemHoverInfo, m_warlockHoverInfo, m_warriorIconInfo, m_marksmanIconInfo, m_minotaurIconInfo;
 	D3DCOLOR					buttonColor;
 	int								selectedUnit;
 

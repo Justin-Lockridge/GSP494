@@ -220,6 +220,19 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
 		D3DCOLOR_XRGB(255, 0, 255), &m_blackHoleIconInfo, 0, &m_blackHoleIcon);
 
+	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"WarriorIcon.png", 0, 0, 0, 0, 
+		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
+		D3DCOLOR_XRGB(255, 0, 255), &m_warriorIconInfo, 0, &m_warriorIcon);
+
+	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"MarksmanIcon.png", 0, 0, 0, 0, 
+		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
+		D3DCOLOR_XRGB(255, 0, 255), &m_marksmanIconInfo, 0, &m_marksmanIcon);
+
+	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"MinotaurIcon.png", 0, 0, 0, 0, 
+		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
+		D3DCOLOR_XRGB(255, 0, 255), &m_minotaurIconInfo, 0, &m_minotaurIcon);
+
+
 	/////////////////////////////////////////////////////
 	// Hover Info
 	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"ArcherUnitInfo.png", 0, 0, 0, 0, 
@@ -371,7 +384,7 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	m_player[0].setActivePlayer(true);
 	m_player[0].setPlayerNumber(0);
 	m_player[1].setPlayerNumber(1);
-	m_player[0].setCharacterType(ARCHER);
+	m_player[0].setCharacterType(WARRIOR);
 	m_player[1].setCharacterType(BLACKMAGE);
 
 	///////////////////////////////////////////////////
@@ -384,18 +397,18 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	m_gameState = BATTLE;
 	//m_unit[2][2].addUnit(MINOTAUR, PLAYERONE);
 	//m_unit[3][3].addUnit(THIEF, PLAYERONE);
-	m_unit[2][6].addUnit( WARLOCK, PLAYERONE );
-	m_unit[3][7].addUnit( WARLOCK, PLAYERTWO );
+	//m_unit[2][6].addUnit( WARLOCK, PLAYERONE );
+	//m_unit[3][7].addUnit( WARLOCK, PLAYERTWO );
 
 	//m_unit[1][1].addUnit( WARLOCK, PLAYERONE );
-	m_unit[1][6].addUnit( WARLOCK, PLAYERONE );
-	m_unit[0][10].addUnit( WARLOCK, PLAYERTWO );
+	//m_unit[1][6].addUnit( WARLOCK, PLAYERONE );
+	//m_unit[0][10].addUnit( WARLOCK, PLAYERTWO );
 	//m_unit[0][5].addUnit( MINOTAUR, PLAYERONE );
-	m_unit[2][12].addUnit( WARLOCK, PLAYERTWO );
-	m_unit[1][4].addUnit( MARKSMAN, PLAYERONE );
+	//m_unit[2][12].addUnit( WARLOCK, PLAYERTWO );
+	//m_unit[1][4].addUnit( MARKSMAN, PLAYERONE );
 
-	m_player[0].adjustCurrentSpecial(100);
-	m_player[1].adjustCurrentSpecial(100);
+	//m_player[0].adjustCurrentSpecial(100);
+	//m_player[1].adjustCurrentSpecial(100);
 }
 
 void GameEngine::InitGameBoard()
@@ -2933,11 +2946,17 @@ void GameEngine::Shutdown()
 	SAFE_RELEASE(m_snipeIcon);
 	SAFE_RELEASE(m_splitShotIcon);
 	SAFE_RELEASE(m_wallIcon2);
+	SAFE_RELEASE(m_minotaurIcon);
+	SAFE_RELEASE(m_warriorIcon);
+	SAFE_RELEASE(m_marksmanIcon);
 	// Unit Hover
 	SAFE_RELEASE(m_archerHover);
 	SAFE_RELEASE(m_thiefHover);
 	SAFE_RELEASE(m_wolfHover);
 	SAFE_RELEASE(m_wallHover);
+	SAFE_RELEASE(m_warlockHover);
+	SAFE_RELEASE(m_blackMageHover);
+	SAFE_RELEASE(m_golemHover);
 	//End turn
 	SAFE_RELEASE(m_endTurn);
 	//Font
@@ -4508,7 +4527,7 @@ void GameEngine::drawIcons(int thisButton , Character thisPlayer, D3DXVECTOR3 po
 
 			m_pD3DSprite->SetTransform(&worldMat);
 
-			m_pD3DSprite->Draw(m_blackMageIcon, 0, &D3DXVECTOR3(m_blackMageIconInfo.Width * 0.5f, m_blackMageIconInfo.Height * 0.5f, 0.0f),
+			m_pD3DSprite->Draw(m_warriorIcon, 0, &D3DXVECTOR3(m_warriorIconInfo.Width * 0.5f, m_warriorIconInfo.Height * 0.5f, 0.0f),
 				0, a_color);
 		}
 
@@ -4521,7 +4540,7 @@ void GameEngine::drawIcons(int thisButton , Character thisPlayer, D3DXVECTOR3 po
 
 			m_pD3DSprite->SetTransform(&worldMat);
 
-			m_pD3DSprite->Draw(m_golemIcon, 0, &D3DXVECTOR3(m_golemIconInfo.Width * 0.5f, m_golemIconInfo.Height * 0.5f, 0.0f),
+			m_pD3DSprite->Draw(m_marksmanIcon, 0, &D3DXVECTOR3(m_marksmanIconInfo.Width * 0.5f, m_marksmanIconInfo.Height * 0.5f, 0.0f),
 				0, a_color);
 		}
 
@@ -4534,7 +4553,7 @@ void GameEngine::drawIcons(int thisButton , Character thisPlayer, D3DXVECTOR3 po
 
 			m_pD3DSprite->SetTransform(&worldMat);
 
-			m_pD3DSprite->Draw(m_warlockIcon, 0, &D3DXVECTOR3(m_warlockIconInfo.Width * 0.5f, m_warlockIconInfo.Height * 0.5f, 0.0f),
+			m_pD3DSprite->Draw(m_minotaurIcon, 0, &D3DXVECTOR3(m_minotaurIconInfo.Width * 0.5f, m_minotaurIconInfo.Height * 0.5f, 0.0f),
 				0, a_color);
 		}
 
@@ -4596,7 +4615,7 @@ void GameEngine::drawIcons(int thisButton , Character thisPlayer, D3DXVECTOR3 po
 
 			m_pD3DSprite->SetTransform(&worldMat);
 
-			m_pD3DSprite->Draw(m_blackMageIcon, 0, &D3DXVECTOR3(m_blackMageIconInfo.Width * 0.5f, m_blackMageIconInfo.Height * 0.5f, 0.0f),
+			m_pD3DSprite->Draw(m_warriorIcon, 0, &D3DXVECTOR3(m_warriorIconInfo.Width * 0.5f, m_warriorIconInfo.Height * 0.5f, 0.0f),
 				0, a_color);
 		}
 
@@ -4609,7 +4628,7 @@ void GameEngine::drawIcons(int thisButton , Character thisPlayer, D3DXVECTOR3 po
 
 			m_pD3DSprite->SetTransform(&worldMat);
 
-			m_pD3DSprite->Draw(m_golemIcon, 0, &D3DXVECTOR3(m_golemIconInfo.Width * 0.5f, m_golemIconInfo.Height * 0.5f, 0.0f),
+			m_pD3DSprite->Draw(m_marksmanIcon, 0, &D3DXVECTOR3(m_marksmanIconInfo.Width * 0.5f, m_marksmanIconInfo.Height * 0.5f, 0.0f),
 				0, a_color);
 		}
 
@@ -4622,7 +4641,7 @@ void GameEngine::drawIcons(int thisButton , Character thisPlayer, D3DXVECTOR3 po
 
 			m_pD3DSprite->SetTransform(&worldMat);
 
-			m_pD3DSprite->Draw(m_warlockIcon, 0, &D3DXVECTOR3(m_warlockIconInfo.Width * 0.5f, m_warlockIconInfo.Height * 0.5f, 0.0f),
+			m_pD3DSprite->Draw(m_minotaurIcon, 0, &D3DXVECTOR3(m_minotaurIconInfo.Width * 0.5f, m_minotaurIconInfo.Height * 0.5f, 0.0f),
 				0, a_color);
 		}
 
