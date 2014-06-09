@@ -61,27 +61,27 @@ class GameEngine
 	//////////////////////////////////////////////////////////////////////////
 	// Application Variables
 	//////////////////////////////////////////////////////////////////////////
-	HWND			m_hWnd;																// Handle to the window
-	bool				m_bVsync;															// Boolean for vertical syncing
-	float				m_currTime;															// Time to render current frame
-	float				m_prevTime, m_deltaTime, m_frameTime;				// Time to render previous frame
+	HWND			m_hWnd;												// Handle to the window
+	bool			m_bVsync;											// Boolean for vertical syncing
+	float			m_currTime;											// Time to render current frame
+	float			m_prevTime, m_deltaTime, m_frameTime;				// Time to render previous frame
 
-	int				m_FPS;																	// Frames per second  
-	int				m_gamePhase, m_randomNumber, selectedHover, unitsAttacked;
-	bool				m_unitCurrentlyAttacking, m_fireBallActive, m_arrowActive, m_floatingTextActive, m_unitCurrentlyMoving, m_lightningActive, m_combatMessageActive, m_attackWillHitPlayer;
-	float				m_projectilePosX, m_projectilePosY, m_arrowForAttackingUnitPosX, m_arrowForAttackingUnitPosY;
-	float				m_temporaryTimer, m_lightningTimer;
+	int				m_FPS;												// Frames per second  
+	int				m_gamePhase, m_randomNumber, selectedHover, unitsAttacked, number;
+	bool			m_unitCurrentlyAttacking, m_fireBallActive, m_arrowActive, m_floatingTextActive, m_unitCurrentlyMoving, m_lightningActive, m_combatMessageActive, m_attackWillHitPlayer;
+	float			m_projectilePosX, m_projectilePosY, m_arrowForAttackingUnitPosX, m_arrowForAttackingUnitPosY;
+	float			m_temporaryTimer, m_lightningTimer;
 	int				m_attackingSpaceX, m_attackingSpaceY, m_attackTargetSpaceX, m_attackTargetSpaceY, m_moveToTarget, m_tester;
 
-	float				m_fireballRotation, m_floatingRectTopMax, m_floatingRectTimer, textCount;
+	float			m_fireballRotation, m_floatingRectTopMax, m_floatingRectTimer, textCount;
 	RECT			m_floatingTextRect, m_healthRect, m_lightningRect;
 
-	bool				noGold, firstTurn, dontPlaceUnit, hoveredUnit;
+	bool			noGold, firstTurn, dontPlaceUnit, hoveredUnit, player1selected, player2selected;
 	//////////////////////////////////////////////////////////////////////////
 	// Direct3D Variables
 	//////////////////////////////////////////////////////////////////////////
 	IDirect3D9*				m_pD3DObject;	// Direct3D 9 Object
-	IDirect3DDevice9*	m_pD3DDevice;	// Direct3D 9 Device
+	IDirect3DDevice9*		m_pD3DDevice;	// Direct3D 9 Device
 	D3DCAPS9				m_D3DCaps;		// Device Capabilities
 
 	//////////////////////////////////////////////////////////////////////////
@@ -92,7 +92,7 @@ class GameEngine
 	//////////////////////////////////////////////////////////////////////////
 	// Sprite Variables
 	//////////////////////////////////////////////////////////////////////////
-	ID3DXSprite*			m_pD3DSprite;
+	ID3DXSprite*		m_pD3DSprite;
 	IDirect3DTexture9   * m_menuButtons,* m_menuBG,*	m_cursor,*m_battleBackgroundOne, *m_gamePiece, *m_archerCharacter, *m_blackMageCharacter, *m_playerUIBackground,
 									*m_goldMine, *m_archerUnit, *m_blackMageUnit, *m_arrow, *m_fireball, *m_archerArrow, *m_healthBar, *m_golemUnit, *m_warlock,
 									*m_lightning, *m_wolf, *m_thief, *m_warriorCharacter, *m_warriorUnitIcon, *m_marksmanUnit, *m_minotaurUnit, *m_blackHoleAbility,
@@ -102,34 +102,29 @@ class GameEngine
 									m_warlockInfo, m_lightningInfo, m_wolfInfo, m_thiefInfo, m_warriorCharacterInfo, m_warriorUnitIconInfo, m_marksmanUnitInfo, m_minotaurUnitInfo,
 									m_blackHoleAbilityInfo, m_flameStrikeAbilityInfo;
 
-	//Clickable Button Icons
-	std::vector<Buttons>	player1_units;
-	std::vector<Buttons>	player2_units;
-	std::vector<Buttons>	map_grid_row1;
-	std::vector<Buttons>	endTurnButton;
 	IDirect3DTexture9		*m_archerIcon, *m_golemIcon, *m_blackMageIcon, *m_thiefIcon, *m_wolfIcon, *m_blackHoleIcon, *m_wallIcon, *m_warlockIcon, *m_endTurn, *m_flameStrikeIcon,
 										*m_snipeIcon, *m_splitShotIcon, *m_wallIcon2, *m_archerHover, *m_wolfHover, *m_thiefHover, *m_wallHover, *m_blackMageHover, *m_golemHover, *m_warlockHover, 
 										*m_warriorIcon, * m_marksmanIcon, *m_minotaurIcon;
 	D3DXIMAGE_INFO			m_archerIconInfo, m_golemIconInfo, m_blackMageIconInfo, m_thiefIconInfo, m_wolfIconInfo, m_blackHoleIconInfo, m_wallIconInfo,m_warlockIconInfo, m_endTurnInfo,
 										m_flameStrikeIconInfo, m_snipeIconInfo, m_splitShotIconInfo, m_wallIconInfo2,m_archerHoverInfo, m_wolfHoverInfo, m_thiefHoverInfo, m_wallHoverInfo, m_blackMageHoverInfo,
 										m_golemHoverInfo, m_warlockHoverInfo, m_warriorIconInfo, m_marksmanIconInfo, m_minotaurIconInfo;
-	D3DCOLOR					buttonColor;
-	int								selectedUnit;
+	D3DCOLOR				buttonColor;
+	int						selectedUnit;
 
 	//////////////////////////////////////////////////////////////////////////
 	// DirectInput
 	//////////////////////////////////////////////////////////////////////////
-	IDirectInput8*			  m_pDIObject;	
+	IDirectInput8*		 m_pDIObject;	
 	IDirectInputDevice8* m_pDIKeyboard;	
 	IDirectInputDevice8* m_pDIMouse;
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Mouse Information
-	Cursor					myMouse;
+	Cursor			myMouse;
 	DIMOUSESTATE2	mouseState;
-	D3DXVECTOR2	cursor;
-	char						buffer[256];
-	wchar_t				m_combatMessage[128];
+	D3DXVECTOR2		cursor;
+	char			buffer[256];
+	wchar_t			m_combatMessage[128];
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//  Audio Includes
@@ -144,19 +139,23 @@ class GameEngine
 	time_t start;
 
 	//////////////////////////////////////////////////////////////////////////
-	//  Main Menu
+	//  Buttons for game
 	//////////////////////////////////////////////////////////////////////////
 	std::vector<Buttons> menuButtons;
-
+	std::vector<Buttons> characterButtons;
 	std::vector<Buttons> hoverButtons;
 	std::vector<Buttons> hoverButtons2;
+	std::vector<Buttons> player1_units;
+	std::vector<Buttons> player2_units;
+	std::vector<Buttons> map_grid_row1;
+	std::vector<Buttons> endTurnButton;
 public:
 	///////////////////////////////////////////////////////////////////////////////////////////
 	//  INFO:  Game Data
-	int				m_gameState, m_damageType;
-	Character		m_player[2];
-	BoardSpace m_gameBoard[MAXBOARDHEIGHT][MAXBOARDWIDTH];
-	Unit				m_unit[MAXBOARDHEIGHT][MAXBOARDWIDTH];
+	int						m_gameState, m_damageType;
+	Character				m_player[2];
+	BoardSpace				m_gameBoard[MAXBOARDHEIGHT][MAXBOARDWIDTH];
+	Unit					m_unit[MAXBOARDHEIGHT][MAXBOARDWIDTH];
 	ClassAbilityAnimator	m_classAbilityAnimator;
 	//////////////////////////////////////////////////////////////////////////
 	// Init and Shutdown are preferred to constructors and destructor,
@@ -224,6 +223,7 @@ public:
 	void drawIcons(int, Character, D3DXVECTOR3, D3DCOLOR);
 	void drawButtonGrid(D3DXVECTOR3, D3DCOLOR);
 	void drawMenu(D3DXVECTOR3, D3DCOLOR, RECT &);
+	void drawCharacters(int, D3DXVECTOR3, D3DCOLOR, RECT &);
 	void drawWinner(Character);
 	void drawEndTurn(D3DXVECTOR3, D3DCOLOR, RECT &);
 	void drawHoverInfo(int, Character, D3DXVECTOR3, D3DCOLOR, int, float dt);

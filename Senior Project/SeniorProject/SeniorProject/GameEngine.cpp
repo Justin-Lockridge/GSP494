@@ -3,31 +3,34 @@
 GameEngine::GameEngine(void)
 {
 	// Init or NULL objects before use to avoid any undefined behavior
-	m_bVsync							=	false;
+	m_bVsync						=	false;
 	m_pD3DObject					=	0;
-	m_pD3DDevice				=	0;
+	m_pD3DDevice					=	0;
 	m_currTime						=	0;
 	m_prevTime						=	0;
-	m_FPS								=	0;
+	m_FPS							=	0;
 	m_deltaTime						=	0;
-	m_gameState					=	0;
+	m_gameState						=	0;
 	m_lightningActive				=	false;
-	m_combatMessageActive	=	false;
-	m_lightningRect.top			=	0;
+	m_combatMessageActive			=	false;
+	m_lightningRect.top				=	0;
 	m_lightningRect.left			=	0;
-	m_lightningRect.right		=	0;
-	m_lightningRect.bottom	=	0;
+	m_lightningRect.right			=	0;
+	m_lightningRect.bottom			=	0;
 	m_lightningTimer				=	0.0f;
-	m_randomNumber			=	0;
-	selectedUnit						=	99;
+	m_randomNumber					=	0;
+	selectedUnit					=	99;
 	textCount						=	0;
-	noGold								=	false;
+	noGold							=	false;
 	dontPlaceUnit					=	false;
-	firstTurn							=  true;
+	firstTurn						=  true;
 	hoveredUnit						=	false;
 	selectedHover					=	0;
-	m_tester							=	0;
+	m_tester						=	0;
 	unitsAttacked					=	0;
+	player1selected					= false;
+	player2selected					= false;
+	number							= 0;
 }
 
 GameEngine::~GameEngine()
@@ -321,7 +324,7 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
 		D3DCOLOR_XRGB(255, 0, 255), &m_blackHoleAbilityInfo, 0, &m_blackHoleAbility);
 
-	
+
 	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"Flames.png", 0, 0, 0, 0, 
 		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
 		D3DCOLOR_XRGB(255, 0, 255), &m_flameStrikeAbilityInfo, 0, &m_flameStrikeAbility);
@@ -384,8 +387,8 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	m_player[0].setActivePlayer(true);
 	m_player[0].setPlayerNumber(0);
 	m_player[1].setPlayerNumber(1);
-	m_player[0].setCharacterType(WARRIOR);
-	m_player[1].setCharacterType(BLACKMAGE);
+	//m_player[0].setCharacterType(WARRIOR);
+	//m_player[1].setCharacterType(BLACKMAGE);
 
 	///////////////////////////////////////////////////
 	//  INFO:  Initializes gameboard and gold mines
@@ -394,7 +397,7 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	m_fireballRotation = 0.0f;
 	////////////////////////////////////////////////////////
 	//  INFO:  Changed the gamestate manually for testing
-	m_gameState = BATTLE;
+	m_gameState = MENUMAIN;
 	//m_unit[2][2].addUnit(MINOTAUR, PLAYERONE);
 	//m_unit[3][3].addUnit(THIEF, PLAYERONE);
 	//m_unit[2][6].addUnit( WARLOCK, PLAYERONE );
@@ -701,6 +704,32 @@ void GameEngine::InitMenu()
 
 		menuButtons.push_back(temp);
 	}
+
+	characterButtons.clear();
+	// T, L, B, R, X, Y, HIGHLIGHT, ROW, COL
+	RectData character_pos[] =
+	{
+		{200, 60, 400, 140, 100, 300, false, 0, 0},
+		{200, 260, 400, 340, 300, 300, false, 0, 0},
+		{200, 460, 400, 540, 500, 300, false, 0, 0},
+	};
+
+	for(int i = 0; i < 3; i++)
+	{
+		Buttons temp;
+		RECT rect;
+
+		rect.top = character_pos[i].t;
+		rect.left = character_pos[i].l;
+		rect.bottom = character_pos[i].b;
+		rect.right = character_pos[i].r;
+
+		temp.setPosition( character_pos[i].x, character_pos[i].y);
+		temp.setHighlight( character_pos[i].highlight);
+		temp.setRect(rect);
+
+		characterButtons.push_back(temp);
+	}
 }
 
 void GameEngine::Update(float dt)
@@ -741,10 +770,11 @@ void GameEngine::Update(float dt)
 	cursor.x = myMouse.cursorPos.x;
 	cursor.y = myMouse.cursorPos.y;
 
+	int selected = 0;
+
 	switch(m_gameState)
 	{
 	case MENUMAIN:
-		int selected;
 		for(auto &Buttons: menuButtons)
 		{
 			if(Buttons.isOn(cursor.x, cursor.y, 3))
@@ -767,7 +797,7 @@ void GameEngine::Update(float dt)
 				switch(selected)
 				{
 				case 0:
-					m_gameState	=	BATTLE;
+					m_gameState	= MENUCHARACTERSELECT;
 					break;
 				case 1:
 					m_gameState = OPTIONS;
@@ -783,6 +813,115 @@ void GameEngine::Update(float dt)
 		}
 		break;
 	case MENUCHARACTERSELECT:
+		// HAVE 3 BUTTONS - 1 FOR EACH CHARACTER
+		if(!player1selected)
+		{
+			for(auto &Buttons: characterButtons)
+			{
+				if(Buttons.isOn(cursor.x, cursor.y, 3))
+				{
+					Buttons.setColor(D3DCOLOR_ARGB(255,255,255,0));
+					Buttons.setHighlight(true);
+				}
+				else
+				{
+					Buttons.setColor(D3DCOLOR_ARGB(255,255,255,255));
+					Buttons.setHighlight(false);
+				}
+
+				if(mouseState.rgbButtons[0])
+				{
+					if(!keyIsDown[DIK_K])
+					{
+						keyIsDown[DIK_K] = true;
+
+						for(int i = 0; i < 3; i++)
+							if(characterButtons[i].isHighlighted())
+								selected = i;
+
+						switch(selected)
+						{
+						case 0:
+							m_player[0].setCharacterType(1);
+							player1selected = true;
+							break;
+						case 1:
+							m_player[0].setCharacterType(2);
+							player1selected = true;
+							break;
+						case 2:
+							m_player[0].setCharacterType(0);
+							player1selected = true;
+							break;
+						}
+					}
+				}
+				else
+					keyIsDown[DIK_K] = false;
+			}
+		}
+
+		if(!player2selected && player1selected)
+		{
+			for(auto &Buttons: characterButtons)
+			{
+				if(Buttons.isOn(cursor.x, cursor.y, 3))
+				{
+					Buttons.setColor(D3DCOLOR_ARGB(255,255,255,0));
+					Buttons.setHighlight(true);
+				}
+				else
+				{
+					Buttons.setColor(D3DCOLOR_ARGB(255,255,255,255));
+					Buttons.setHighlight(false);
+				}
+
+				if(mouseState.rgbButtons[0])
+				{
+					if(!keyIsDown[DIK_K])
+					{
+						keyIsDown[DIK_K] = true;
+
+						for(int i = 0; i < 3; i++)
+							if(characterButtons[i].isHighlighted())
+								selected = i;
+
+						switch(selected)
+						{
+						case 0:
+							m_player[1].setCharacterType(1);
+							player2selected = true;
+							break;
+						case 1:
+							m_player[1].setCharacterType(2);
+							player2selected = true;
+							break;
+						case 2:
+							m_player[1].setCharacterType(0);
+							player2selected = true;
+							break;
+						}
+					}
+				}
+				else
+					keyIsDown[DIK_K] = false;
+			}
+		}
+
+		if(buffer[DIK_RETURN] & 0x80)
+		{
+			if(!keyIsDown[DIK_RETURN])
+			{
+				keyIsDown[DIK_RETURN] = true;
+				m_gameState = MENUMAIN;
+			}
+		}
+		else
+			keyIsDown[DIK_RETURN] = false;
+
+		if(player1selected && player2selected)
+			m_gameState = BATTLE;
+
 		break;
 	case OPTIONS:
 		if(buffer[DIK_RETURN] & 0x80)
@@ -869,8 +1008,8 @@ void GameEngine::Update(float dt)
 			if( !keyIsDown[DIK_RIGHT] )
 			{
 				m_classAbilityAnimator.setAnimationActive( true );
-				
-				
+
+
 				keyIsDown[DIK_RIGHT] = true;
 				m_tester++;
 				switch(m_tester)
@@ -900,7 +1039,7 @@ void GameEngine::Update(float dt)
 			if( !keyIsDown[DIK_LEFT] )
 			{
 				m_classAbilityAnimator.setAnimationActive( false );
-				
+
 				keyIsDown[DIK_LEFT] = true;
 				m_tester--;
 				switch(m_tester){
@@ -1011,183 +1150,181 @@ void GameEngine::Update(float dt)
 					Buttons.setHighlight(false);
 				}
 				// Check if mouse is over GRID button and mouse was clicked
-				if(Buttons.isOn(cursor.x, cursor.y, 3) && (mouseState.rgbButtons[0]& 0x80) != 0)
+				if(Buttons.isOn(cursor.x, cursor.y, 3) && (mouseState.rgbButtons[0]& 0x80) != 0 && !keyIsDown[DIK_P])
 				{
 					row = Buttons.row;
 					col = Buttons.col;
 					locationFound = true;
 
-					if(!keyIsDown[DIK_P])
+					keyIsDown[DIK_P] = true;
+
+					if(locationFound)
 					{
-						keyIsDown[DIK_P] = true;
-
-						if(locationFound)
+						bool done = false;
+						switch(selectedUnit)
 						{
-							bool done = false;
-							switch(selectedUnit)
+						case 0: // first unit(s)
+							if(m_player[0].getGold() < 100)
+								dontPlaceUnit = true;
+
+							if(!m_unit[row][col].occupied && !dontPlaceUnit && col < 6)
 							{
-							case 0: // first unit(s)
-								if(m_player[0].getGold() < 100)
-									dontPlaceUnit = true;
-
-								if(!m_unit[row][col].occupied && !dontPlaceUnit && col < 4)
+								if(m_player[0].getCharacterType() == ARCHER)
 								{
-									if(m_player[0].getCharacterType() == ARCHER)
-									{
-										m_unit[row][col].addUnit(ARCHERUNIT, PLAYERONE);
-										m_unit[row][col].setPosX(m_gameBoard[row][col].getPosX());
-										m_unit[row][col].setPosY(m_gameBoard[row][col].getPosY());
-										m_player[0].adjustGold(-100);
-									}
-
-									if(m_player[0].getCharacterType() == BLACKMAGE)
-									{
-										m_unit[row][col].addUnit(BLACKMAGEUNIT, PLAYERONE);
-										m_unit[row][col].setPosX(m_gameBoard[row][col].getPosX());
-										m_unit[row][col].setPosY(m_gameBoard[row][col].getPosY());
-										m_player[0].adjustGold(-100);
-									}
-
-									if(m_player[0].getCharacterType() == WARRIOR)
-									{
-										m_unit[row][col].addUnit(WARRIORUNIT, PLAYERONE);
-										m_unit[row][col].setPosX(m_gameBoard[row][col].getPosX());
-										m_unit[row][col].setPosY(m_gameBoard[row][col].getPosY());
-										m_player[0].adjustGold(-100);
-									}
-								}
-								break;
-							case 1: // second unit(s)
-								if(m_player[0].getGold() < 125)
-									dontPlaceUnit = true;
-
-								if(!m_unit[row][col].occupied && !dontPlaceUnit && col < 6)
-								{
-									if(m_player[0].getCharacterType() == ARCHER) // wolf
-									{
-										m_unit[row][col].addUnit(WOLF, PLAYERONE);
-										m_unit[row][col].setPosX(m_gameBoard[row][col].getPosX());
-										m_unit[row][col].setPosY(m_gameBoard[row][col].getPosY());
-										m_player[0].adjustGold(-125);
-									}
-
-									if(m_player[0].getCharacterType() == BLACKMAGE) // golem
-									{
-										m_unit[row][col].addUnit(GOLEM, PLAYERONE);
-										m_unit[row][col].setPosX(m_gameBoard[row][col].getPosX());
-										m_unit[row][col].setPosY(m_gameBoard[row][col].getPosY());
-										m_player[0].adjustGold(-125);
-									}
-
-									if(m_player[0].getCharacterType() == WARRIOR) // Marksman
-									{
-										m_unit[row][col].addUnit(MARKSMAN, PLAYERONE);
-										m_unit[row][col].setPosX(m_gameBoard[row][col].getPosX());
-										m_unit[row][col].setPosY(m_gameBoard[row][col].getPosY());
-										m_player[0].adjustGold(-125);
-									}
-								}
-								break;
-							case 2: // third unit(s)
-								if(m_player[0].getGold() < 250)
-									dontPlaceUnit = true;
-
-								if(!m_unit[row][col].occupied && !dontPlaceUnit && col < 6)
-								{
-									if(m_player[0].getCharacterType() == ARCHER) // thief
-									{
-										m_unit[row][col].addUnit(THIEF, PLAYERONE);
-										m_unit[row][col].setPosX(m_gameBoard[row][col].getPosX());
-										m_unit[row][col].setPosY(m_gameBoard[row][col].getPosY());
-										m_player[0].adjustGold(-250);
-									}
-									if(m_player[0].getCharacterType() == BLACKMAGE) // warlock
-									{
-										m_unit[row][col].addUnit(WARLOCK, PLAYERONE);
-										m_unit[row][col].setPosX(m_gameBoard[row][col].getPosX());
-										m_unit[row][col].setPosY(m_gameBoard[row][col].getPosY());
-										m_player[0].adjustGold(-250);
-									}
-
-									if(m_player[0].getCharacterType() == WARRIOR)
-									{
-										m_unit[row][col].addUnit(MINOTAUR, PLAYERONE);
-										m_unit[row][col].setPosX(m_gameBoard[row][col].getPosX());
-										m_unit[row][col].setPosY(m_gameBoard[row][col].getPosY());
-										m_player[0].adjustGold(-250);
-									}
-								}
-								break;
-							case 3: // wall
-								if(m_player[0].getGold() < 75)
-									dontPlaceUnit = true;
-
-								if(!m_unit[row][col].occupied && !dontPlaceUnit && col < 7)
-								{
-									m_unit[row][col].addUnit(WALL, PLAYERONE);
+									m_unit[row][col].addUnit(ARCHERUNIT, PLAYERONE);
 									m_unit[row][col].setPosX(m_gameBoard[row][col].getPosX());
 									m_unit[row][col].setPosY(m_gameBoard[row][col].getPosY());
-									m_player[0].adjustGold(-75);
-								}
-								break;
-							case 4: // Ability 1
-								//Check special meter
-								if(m_player[0].getCurrentSpecial() >= 50)
-								{
-									//allow ability or don't based on meter
-									if(m_player[0].getCharacterType() == ARCHER) // Split shot = Kills 2 enemy units of player's choosing
-									{
-										archerAbility1(done);
-
-										if(!done && unitsAttacked != 2)
-											archerAbility1(done);
-										else
-										{
-											unitsAttacked = 0;
-											m_player[0].adjustCurrentSpecial(-50);
-											break;
-										}
-									}
-
-									if(m_player[0].getCharacterType() == BLACKMAGE) // Black hole
-									{
-
-
-									}
-
-									if(m_player[0].getCharacterType() == WARRIOR) // ??
-									{
-
-									}
-
-								}
-								break;
-							case 5: // Ability 2
-								if(m_player[0].getCharacterType() == ARCHER) // Precision Shot
-								{
-									if(m_player[0].getCurrentSpecial() == 100)
-									{
-										m_player[0].adjustCurrentSpecial(-100);
-										m_player[1].adjustCurrentHealth(-100);
-									}
+									m_player[0].adjustGold(-100);
 								}
 
 								if(m_player[0].getCharacterType() == BLACKMAGE)
 								{
+									m_unit[row][col].addUnit(BLACKMAGEUNIT, PLAYERONE);
+									m_unit[row][col].setPosX(m_gameBoard[row][col].getPosX());
+									m_unit[row][col].setPosY(m_gameBoard[row][col].getPosY());
+									m_player[0].adjustGold(-100);
 								}
 
 								if(m_player[0].getCharacterType() == WARRIOR)
-								{}
+								{
+									m_unit[row][col].addUnit(WARRIORUNIT, PLAYERONE);
+									m_unit[row][col].setPosX(m_gameBoard[row][col].getPosX());
+									m_unit[row][col].setPosY(m_gameBoard[row][col].getPosY());
+									m_player[0].adjustGold(-100);
+								}
+							}
+							break;
+						case 1: // second unit(s)
+							if(m_player[0].getGold() < 125)
+								dontPlaceUnit = true;
 
-								break;
-							default:
-								break;
-							}	
-						}
+							if(!m_unit[row][col].occupied && !dontPlaceUnit && col < 6)
+							{
+								if(m_player[0].getCharacterType() == ARCHER) // wolf
+								{
+									m_unit[row][col].addUnit(WOLF, PLAYERONE);
+									m_unit[row][col].setPosX(m_gameBoard[row][col].getPosX());
+									m_unit[row][col].setPosY(m_gameBoard[row][col].getPosY());
+									m_player[0].adjustGold(-125);
+								}
+
+								if(m_player[0].getCharacterType() == BLACKMAGE) // golem
+								{
+									m_unit[row][col].addUnit(GOLEM, PLAYERONE);
+									m_unit[row][col].setPosX(m_gameBoard[row][col].getPosX());
+									m_unit[row][col].setPosY(m_gameBoard[row][col].getPosY());
+									m_player[0].adjustGold(-125);
+								}
+
+								if(m_player[0].getCharacterType() == WARRIOR) // Marksman
+								{
+									m_unit[row][col].addUnit(MARKSMAN, PLAYERONE);
+									m_unit[row][col].setPosX(m_gameBoard[row][col].getPosX());
+									m_unit[row][col].setPosY(m_gameBoard[row][col].getPosY());
+									m_player[0].adjustGold(-125);
+								}
+							}
+							break;
+						case 2: // third unit(s)
+							if(m_player[0].getGold() < 250)
+								dontPlaceUnit = true;
+
+							if(!m_unit[row][col].occupied && !dontPlaceUnit && col < 6)
+							{
+								if(m_player[0].getCharacterType() == ARCHER) // thief
+								{
+									m_unit[row][col].addUnit(THIEF, PLAYERONE);
+									m_unit[row][col].setPosX(m_gameBoard[row][col].getPosX());
+									m_unit[row][col].setPosY(m_gameBoard[row][col].getPosY());
+									m_player[0].adjustGold(-250);
+								}
+								if(m_player[0].getCharacterType() == BLACKMAGE) // warlock
+								{
+									m_unit[row][col].addUnit(WARLOCK, PLAYERONE);
+									m_unit[row][col].setPosX(m_gameBoard[row][col].getPosX());
+									m_unit[row][col].setPosY(m_gameBoard[row][col].getPosY());
+									m_player[0].adjustGold(-250);
+								}
+
+								if(m_player[0].getCharacterType() == WARRIOR)
+								{
+									m_unit[row][col].addUnit(MINOTAUR, PLAYERONE);
+									m_unit[row][col].setPosX(m_gameBoard[row][col].getPosX());
+									m_unit[row][col].setPosY(m_gameBoard[row][col].getPosY());
+									m_player[0].adjustGold(-250);
+								}
+							}
+							break;
+						case 3: // wall
+							if(m_player[0].getGold() < 75)
+								dontPlaceUnit = true;
+
+							if(!m_unit[row][col].occupied && !dontPlaceUnit && col < 7)
+							{
+								m_unit[row][col].addUnit(WALL, PLAYERONE);
+								m_unit[row][col].setPosX(m_gameBoard[row][col].getPosX());
+								m_unit[row][col].setPosY(m_gameBoard[row][col].getPosY());
+								m_player[0].adjustGold(-75);
+							}
+							break;
+						case 4: // Ability 1
+							//Check special meter
+							if(m_player[0].getCurrentSpecial() >= 50)
+							{
+								//allow ability or don't based on meter
+								if(m_player[0].getCharacterType() == ARCHER) // Split shot = Kills 2 enemy units of player's choosing
+								{
+									archerAbility1(done);
+
+									if(!done && unitsAttacked != 2)
+										archerAbility1(done);
+									else
+									{
+										unitsAttacked = 0;
+										m_player[0].adjustCurrentSpecial(-50);
+										break;
+									}
+								}
+
+								if(m_player[0].getCharacterType() == BLACKMAGE) // Black hole
+								{
+
+
+								}
+
+								if(m_player[0].getCharacterType() == WARRIOR) // ??
+								{
+
+								}
+
+							}
+							break;
+						case 5: // Ability 2
+							if(m_player[0].getCharacterType() == ARCHER) // Precision Shot
+							{
+								if(m_player[0].getCurrentSpecial() == 100)
+								{
+									m_player[0].adjustCurrentSpecial(-100);
+									m_player[1].adjustCurrentHealth(-100);
+								}
+							}
+
+							if(m_player[0].getCharacterType() == BLACKMAGE)
+							{
+							}
+
+							if(m_player[0].getCharacterType() == WARRIOR)
+							{}
+
+							break;
+						default:
+							break;
+						}	
 					}
-					else
-						keyIsDown[DIK_P] = false;
+
 				}
+				else
+					keyIsDown[DIK_P] = false;
 			}
 		}
 		// All player 2 checks and actions
@@ -1293,7 +1430,7 @@ void GameEngine::Update(float dt)
 							if(m_player[1].getGold() < 100)
 								dontPlaceUnit = true;
 
-							if(!m_unit[row][col].occupied && !dontPlaceUnit && col > 11)
+							if(!m_unit[row][col].occupied && !dontPlaceUnit && col > 9)
 							{
 								if(m_player[1].getCharacterType() == ARCHER)
 								{
@@ -1312,7 +1449,7 @@ void GameEngine::Update(float dt)
 
 								if(m_player[1].getCharacterType() == WARRIOR)
 								{
-									m_unit[row][col].addUnit(WARRIORUNIT, PLAYERONE);
+									m_unit[row][col].addUnit(WARRIORUNIT, PLAYERTWO);
 									m_unit[row][col].setPosX(m_gameBoard[row][col].getPosX());
 									m_unit[row][col].setPosY(m_gameBoard[row][col].getPosY());
 									m_player[1].adjustGold(-100);
@@ -1343,7 +1480,7 @@ void GameEngine::Update(float dt)
 
 								if(m_player[1].getCharacterType() == WARRIOR)
 								{
-									m_unit[row][col].addUnit(MARKSMAN, PLAYERONE);
+									m_unit[row][col].addUnit(MARKSMAN, PLAYERTWO);
 									m_unit[row][col].setPosX(m_gameBoard[row][col].getPosX());
 									m_unit[row][col].setPosY(m_gameBoard[row][col].getPosY());
 									m_player[1].adjustGold(-125);
@@ -1375,7 +1512,7 @@ void GameEngine::Update(float dt)
 
 								if(m_player[1].getCharacterType() == WARRIOR) // minotaur
 								{
-									m_unit[row][col].addUnit(MINOTAUR, PLAYERONE);
+									m_unit[row][col].addUnit(MINOTAUR, PLAYERTWO);
 									m_unit[row][col].setPosX(m_gameBoard[row][col].getPosX());
 									m_unit[row][col].setPosY(m_gameBoard[row][col].getPosY());
 									m_player[1].adjustGold(-250);
@@ -1432,8 +1569,6 @@ void GameEngine::Update(float dt)
 
 										if(m_unit[row+1][col+1].occupied)
 											m_unit[row+1][col+1].removeUnit();
-
-										//m_player[1].adjustCurrentSpecial(-50);
 									}
 									//last row has different locations to remove units
 									if(row == 4 && col != 14)
@@ -1449,8 +1584,6 @@ void GameEngine::Update(float dt)
 
 										if(m_unit[row-1][col+1].occupied)
 											m_unit[row-1][col+1].removeUnit();
-
-										//m_player[1].adjustCurrentSpecial(-50);
 									}
 									//last col has different locations to remove units
 									if(col == 14 && row != 4)
@@ -1466,8 +1599,6 @@ void GameEngine::Update(float dt)
 
 										if(m_unit[row+1][col-1].occupied)
 											m_unit[row+1][col-1].removeUnit();
-
-										//m_player[1].adjustCurrentSpecial(-50);
 									}
 
 									if(row == 4 && col == 14)
@@ -1483,8 +1614,6 @@ void GameEngine::Update(float dt)
 
 										if(m_unit[row-1][col-1].occupied)
 											m_unit[row-1][col-1].removeUnit();
-
-										//m_player[1].adjustCurrentSpecial(-50);
 									}
 									m_player[1].adjustCurrentSpecial(-50);
 								}
@@ -1518,7 +1647,7 @@ void GameEngine::Update(float dt)
 									m_classAbilityAnimator.setClassAbilityAnimation( FLAMESTRIKE , m_unit[row][col].getPosX() +8 , m_unit[row][col].getPosY() - 12 );
 									m_attackTargetSpaceX = row;
 									//m_classAbilityAnimator.setPosX( m_unit[row][0].getPosX() );
-								//	m_player[1].adjustCurrentSpecial(-100);
+									m_player[1].adjustCurrentSpecial(-100);
 								}
 
 								/*	if(row == 0)
@@ -1546,7 +1675,6 @@ void GameEngine::Update(float dt)
 				}
 				else if (!mouseState.rgbButtons[0] )
 					keyIsDown[DIK_P] = false;
-
 			}
 		}
 
@@ -1807,10 +1935,10 @@ void GameEngine::updateEventPhase(float dt)
 								m_combatMessageActive = true;
 								swprintf_s(m_combatMessage, 128, L"Drain!!");
 								m_floatingRectTopMax	=	m_unit[i][j].getPosY() - 50;
-								m_floatingTextRect.top = m_unit[i][j].getPosY() - 10;
-								m_floatingTextRect.left = m_unit[i][j].getPosX() - 5;
-								m_floatingTextRect.right = m_unit[i][j].getPosX() + 10;
-								m_floatingTextRect.bottom = m_unit[i][j].getPosY() + 10;
+								m_floatingTextRect.top = long(m_unit[i][j].getPosY() - 10);
+								m_floatingTextRect.left = long(m_unit[i][j].getPosX() - 5);
+								m_floatingTextRect.right = long(m_unit[i][j].getPosX() + 10);
+								m_floatingTextRect.bottom = long(m_unit[i][j].getPosY() + 10);
 								m_damageType	=	m_unit[i][j].getDamage();
 								m_floatingTextActive = true;
 								m_damageType	=	15;
@@ -2013,10 +2141,10 @@ void GameEngine::updateEventPhase(float dt)
 								m_combatMessageActive = true;
 								swprintf_s(m_combatMessage, 128, L"Drain!!");
 								m_floatingRectTopMax	=	m_unit[i][j].getPosY() - 50;
-								m_floatingTextRect.top = m_unit[i][j].getPosY() - 10;
-								m_floatingTextRect.left = m_unit[i][j].getPosX() - 5;
-								m_floatingTextRect.right = m_unit[i][j].getPosX() + 10;
-								m_floatingTextRect.bottom = m_unit[i][j].getPosY() + 10;
+								m_floatingTextRect.top = long(m_unit[i][j].getPosY() - 10);
+								m_floatingTextRect.left = long(m_unit[i][j].getPosX() - 5);
+								m_floatingTextRect.right = long(m_unit[i][j].getPosX() + 10);
+								m_floatingTextRect.bottom = long(m_unit[i][j].getPosY() + 10);
 								m_damageType	=	m_unit[i][j].getDamage();
 								m_floatingTextActive = true;
 								m_damageType	=	15;
@@ -2213,7 +2341,7 @@ void GameEngine::updateEventPhase(float dt)
 					//  INFO:  Remove attacked unit if health < 1
 					if( m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getCurrentHealth() < 1 )
 						destroyUnit();
-						//m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].removeUnit();
+					//m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].removeUnit();
 				}
 				else
 				{
@@ -2256,7 +2384,7 @@ void GameEngine::updateEventPhase(float dt)
 					//  INFO:  Remove attacked unit if health < 1
 					if( m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getCurrentHealth() < 1 )
 						destroyUnit();
-						//m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].removeUnit();
+					//m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].removeUnit();
 				}
 				else
 				{
@@ -2373,7 +2501,7 @@ void GameEngine::updateEventPhase(float dt)
 				//  INFO:  Remove attacked unit if health < 1
 				if( m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getCurrentHealth() < 1 )
 					destroyUnit();
-					//m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].removeUnit();
+				//m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].removeUnit();
 			}
 		}
 	}
@@ -2722,6 +2850,8 @@ void GameEngine::Render(float dt)
 			if(SUCCEEDED(m_pD3DSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_SORT_DEPTH_FRONTTOBACK)))
 			{
 				D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
+				int fuckyou = 0;
+				int fuckyou2 = 0;
 				///////////////////////////////////////////////////
 				//  INFO:  For drawing graphics
 				switch(m_gameState)
@@ -2747,6 +2877,37 @@ void GameEngine::Render(float dt)
 
 					break;
 				case MENUCHARACTERSELECT:
+					D3DXMatrixIdentity(&transMat);
+					D3DXMatrixIdentity(&scaleMat);
+					D3DXMatrixIdentity(&rotMat);
+					D3DXMatrixIdentity(&worldMat);
+
+					D3DXMatrixScaling(&scaleMat, 0.8f, 0.8f, 0.0f);
+					D3DXMatrixTranslation(&transMat, 380.0f, 300.0f, 0.0f);
+					D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+					D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+					m_pD3DSprite->SetTransform(&worldMat);
+					//change backgroung image
+					m_pD3DSprite->Draw(m_menuBG, 0, &D3DXVECTOR3(m_menuBGInfo.Width * 0.5f, m_menuBGInfo.Height * 0.5f, 0.0f),
+						0, D3DXCOLOR(255,255, 255,255));
+					//Character select buttons
+
+					for(auto& Buttons: characterButtons)
+					{
+						if(!player1selected)
+							drawCharacters(fuckyou, D3DXVECTOR3(Buttons.getPosition().x, Buttons.getPosition().y, 0.0f), Buttons.getColor(), Buttons.getRect());
+
+						fuckyou += 1;
+					}
+
+					for(auto& Buttons: characterButtons)
+					{
+						if(player1selected)
+							drawCharacters(fuckyou2, D3DXVECTOR3(Buttons.getPosition().x, Buttons.getPosition().y, 0.0f), Buttons.getColor(), Buttons.getRect());
+
+						fuckyou2 += 1;
+					}
 					break;
 				case MENUCREDITS:
 					break;
@@ -2764,7 +2925,7 @@ void GameEngine::Render(float dt)
 					//Draws Units onto battle map
 					drawGameBoard();
 					// Player 1 character options for buttons
-					int number = 0;
+					number = 0;
 					for(auto& Buttons: player1_units)
 					{
 						if(m_player[0].characterType == ARCHER)
@@ -2795,10 +2956,27 @@ void GameEngine::Render(float dt)
 
 					if(m_gamePhase == PLAYERONE_PLAYPHASE)
 					{
-						hoverCount = 0;
+						//hoverCount = 0;
 						for(auto&Buttons: hoverButtons)
 						{
 							if(m_player[0].characterType == ARCHER)
+								drawHoverInfo(hoverCount, m_player[0], D3DXVECTOR3(Buttons.getPosition().x, Buttons.getPosition().y, 0.0f), Buttons.getColor(), selectedUnit, dt);
+
+							hoverCount += 1;
+						}
+						hoverCount = 6;
+						for(auto&Buttons: hoverButtons)
+						{
+							if(m_player[0].characterType == BLACKMAGE)
+								drawHoverInfo(hoverCount, m_player[0], D3DXVECTOR3(Buttons.getPosition().x, Buttons.getPosition().y, 0.0f), Buttons.getColor(), selectedUnit, dt);
+
+							hoverCount += 1;
+						}
+
+						hoverCount = 12;
+						for(auto&Buttons: hoverButtons)
+						{
+							if(m_player[0].characterType == WARRIOR)
 								drawHoverInfo(hoverCount, m_player[0], D3DXVECTOR3(Buttons.getPosition().x, Buttons.getPosition().y, 0.0f), Buttons.getColor(), selectedUnit, dt);
 
 							hoverCount += 1;
@@ -2807,10 +2985,28 @@ void GameEngine::Render(float dt)
 
 					if(m_gamePhase == PLAYERTWO_PLAYPHASE)
 					{
+						hoverCount = 0;
+						for(auto&Buttons: hoverButtons2)
+						{
+							if(m_player[1].characterType == ARCHER)
+								drawHoverInfo(hoverCount, m_player[1], D3DXVECTOR3(Buttons.getPosition().x, Buttons.getPosition().y, 0.0f), Buttons.getColor(), selectedUnit, dt);
+
+							hoverCount += 1;
+						}
+
 						hoverCount = 6;
 						for(auto&Buttons: hoverButtons2)
 						{
 							if(m_player[1].characterType == BLACKMAGE)
+								drawHoverInfo(hoverCount, m_player[1], D3DXVECTOR3(Buttons.getPosition().x, Buttons.getPosition().y, 0.0f), Buttons.getColor(), selectedUnit, dt);
+
+							hoverCount += 1;
+						}
+
+						hoverCount = 12;
+						for(auto&Buttons: hoverButtons2)
+						{
+							if(m_player[1].characterType == WARRIOR)
 								drawHoverInfo(hoverCount, m_player[1], D3DXVECTOR3(Buttons.getPosition().x, Buttons.getPosition().y, 0.0f), Buttons.getColor(), selectedUnit, dt);
 
 							hoverCount += 1;
@@ -3118,21 +3314,48 @@ void GameEngine::drawGameBoard()
 
 				m_pD3DSprite->SetTransform(&worldMat);
 
-				m_pD3DSprite->Draw(m_wallIcon, 0, &D3DXVECTOR3(m_wallIconInfo.Width * 0.5f, m_wallIconInfo.Height * 0.5f, 0.0f),
-					0, D3DCOLOR_ARGB(255, 255, 255, 255));
-
-				if(m_unit[i][j].getWhoUnitBelongsTo() == 1)
+				if(m_unit[i][j].getWhoUnitBelongsTo() == PLAYERONE)
 				{
-					D3DXMatrixScaling(&scaleMat, 1.0f, 1.0f, 0.0f);			
-					D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX() + 8, m_unit[i][j].getPosY() + 10, 0.0f);
-					D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);	
-					D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);	
+					int type = m_player[0].getCharacterType();
 
-					m_pD3DSprite->SetTransform(&worldMat);
-
-					m_pD3DSprite->Draw(m_wallIcon, 0, &D3DXVECTOR3(m_wallIconInfo.Width * 0.5f, m_wallIconInfo.Height * 0.5f, 0.0f),
-						0, D3DCOLOR_ARGB(255, 0, 255, 255));
+					switch (type)
+					{
+					case ARCHER:
+						m_pD3DSprite->Draw(m_wallIcon, 0, &D3DXVECTOR3(m_wallIconInfo.Width * 0.5f, m_wallIconInfo.Height * 0.5f, 0.0f),
+							0, D3DCOLOR_ARGB(255, 255, 255, 255));
+						break;
+					case BLACKMAGE:
+						m_pD3DSprite->Draw(m_wallIcon, 0, &D3DXVECTOR3(m_wallIconInfo.Width * 0.5f, m_wallIconInfo.Height * 0.5f, 0.0f),
+							0, D3DCOLOR_ARGB(255, 0, 255, 255));
+						break;
+					case WARRIOR:
+						m_pD3DSprite->Draw(m_wallIcon, 0, &D3DXVECTOR3(m_wallIconInfo.Width * 0.5f, m_wallIconInfo.Height * 0.5f, 0.0f),
+							0, D3DCOLOR_ARGB(255, 255, 0, 0));
+						break;
+					}
 				}
+
+				if(m_unit[i][j].getWhoUnitBelongsTo() == PLAYERTWO)
+				{
+					int type = m_player[1].getCharacterType();
+
+					switch (type)
+					{
+					case ARCHER:
+						m_pD3DSprite->Draw(m_wallIcon, 0, &D3DXVECTOR3(m_wallIconInfo.Width * 0.5f, m_wallIconInfo.Height * 0.5f, 0.0f),
+							0, D3DCOLOR_ARGB(255, 255, 255, 255));
+						break;
+					case BLACKMAGE:
+						m_pD3DSprite->Draw(m_wallIcon, 0, &D3DXVECTOR3(m_wallIconInfo.Width * 0.5f, m_wallIconInfo.Height * 0.5f, 0.0f),
+							0, D3DCOLOR_ARGB(255, 0, 255, 255));
+						break;
+					case WARRIOR:
+						m_pD3DSprite->Draw(m_wallIcon, 0, &D3DXVECTOR3(m_wallIconInfo.Width * 0.5f, m_wallIconInfo.Height * 0.5f, 0.0f),
+							0, D3DCOLOR_ARGB(255, 255, 0, 0));
+						break;
+					}
+				}
+
 				//////////////////////////////////////////////////////////////////////////////
 				//  INFO:  Draws black background for health bar
 				D3DXMatrixIdentity(&transMat);
@@ -3984,7 +4207,6 @@ void GameEngine::drawGameBoard()
 				0, D3DCOLOR_ARGB(255, 255, 255, 255));
 		}
 	}
-
 };
 
 void GameEngine::drawPlayers()
@@ -4152,7 +4374,7 @@ void GameEngine::drawUIText(float dt)
 	swprintf_s(buffer, 128, L"%f", cursor.y);
 	m_pD3DFont->DrawText(0, buffer, -1, &cursorRect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));*/
 };
-// Change WARRIOR icons to correct icons once recieved!!
+// Change WARRIOR ABILITY icons to correct icons once recieved!!
 void GameEngine::drawIcons(int thisButton , Character thisPlayer, D3DXVECTOR3 position,D3DCOLOR a_color)
 {
 	//ARCHER UNIT BUTTONS
@@ -4225,7 +4447,7 @@ void GameEngine::drawIcons(int thisButton , Character thisPlayer, D3DXVECTOR3 po
 
 			m_pD3DSprite->SetTransform(&worldMat);
 
-			m_pD3DSprite->Draw(m_snipeIcon, 0, &D3DXVECTOR3(m_snipeIconInfo.Width * 0.5f, m_snipeIconInfo.Height * 0.5f, 0.0f),
+			m_pD3DSprite->Draw(m_splitShotIcon, 0, &D3DXVECTOR3(m_splitShotIconInfo.Width * 0.5f, m_splitShotIconInfo.Height * 0.5f, 0.0f),
 				0, a_color);
 		}
 
@@ -4238,7 +4460,7 @@ void GameEngine::drawIcons(int thisButton , Character thisPlayer, D3DXVECTOR3 po
 
 			m_pD3DSprite->SetTransform(&worldMat);
 
-			m_pD3DSprite->Draw(m_splitShotIcon, 0, &D3DXVECTOR3(m_splitShotIconInfo.Width * 0.5f, m_splitShotIconInfo.Height * 0.5f, 0.0f),
+			m_pD3DSprite->Draw( m_snipeIcon, 0, &D3DXVECTOR3(m_snipeIconInfo.Width * 0.5f, m_snipeIconInfo.Height * 0.5f, 0.0f),
 				0, a_color);
 		}
 	}
@@ -4313,7 +4535,7 @@ void GameEngine::drawIcons(int thisButton , Character thisPlayer, D3DXVECTOR3 po
 
 			m_pD3DSprite->SetTransform(&worldMat);
 
-			m_pD3DSprite->Draw(m_snipeIcon, 0, &D3DXVECTOR3(m_snipeIconInfo.Width * 0.5f, m_snipeIconInfo.Height * 0.5f, 0.0f),
+			m_pD3DSprite->Draw(m_splitShotIcon, 0, &D3DXVECTOR3(m_splitShotIconInfo.Width * 0.5f, m_splitShotIconInfo.Height * 0.5f, 0.0f),
 				0, a_color);
 		}
 
@@ -4326,7 +4548,7 @@ void GameEngine::drawIcons(int thisButton , Character thisPlayer, D3DXVECTOR3 po
 
 			m_pD3DSprite->SetTransform(&worldMat);
 
-			m_pD3DSprite->Draw(m_splitShotIcon, 0, &D3DXVECTOR3(m_splitShotIconInfo.Width * 0.5f, m_splitShotIconInfo.Height * 0.5f, 0.0f),
+			m_pD3DSprite->Draw( m_snipeIcon, 0, &D3DXVECTOR3(m_snipeIconInfo.Width * 0.5f, m_snipeIconInfo.Height * 0.5f, 0.0f),
 				0, a_color);
 		}
 	}
@@ -4654,7 +4876,7 @@ void GameEngine::drawIcons(int thisButton , Character thisPlayer, D3DXVECTOR3 po
 
 			m_pD3DSprite->SetTransform(&worldMat);
 
-			m_pD3DSprite->Draw(m_wallIcon, 0, &D3DXVECTOR3(m_wallIconInfo.Width * 0.5f, m_wallIconInfo.Height * 0.5f, 0.0f),
+			m_pD3DSprite->Draw(m_wallIcon2, 0, &D3DXVECTOR3(m_wallIconInfo2.Width * 0.5f, m_wallIconInfo2.Height * 0.5f, 0.0f),
 				0, a_color);
 		}
 
@@ -4726,6 +4948,55 @@ void GameEngine::drawMenu(D3DXVECTOR3 position, D3DCOLOR a_color, RECT &a_rect)
 		0, a_color);
 }
 
+void GameEngine::drawCharacters(int a_number, D3DXVECTOR3 position, D3DCOLOR a_color, RECT &a_rect)
+{
+	D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
+	D3DXMatrixIdentity(&transMat);
+	D3DXMatrixIdentity(&scaleMat);
+	D3DXMatrixIdentity(&rotMat);
+	D3DXMatrixIdentity(&worldMat);
+
+	//draw archer
+	if(a_number == 0)
+	{
+		D3DXMatrixScaling(&scaleMat, 0.2f, 0.2f, 0.0f);
+		D3DXMatrixTranslation(&transMat, position.x, position.y, 0.0f);
+		D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+		D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+		m_pD3DSprite->SetTransform(&worldMat);
+
+		m_pD3DSprite->Draw(m_archerCharacter, 0, &D3DXVECTOR3(m_archerCharacterInfo.Width * 0.5f, m_archerCharacterInfo.Height * 0.5f, 0.0f),
+			0, a_color);
+	}
+	//draw warrior
+	if(a_number == 2)
+	{
+		D3DXMatrixScaling(&scaleMat, 0.2f, 0.35f, 0.0f);
+		D3DXMatrixTranslation(&transMat, position.x, position.y, 0.0f);
+		D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+		D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+		m_pD3DSprite->SetTransform(&worldMat);
+
+		m_pD3DSprite->Draw(m_warriorCharacter, 0, &D3DXVECTOR3(m_warriorCharacterInfo.Width * 0.5f, m_warriorCharacterInfo.Height * 0.5f, 0.0f),
+			0, a_color);
+	}
+	////draw black mage
+	if(a_number == 1)
+	{
+		D3DXMatrixScaling(&scaleMat, 0.2f, 0.35f, 0.0f);
+		D3DXMatrixTranslation(&transMat, position.x+100.0f, position.y, 0.0f);
+		D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+		D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+		m_pD3DSprite->SetTransform(&worldMat);
+
+		m_pD3DSprite->Draw(m_blackMageCharacter, 0, &D3DXVECTOR3(m_blackMageCharacterInfo.Width * 0.5f, m_blackMageCharacterInfo.Height * 0.5f, 0.0f),
+			0, a_color);
+	}
+}
+
 void GameEngine::drawWinner(Character a_player)
 {
 	RECT rect;
@@ -4763,8 +5034,80 @@ void GameEngine::drawEndTurn(D3DXVECTOR3 position, D3DCOLOR a_color, RECT &a_rec
 
 void GameEngine::drawHoverInfo(int thisButton , Character thisPlayer, D3DXVECTOR3 position,D3DCOLOR a_color, int thisUnit, float dt)
 {
-	//ARCHER UNIT BUTTONS
+	////////////////////////////////
+	// ARCHER
 	if(thisPlayer.getPlayerNumber() == 0 && thisPlayer.characterType == ARCHER)
+	{
+		D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
+
+		D3DXMatrixIdentity(&transMat);
+		D3DXMatrixIdentity(&scaleMat);
+		D3DXMatrixIdentity(&rotMat);
+		D3DXMatrixIdentity(&worldMat);
+
+		if(thisUnit == 0)
+		{
+			if(thisButton == ARCHERBUTTON)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 1.0f, 0.0f);
+				D3DXMatrixTranslation(&transMat, position.x, position.y - 50.0f, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_archerHover, 0, &D3DXVECTOR3(m_archerHoverInfo.Width * 0.5f, m_archerHoverInfo.Height * 0.5f, 0.0f),
+					0, a_color);
+			}
+		}
+		if(thisUnit == 2)
+		{
+			if(thisButton == THIEFBUTTON)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 1.0f, 0.0f);
+				D3DXMatrixTranslation(&transMat, position.x, position.y-50.0f, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_thiefHover, 0, &D3DXVECTOR3(m_thiefHoverInfo.Width * 0.5f, m_thiefHoverInfo.Height * 0.5f, 0.0f),
+					0, a_color);
+			}
+		}
+		if(thisUnit == 1)
+		{
+			if(thisButton == WOLFBUTTON)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 1.0f, 0.0f);
+				D3DXMatrixTranslation(&transMat, position.x, position.y-50.0f, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_wolfHover, 0, &D3DXVECTOR3(m_wolfHoverInfo.Width * 0.5f, m_wolfHoverInfo.Height * 0.5f, 0.0f),
+					0, a_color);
+			}
+		}
+		if(thisUnit == 3)
+		{
+			if(thisButton == WALLBUTTON)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 1.0f, 0.0f);
+				D3DXMatrixTranslation(&transMat, position.x, position.y-50.0f, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_wallHover, 0, &D3DXVECTOR3(m_wallHoverInfo.Width * 0.5f, m_wallHoverInfo.Height * 0.5f, 0.0f),
+					0, a_color);
+			}
+		}
+	}
+
+	if(thisPlayer.getPlayerNumber() == 1 && thisPlayer.characterType == ARCHER)
 	{
 		D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
 
@@ -4908,18 +5251,232 @@ void GameEngine::drawHoverInfo(int thisButton , Character thisPlayer, D3DXVECTOR
 		}
 	}
 
+	if(thisPlayer.getPlayerNumber() == 0 && thisPlayer.characterType == BLACKMAGE)
+	{
+		D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
+
+		D3DXMatrixIdentity(&transMat);
+		D3DXMatrixIdentity(&scaleMat);
+		D3DXMatrixIdentity(&rotMat);
+		D3DXMatrixIdentity(&worldMat);
+
+		if(thisUnit == 0)
+		{
+			if(thisButton == BLACKMAGEBUTTON)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 1.0f, 0.0f);
+				D3DXMatrixTranslation(&transMat, position.x, position.y - 50.0f, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_blackMageHover, 0, &D3DXVECTOR3(m_blackMageHoverInfo.Width * 0.5f, m_blackMageHoverInfo.Height * 0.5f, 0.0f),
+					0, a_color);
+			}
+		}
+		if(thisUnit == 2)
+		{
+			if(thisButton == WARLOCKBUTTON)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 1.0f, 0.0f);
+				D3DXMatrixTranslation(&transMat, position.x, position.y-50.0f, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_warlockHover, 0, &D3DXVECTOR3(m_warlockHoverInfo.Width * 0.5f, m_warlockHoverInfo.Height * 0.5f, 0.0f),
+					0, a_color);
+			}
+		}
+		if(thisUnit == 1)
+		{
+			if(thisButton == GOLEMBUTTON)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 1.0f, 0.0f);
+				D3DXMatrixTranslation(&transMat, position.x, position.y-50.0f, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_golemHover, 0, &D3DXVECTOR3(m_golemHoverInfo.Width * 0.5f, m_golemHoverInfo.Height * 0.5f, 0.0f),
+					0, a_color);
+			}
+		}
+		if(thisUnit == 3)
+		{
+			if(thisButton == WALLBUTTON2)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 1.0f, 0.0f);
+				D3DXMatrixTranslation(&transMat, position.x, position.y-50.0f, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_wallHover, 0, &D3DXVECTOR3(m_wallHoverInfo.Width * 0.5f, m_wallHoverInfo.Height * 0.5f, 0.0f),
+					0, a_color);
+			}
+		}
+	}
+
+	//////////////////////////////////
+	// WARRIOR
+	if(thisPlayer.getPlayerNumber() == 1 && thisPlayer.characterType == WARRIOR)
+	{
+		D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
+
+		D3DXMatrixIdentity(&transMat);
+		D3DXMatrixIdentity(&scaleMat);
+		D3DXMatrixIdentity(&rotMat);
+		D3DXMatrixIdentity(&worldMat);
+
+		if(thisUnit == 0)
+		{
+			if(thisButton == WARRIORBUTTON)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 1.0f, 0.0f);
+				D3DXMatrixTranslation(&transMat, position.x, position.y - 50.0f, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_blackMageHover, 0, &D3DXVECTOR3(m_blackMageHoverInfo.Width * 0.5f, m_blackMageHoverInfo.Height * 0.5f, 0.0f),
+					0, a_color);
+			}
+		}
+		if(thisUnit == 2)
+		{
+			if(thisButton == MINOTAURBUTTON)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 1.0f, 0.0f);
+				D3DXMatrixTranslation(&transMat, position.x, position.y-50.0f, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_warlockHover, 0, &D3DXVECTOR3(m_warlockHoverInfo.Width * 0.5f, m_warlockHoverInfo.Height * 0.5f, 0.0f),
+					0, a_color);
+			}
+		}
+		if(thisUnit == 1)
+		{
+			if(thisButton == MARKSMANBUTTON)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 1.0f, 0.0f);
+				D3DXMatrixTranslation(&transMat, position.x, position.y-50.0f, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_golemHover, 0, &D3DXVECTOR3(m_golemHoverInfo.Width * 0.5f, m_golemHoverInfo.Height * 0.5f, 0.0f),
+					0, a_color);
+			}
+		}
+		if(thisUnit == 3)
+		{
+			if(thisButton == WALLBUTTON2)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 1.0f, 0.0f);
+				D3DXMatrixTranslation(&transMat, position.x, position.y-50.0f, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_wallHover, 0, &D3DXVECTOR3(m_wallHoverInfo.Width * 0.5f, m_wallHoverInfo.Height * 0.5f, 0.0f),
+					0, a_color);
+			}
+		}
+	}
+
+	if(thisPlayer.getPlayerNumber() == 0 && thisPlayer.characterType == WARRIOR)
+	{
+		D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
+
+		D3DXMatrixIdentity(&transMat);
+		D3DXMatrixIdentity(&scaleMat);
+		D3DXMatrixIdentity(&rotMat);
+		D3DXMatrixIdentity(&worldMat);
+
+		if(thisUnit == 0)
+		{
+			if(thisButton == WARRIORBUTTON)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 1.0f, 0.0f);
+				D3DXMatrixTranslation(&transMat, position.x, position.y - 50.0f, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_blackMageHover, 0, &D3DXVECTOR3(m_blackMageHoverInfo.Width * 0.5f, m_blackMageHoverInfo.Height * 0.5f, 0.0f),
+					0, a_color);
+			}
+		}
+		if(thisUnit == 2)
+		{
+			if(thisButton == MINOTAURBUTTON)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 1.0f, 0.0f);
+				D3DXMatrixTranslation(&transMat, position.x, position.y-50.0f, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_warlockHover, 0, &D3DXVECTOR3(m_warlockHoverInfo.Width * 0.5f, m_warlockHoverInfo.Height * 0.5f, 0.0f),
+					0, a_color);
+			}
+		}
+		if(thisUnit == 1)
+		{
+			if(thisButton == MARKSMANBUTTON)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 1.0f, 0.0f);
+				D3DXMatrixTranslation(&transMat, position.x, position.y-50.0f, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_golemHover, 0, &D3DXVECTOR3(m_golemHoverInfo.Width * 0.5f, m_golemHoverInfo.Height * 0.5f, 0.0f),
+					0, a_color);
+			}
+		}
+		if(thisUnit == 3)
+		{
+			if(thisButton == WALLBUTTON2)
+			{
+				D3DXMatrixScaling(&scaleMat, 0.8f, 1.0f, 0.0f);
+				D3DXMatrixTranslation(&transMat, position.x, position.y-50.0f, 0.0f);
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+				m_pD3DSprite->SetTransform(&worldMat);
+
+				m_pD3DSprite->Draw(m_wallHover, 0, &D3DXVECTOR3(m_wallHoverInfo.Width * 0.5f, m_wallHoverInfo.Height * 0.5f, 0.0f),
+					0, a_color);
+			}
+		}
+	}
+
 
 }
 
-void GameEngine::drawAbilityAnimations(){
+void GameEngine::drawAbilityAnimations()
+{
 	D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
 
 	D3DXMatrixIdentity(&transMat);
 	D3DXMatrixIdentity(&scaleMat);
 	D3DXMatrixIdentity(&rotMat);
 	D3DXMatrixIdentity(&worldMat);
-
-
 
 	D3DXMatrixScaling(&scaleMat, m_classAbilityAnimator.getScaleX(), m_classAbilityAnimator.getScaleY(), 0.0f);		
 	D3DXMatrixTranslation(&transMat, m_classAbilityAnimator.getPosX(), m_classAbilityAnimator.getPosY(), 0.0f);			
