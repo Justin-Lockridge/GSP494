@@ -387,8 +387,6 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	m_player[0].setActivePlayer(true);
 	m_player[0].setPlayerNumber(0);
 	m_player[1].setPlayerNumber(1);
-	//m_player[0].setCharacterType(WARRIOR);
-	//m_player[1].setCharacterType(BLACKMAGE);
 
 	///////////////////////////////////////////////////
 	//  INFO:  Initializes gameboard and gold mines
@@ -409,9 +407,6 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	//m_unit[0][5].addUnit( MINOTAUR, PLAYERONE );
 	//m_unit[2][12].addUnit( WARLOCK, PLAYERTWO );
 	//m_unit[1][4].addUnit( MARKSMAN, PLAYERONE );
-
-	//m_player[0].adjustCurrentSpecial(100);
-	//m_player[1].adjustCurrentSpecial(100);
 }
 
 void GameEngine::InitGameBoard()
@@ -734,6 +729,8 @@ void GameEngine::InitMenu()
 
 void GameEngine::Update(float dt)
 {
+	m_player[0].adjustCurrentSpecial(100);
+	m_player[1].adjustCurrentSpecial(100);
 	///////////////////////////////////////////////////////////////////////////////
 	//  INFO:  Used with tools to get animations working, leave this in
 	int animationOffsetLeft = 47;
@@ -1268,10 +1265,8 @@ void GameEngine::Update(float dt)
 							}
 							break;
 						case 4: // Ability 1
-							//Check special meter
 							if(m_player[0].getCurrentSpecial() >= 50)
 							{
-								//allow ability or don't based on meter
 								if(m_player[0].getCharacterType() == ARCHER) // Split shot = Kills 2 enemy units of player's choosing
 								{
 									archerAbility1(done);
@@ -1287,10 +1282,7 @@ void GameEngine::Update(float dt)
 								}
 
 								if(m_player[0].getCharacterType() == BLACKMAGE) // Black hole
-								{
-
-
-								}
+									blackHoleAbility(row, col, 0);
 
 								if(m_player[0].getCharacterType() == WARRIOR) // ??
 								{
@@ -1417,8 +1409,6 @@ void GameEngine::Update(float dt)
 					col = Buttons.col;
 					locationFound = true;
 
-					//if(!keyIsDown[DIK_P])
-					//{
 					keyIsDown[DIK_P] = true;
 
 					if(locationFound)
@@ -1553,70 +1543,7 @@ void GameEngine::Update(float dt)
 								}
 
 								if(m_player[1].getCharacterType() == BLACKMAGE) // Black hole
-								{
-									m_classAbilityAnimator.setAnimationActive( true );
-									m_classAbilityAnimator.setClassAbilityAnimation( BLACKHOLE , m_unit[row][col].getPosX() + 32, m_unit[row][col].getPosY() + 32 );
-									if(row != 4 && col != 14)
-									{
-										if(m_unit[row][col].occupied)
-											m_unit[row][col].removeUnit();
-
-										if(m_unit[row][col+1].occupied)
-											m_unit[row][col+1].removeUnit();
-
-										if(m_unit[row+1][col].occupied)
-											m_unit[row+1][col].removeUnit();
-
-										if(m_unit[row+1][col+1].occupied)
-											m_unit[row+1][col+1].removeUnit();
-									}
-									//last row has different locations to remove units
-									if(row == 4 && col != 14)
-									{
-										if(m_unit[row][col].occupied)
-											m_unit[row][col].removeUnit();
-
-										if(m_unit[row-1][col].occupied)
-											m_unit[row-1][col].removeUnit();
-
-										if(m_unit[row][col+1].occupied)
-											m_unit[row][col+1].removeUnit();
-
-										if(m_unit[row-1][col+1].occupied)
-											m_unit[row-1][col+1].removeUnit();
-									}
-									//last col has different locations to remove units
-									if(col == 14 && row != 4)
-									{
-										if(m_unit[row][col].occupied)
-											m_unit[row][col].removeUnit();
-
-										if(m_unit[row+1][col].occupied)
-											m_unit[row+1][col].removeUnit();
-
-										if(m_unit[row][col-1].occupied)
-											m_unit[row][col-1].removeUnit();
-
-										if(m_unit[row+1][col-1].occupied)
-											m_unit[row+1][col-1].removeUnit();
-									}
-
-									if(row == 4 && col == 14)
-									{
-										if(m_unit[row][col].occupied)
-											m_unit[row][col].removeUnit();
-
-										if(m_unit[row][col-1].occupied)
-											m_unit[row][col-1].removeUnit();
-
-										if(m_unit[row-1][col].occupied)
-											m_unit[row-1][col].removeUnit();
-
-										if(m_unit[row-1][col-1].occupied)
-											m_unit[row-1][col-1].removeUnit();
-									}
-									m_player[1].adjustCurrentSpecial(-50);
-								}
+									blackHoleAbility(row, col, 1);
 
 								if(m_player[1].getCharacterType() == WARRIOR) // ??
 								{
@@ -1670,14 +1597,11 @@ void GameEngine::Update(float dt)
 						}
 						//}
 					}
-					//else
-					//	keyIsDown[DIK_P] = false;
 				}
 				else if (!mouseState.rgbButtons[0] )
 					keyIsDown[DIK_P] = false;
 			}
 		}
-
 
 		if(m_player[0].currentHealth < 0)
 			m_gameState = PLAYER2WIN;
@@ -2836,6 +2760,147 @@ void GameEngine::archerAbility1(bool done)
 		}
 	}
 
+}
+
+void GameEngine::blackHoleAbility(int row, int col, int a_player)
+{
+	if(a_player == 0)
+	{
+		if(m_player[0].getCharacterType() == BLACKMAGE) // Black hole
+		{
+			m_classAbilityAnimator.setAnimationActive( true );
+			m_classAbilityAnimator.setClassAbilityAnimation( BLACKHOLE , m_unit[row][col].getPosX() + 32, m_unit[row][col].getPosY() + 32 );
+			if(row != 4 && col != 14)
+			{
+				if(m_unit[row][col].occupied)
+					m_unit[row][col].removeUnit();
+
+				if(m_unit[row][col+1].occupied)
+					m_unit[row][col+1].removeUnit();
+
+				if(m_unit[row+1][col].occupied)
+					m_unit[row+1][col].removeUnit();
+
+				if(m_unit[row+1][col+1].occupied)
+					m_unit[row+1][col+1].removeUnit();
+			}
+			//last row has different locations to remove units
+			if(row == 4 && col != 14)
+			{
+				if(m_unit[row][col].occupied)
+					m_unit[row][col].removeUnit();
+
+				if(m_unit[row-1][col].occupied)
+					m_unit[row-1][col].removeUnit();
+
+				if(m_unit[row][col+1].occupied)
+					m_unit[row][col+1].removeUnit();
+
+				if(m_unit[row-1][col+1].occupied)
+					m_unit[row-1][col+1].removeUnit();
+			}
+			//last col has different locations to remove units
+			if(col == 14 && row != 4)
+			{
+				if(m_unit[row][col].occupied)
+					m_unit[row][col].removeUnit();
+
+				if(m_unit[row+1][col].occupied)
+					m_unit[row+1][col].removeUnit();
+
+				if(m_unit[row][col-1].occupied)
+					m_unit[row][col-1].removeUnit();
+
+				if(m_unit[row+1][col-1].occupied)
+					m_unit[row+1][col-1].removeUnit();
+			}
+
+			if(row == 4 && col == 14)
+			{
+				if(m_unit[row][col].occupied)
+					m_unit[row][col].removeUnit();
+
+				if(m_unit[row][col-1].occupied)
+					m_unit[row][col-1].removeUnit();
+
+				if(m_unit[row-1][col].occupied)
+					m_unit[row-1][col].removeUnit();
+
+				if(m_unit[row-1][col-1].occupied)
+					m_unit[row-1][col-1].removeUnit();
+			}
+			m_player[0].adjustCurrentSpecial(-50);
+		}
+	}
+
+	if(a_player == 1)
+	{
+		if(m_player[1].getCharacterType() == BLACKMAGE) // Black hole
+		{
+			m_classAbilityAnimator.setAnimationActive( true );
+			m_classAbilityAnimator.setClassAbilityAnimation( BLACKHOLE , m_unit[row][col].getPosX() + 32, m_unit[row][col].getPosY() + 32 );
+			if(row != 4 && col != 14)
+			{
+				if(m_unit[row][col].occupied)
+					m_unit[row][col].removeUnit();
+
+				if(m_unit[row][col+1].occupied)
+					m_unit[row][col+1].removeUnit();
+
+				if(m_unit[row+1][col].occupied)
+					m_unit[row+1][col].removeUnit();
+
+				if(m_unit[row+1][col+1].occupied)
+					m_unit[row+1][col+1].removeUnit();
+			}
+			//last row has different locations to remove units
+			if(row == 4 && col != 14)
+			{
+				if(m_unit[row][col].occupied)
+					m_unit[row][col].removeUnit();
+
+				if(m_unit[row-1][col].occupied)
+					m_unit[row-1][col].removeUnit();
+
+				if(m_unit[row][col+1].occupied)
+					m_unit[row][col+1].removeUnit();
+
+				if(m_unit[row-1][col+1].occupied)
+					m_unit[row-1][col+1].removeUnit();
+			}
+			//last col has different locations to remove units
+			if(col == 14 && row != 4)
+			{
+				if(m_unit[row][col].occupied)
+					m_unit[row][col].removeUnit();
+
+				if(m_unit[row+1][col].occupied)
+					m_unit[row+1][col].removeUnit();
+
+				if(m_unit[row][col-1].occupied)
+					m_unit[row][col-1].removeUnit();
+
+				if(m_unit[row+1][col-1].occupied)
+					m_unit[row+1][col-1].removeUnit();
+			}
+
+			if(row == 4 && col == 14)
+			{
+				if(m_unit[row][col].occupied)
+					m_unit[row][col].removeUnit();
+
+				if(m_unit[row][col-1].occupied)
+					m_unit[row][col-1].removeUnit();
+
+				if(m_unit[row-1][col].occupied)
+					m_unit[row-1][col].removeUnit();
+
+				if(m_unit[row-1][col-1].occupied)
+					m_unit[row-1][col-1].removeUnit();
+			}
+			m_player[1].adjustCurrentSpecial(-50);
+		}
+	}
 }
 
 void GameEngine::Render(float dt)
