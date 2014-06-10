@@ -458,12 +458,12 @@ void GameEngine::InitGameBoard()
 	// T, L, B, R, X, Y, Highlighted
 	RectData temp_units_pos[] =
 	{
-		{480, 120, 560, 160, 140, 500, false}, //unit 1
-		{480, 170, 560, 210, 190, 500, false}, //unit 2
-		{480, 220, 560, 260, 240, 500, false}, //unit 3
-		{480, 270, 560, 310, 290, 500, false}, //unit 4
-		{561, 120, 600, 160, 140, 570, false}, //ability 1
-		{561, 170, 600, 210, 190, 570, false}, //ability 2
+		{480, 120, 580, 205, 140, 500, false}, //unit 1
+		{480, 170, 580, 255, 190, 500, false}, //unit 2
+		{480, 220, 580, 305, 240, 500, false}, //unit 3
+		{480, 270, 580, 355, 290, 500, false}, //unit 4
+		{561, 120, 650, 205, 140, 570, false}, //ability 1
+		{561, 170, 650, 255, 190, 570, false}, //ability 2
 	};
 
 	for(int i = 0; i < MAX_BATTLE_BUTTONS; i++)
@@ -490,12 +490,12 @@ void GameEngine::InitGameBoard()
 
 	RectData temp_units_pos2[] =
 	{
-		{480, 620, 560, 660, 640, 500, false}, //player 2 unit 1
-		{480, 570, 560, 610, 590, 500, false}, //player 2 unit 2
-		{480, 520, 560, 560, 540, 500, false}, //player 2 unit 3
-		{480, 470, 560, 510, 490, 500, false}, //player 2 unit 4
-		{561, 620, 600, 660, 640, 570, false}, //player 2 ability 1
-		{561, 570, 600, 610, 590, 570, false}, //player 2 ability 2
+		{480, 620, 580, 705, 640, 500, false}, //player 2 unit 1
+		{480, 570, 580, 655, 590, 500, false}, //player 2 unit 2
+		{480, 520, 580, 605, 540, 500, false}, //player 2 unit 3
+		{480, 470, 580, 555, 490, 500, false}, //player 2 unit 4
+		{561, 620, 650, 705, 640, 570, false}, //player 2 ability 1
+		{561, 570, 650, 655, 590, 570, false}, //player 2 ability 2
 	};
 
 	for(int i = 0; i < MAX_BATTLE_BUTTONS; i++)
@@ -1288,7 +1288,6 @@ void GameEngine::Update(float dt)
 								{
 
 								}
-
 							}
 							break;
 						case 5: // Ability 2
@@ -1301,9 +1300,8 @@ void GameEngine::Update(float dt)
 								}
 							}
 
-							if(m_player[0].getCharacterType() == BLACKMAGE)
-							{
-							}
+							if(m_player[0].getCharacterType() == BLACKMAGE) //  Flame Wave
+								flameWaveAbility(row, col, 0);
 
 							if(m_player[0].getCharacterType() == WARRIOR)
 							{}
@@ -1564,30 +1562,7 @@ void GameEngine::Update(float dt)
 							}
 
 							if(m_player[1].getCharacterType() == BLACKMAGE) //  Flame Wave
-							{
-								if(m_player[1].getCurrentSpecial() == 100)
-								{
-									//Kill everyone in same row including gold mines
-									for(int i = 0; i < 16; i++)
-										m_unit[row][i].removeUnit();
-									m_classAbilityAnimator.setAnimationActive( true );
-									m_classAbilityAnimator.setClassAbilityAnimation( FLAMESTRIKE , m_unit[row][col].getPosX() +8 , m_unit[row][col].getPosY() - 12 );
-									m_attackTargetSpaceX = row;
-									//m_classAbilityAnimator.setPosX( m_unit[row][0].getPosX() );
-									m_player[1].adjustCurrentSpecial(-100);
-								}
-
-								/*	if(row == 0)
-								{
-								for(int i = 1; i < 15; i++)
-								m_unit[row][i].removeUnit();
-								}
-
-								if(row == 1)
-								{
-
-								}*/
-							}
+								flameWaveAbility(row, col, 1);
 
 							if(m_player[1].getCharacterType() == WARRIOR) // ??
 							{}
@@ -1595,7 +1570,6 @@ void GameEngine::Update(float dt)
 						default:
 							break;
 						}
-						//}
 					}
 				}
 				else if (!mouseState.rgbButtons[0] )
@@ -2899,6 +2873,37 @@ void GameEngine::blackHoleAbility(int row, int col, int a_player)
 					m_unit[row-1][col-1].removeUnit();
 			}
 			m_player[1].adjustCurrentSpecial(-50);
+		}
+	}
+}
+
+void GameEngine::flameWaveAbility(int row, int col, int a_player)
+{
+	if(a_player == 0)
+	{
+		if(m_player[0].getCurrentSpecial() == 100)
+		{
+			//Kill everyone in same row including gold mines
+			for(int i = 0; i < 16; i++)
+				m_unit[row][i].removeUnit();
+			m_classAbilityAnimator.setAnimationActive( true );
+			m_classAbilityAnimator.setClassAbilityAnimation( FLAMESTRIKE , m_unit[row][col].getPosX() +8 , m_unit[row][col].getPosY() - 12 );
+			m_attackTargetSpaceX = row;
+			m_player[0].adjustCurrentSpecial(-100);
+		}
+	}
+
+	if(a_player == 1)
+	{
+		if(m_player[1].getCurrentSpecial() == 100)
+		{
+			//Kill everyone in same row including gold mines
+			for(int i = 0; i < 16; i++)
+				m_unit[row][i].removeUnit();
+			m_classAbilityAnimator.setAnimationActive( true );
+			m_classAbilityAnimator.setClassAbilityAnimation( FLAMESTRIKE , m_unit[row][col].getPosX() +8 , m_unit[row][col].getPosY() - 12 );
+			m_attackTargetSpaceX = row;
+			m_player[1].adjustCurrentSpecial(-100);
 		}
 	}
 }

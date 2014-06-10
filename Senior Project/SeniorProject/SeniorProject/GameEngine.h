@@ -196,6 +196,7 @@ public:
 	void changePhase();
 	void archerAbility1(bool);
 	void blackHoleAbility(int, int, int);
+	void flameWaveAbility(int, int, int);
 	//////////////////////////////////////////////////////////////////////////
 	// Name:		Render
 	// Parameters:	float elapsedTime - Time that has elapsed since the last
