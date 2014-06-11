@@ -51,7 +51,7 @@
 // Define for buttons used in battle
 #define MAX_BATTLE_BUTTONS 6
 #define MAX_HOVER_INFO 4
-#define MAX_COL_BUTTONS 70
+#define MAX_COL_BUTTONS 80
 // maps unsigned 8 bits/channel to D3DCOLOR
 #define D3DCOLOR_ARGB(a,r,g,b) \
     ((D3DCOLOR)((((a)&0xff)<<24)|(((r)&0xff)<<16)|(((g)&0xff)<<8)|((b)&0xff)))

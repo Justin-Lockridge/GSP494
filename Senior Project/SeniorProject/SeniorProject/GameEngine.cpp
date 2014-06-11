@@ -527,80 +527,100 @@ void GameEngine::InitGameBoard()
 	RectData temp_grid_pos_row1[] =
 	{
 		//Row 1
-		{int(m_gameBoard[0][1].getPosY()), int(m_gameBoard[0][1].getPosX() -20.0f),  int(m_gameBoard[0][1].getPosY() +100.0f), int(m_gameBoard[0][1].getPosX() +50.0f), m_gameBoard[0][1].getPosX(), m_gameBoard[0][1].getPosY(), false, 0, 1}, //1
-		{int(m_gameBoard[0][2].getPosY()), int(m_gameBoard[0][2].getPosX() -20.0f),  int(m_gameBoard[0][2].getPosY() +100.0f), int(m_gameBoard[0][2].getPosX() +50.0f), m_gameBoard[0][2].getPosX(), m_gameBoard[0][2].getPosY(), false, 0, 2}, // 2
-		{int(m_gameBoard[0][3].getPosY()), int(m_gameBoard[0][3].getPosX() -20.0f),  int(m_gameBoard[0][3].getPosY() +100.0f), int(m_gameBoard[0][3].getPosX() +50.0f), m_gameBoard[0][3].getPosX(), m_gameBoard[0][3].getPosY(), false, 0, 3},// 3
-		{int(m_gameBoard[0][4].getPosY()), int(m_gameBoard[0][4].getPosX() -20.0f),  int(m_gameBoard[0][4].getPosY() +100), int(m_gameBoard[0][4].getPosX() +50), m_gameBoard[0][4].getPosX(), m_gameBoard[0][4].getPosY(), false, 0, 4},// 4
-		{int(m_gameBoard[0][5].getPosY()), int(m_gameBoard[0][5].getPosX() -20.0f),  int(m_gameBoard[0][5].getPosY() +100), int(m_gameBoard[0][5].getPosX() +50), m_gameBoard[0][5].getPosX(), m_gameBoard[0][5].getPosY(), false, 0, 5},// 5
-		{int(m_gameBoard[0][6].getPosY()), int(m_gameBoard[0][6].getPosX() -20.0f),  int(m_gameBoard[0][6].getPosY() +100), int(m_gameBoard[0][6].getPosX() +50), m_gameBoard[0][6].getPosX(), m_gameBoard[0][6].getPosY(), false, 0, 6},// 6
-		{int(m_gameBoard[0][7].getPosY()), int(m_gameBoard[0][7].getPosX() -20.0f),	int(m_gameBoard[0][7].getPosY() +100), int(m_gameBoard[0][7].getPosX() +50), m_gameBoard[0][7].getPosX(), m_gameBoard[0][7].getPosY(), false, 0, 7},//7
-		{int(m_gameBoard[0][8].getPosY()), int(m_gameBoard[0][8].getPosX() -20.0f),  int(m_gameBoard[0][8].getPosY() +100), int(m_gameBoard[0][8].getPosX() +50), m_gameBoard[0][8].getPosX(), m_gameBoard[0][8].getPosY(), false, 0, 8},//8
-		{int(m_gameBoard[0][9].getPosY()), int(m_gameBoard[0][9].getPosX() -20.0f),  int(m_gameBoard[0][9].getPosY() +100), int(m_gameBoard[0][9].getPosX() +50), m_gameBoard[0][9].getPosX(), m_gameBoard[0][9].getPosY(), false, 0, 9},// 9
-		{int(m_gameBoard[0][10].getPosY()), int(m_gameBoard[0][10].getPosX() -20.0f),  int(m_gameBoard[0][10].getPosY() +100), int(m_gameBoard[0][10].getPosX() +50),m_gameBoard[0][10].getPosX(), m_gameBoard[0][10].getPosY(), false, 0, 10},// 10
-		{int(m_gameBoard[0][11].getPosY()), int(m_gameBoard[0][11].getPosX() -20.0f),  int(m_gameBoard[0][11].getPosY() +100), int(m_gameBoard[0][11].getPosX() +50), m_gameBoard[0][11].getPosX(), m_gameBoard[0][11].getPosY(), false, 0, 11},// 11
-		{int(m_gameBoard[0][12].getPosY()), int(m_gameBoard[0][12].getPosX() -20.0f),  int(m_gameBoard[0][12].getPosY() +100), int(m_gameBoard[0][12].getPosX() +50), m_gameBoard[0][12].getPosX(), m_gameBoard[0][12].getPosY(), false, 0, 12},// 12
-		{int(m_gameBoard[0][13].getPosY()), int(m_gameBoard[0][13].getPosX() -20.0f),  int(m_gameBoard[0][13].getPosY() +100), int(m_gameBoard[0][13].getPosX() +50), m_gameBoard[0][13].getPosX(), m_gameBoard[0][13].getPosY(), false, 0, 13},// 13
-		{int(m_gameBoard[0][14].getPosY()), int(m_gameBoard[0][14].getPosX() -20.0f),  int(m_gameBoard[0][14].getPosY() +100), int(m_gameBoard[0][14].getPosX() +50), m_gameBoard[0][14].getPosX(), m_gameBoard[0][14].getPosY(), false,0, 14},// 14
+		{int(m_gameBoard[0][0].getPosY()-3.0f), int(m_gameBoard[0][0].getPosX() -20.0f),  int(m_gameBoard[0][0].getPosY() +100.0f), int(m_gameBoard[0][0].getPosX() +50.0f), m_gameBoard[0][0].getPosX(), m_gameBoard[0][0].getPosY(), false, 0, 0}, //GOLDMINE
+
+		{int(m_gameBoard[0][1].getPosY()-3.0f), int(m_gameBoard[0][1].getPosX() -20.0f),  int(m_gameBoard[0][1].getPosY() +100.0f), int(m_gameBoard[0][1].getPosX() +50.0f), m_gameBoard[0][1].getPosX(), m_gameBoard[0][1].getPosY(), false, 0, 1}, //1
+		{int(m_gameBoard[0][2].getPosY()-3.0f), int(m_gameBoard[0][2].getPosX() -20.0f),  int(m_gameBoard[0][2].getPosY() +100.0f), int(m_gameBoard[0][2].getPosX() +50.0f), m_gameBoard[0][2].getPosX(), m_gameBoard[0][2].getPosY(), false, 0, 2}, // 2
+		{int(m_gameBoard[0][3].getPosY()-3.0f), int(m_gameBoard[0][3].getPosX() -20.0f),  int(m_gameBoard[0][3].getPosY() +100.0f), int(m_gameBoard[0][3].getPosX() +50.0f), m_gameBoard[0][3].getPosX(), m_gameBoard[0][3].getPosY(), false, 0, 3},// 3
+		{int(m_gameBoard[0][4].getPosY()-3.0f), int(m_gameBoard[0][4].getPosX() -20.0f),  int(m_gameBoard[0][4].getPosY() +100), int(m_gameBoard[0][4].getPosX() +50), m_gameBoard[0][4].getPosX(), m_gameBoard[0][4].getPosY(), false, 0, 4},// 4
+		{int(m_gameBoard[0][5].getPosY()-3.0f), int(m_gameBoard[0][5].getPosX() -20.0f),  int(m_gameBoard[0][5].getPosY() +100), int(m_gameBoard[0][5].getPosX() +50), m_gameBoard[0][5].getPosX(), m_gameBoard[0][5].getPosY(), false, 0, 5},// 5
+		{int(m_gameBoard[0][6].getPosY()-3.0f), int(m_gameBoard[0][6].getPosX() -20.0f),  int(m_gameBoard[0][6].getPosY() +100), int(m_gameBoard[0][6].getPosX() +50), m_gameBoard[0][6].getPosX(), m_gameBoard[0][6].getPosY(), false, 0, 6},// 6
+		{int(m_gameBoard[0][7].getPosY()-3.0f), int(m_gameBoard[0][7].getPosX() -20.0f),	int(m_gameBoard[0][7].getPosY() +100), int(m_gameBoard[0][7].getPosX() +50), m_gameBoard[0][7].getPosX(), m_gameBoard[0][7].getPosY(), false, 0, 7},//7
+		{int(m_gameBoard[0][8].getPosY()-3.0f), int(m_gameBoard[0][8].getPosX() -20.0f),  int(m_gameBoard[0][8].getPosY() +100), int(m_gameBoard[0][8].getPosX() +50), m_gameBoard[0][8].getPosX(), m_gameBoard[0][8].getPosY(), false, 0, 8},//8
+		{int(m_gameBoard[0][9].getPosY()-3.0f), int(m_gameBoard[0][9].getPosX() -20.0f),  int(m_gameBoard[0][9].getPosY() +100), int(m_gameBoard[0][9].getPosX() +50), m_gameBoard[0][9].getPosX(), m_gameBoard[0][9].getPosY(), false, 0, 9},// 9
+		{int(m_gameBoard[0][10].getPosY()-3.0f), int(m_gameBoard[0][10].getPosX() -20.0f),  int(m_gameBoard[0][10].getPosY() +100), int(m_gameBoard[0][10].getPosX() +50),m_gameBoard[0][10].getPosX(), m_gameBoard[0][10].getPosY(), false, 0, 10},// 10
+		{int(m_gameBoard[0][11].getPosY()-3.0f), int(m_gameBoard[0][11].getPosX() -20.0f),  int(m_gameBoard[0][11].getPosY() +100), int(m_gameBoard[0][11].getPosX() +50), m_gameBoard[0][11].getPosX(), m_gameBoard[0][11].getPosY(), false, 0, 11},// 11
+		{int(m_gameBoard[0][12].getPosY()-3.0f), int(m_gameBoard[0][12].getPosX() -20.0f),  int(m_gameBoard[0][12].getPosY() +100), int(m_gameBoard[0][12].getPosX() +50), m_gameBoard[0][12].getPosX(), m_gameBoard[0][12].getPosY(), false, 0, 12},// 12
+		{int(m_gameBoard[0][13].getPosY()-3.0f), int(m_gameBoard[0][13].getPosX() -20.0f),  int(m_gameBoard[0][13].getPosY() +100), int(m_gameBoard[0][13].getPosX() +50), m_gameBoard[0][13].getPosX(), m_gameBoard[0][13].getPosY(), false, 0, 13},// 13
+		{int(m_gameBoard[0][14].getPosY()-3.0f), int(m_gameBoard[0][14].getPosX() -20.0f),  int(m_gameBoard[0][14].getPosY() +100), int(m_gameBoard[0][14].getPosX() +50), m_gameBoard[0][14].getPosX(), m_gameBoard[0][14].getPosY(), false,0, 14},// 14
+
+		{int(m_gameBoard[0][15].getPosY()-3.0f), int(m_gameBoard[0][15].getPosX() -20.0f),  int(m_gameBoard[0][15].getPosY() +100.0f), int(m_gameBoard[0][15].getPosX() +50.0f), m_gameBoard[0][15].getPosX(), m_gameBoard[0][15].getPosY(), false, 0, 15}, //GOLDMINE
 		//Row 2
-		{int(m_gameBoard[1][1].getPosY()), int(m_gameBoard[1][1].getPosX() -20),  int(m_gameBoard[1][1].getPosY() +90), int(m_gameBoard[1][1].getPosX() +50), m_gameBoard[1][1].getPosX(), m_gameBoard[1][1].getPosY(), false, 1, 1}, //1
-		{int(m_gameBoard[1][2].getPosY()), int(m_gameBoard[1][2].getPosX() -20),  int(m_gameBoard[1][2].getPosY() +90), int(m_gameBoard[1][2].getPosX() +50), m_gameBoard[1][2].getPosX(), m_gameBoard[1][2].getPosY(), false, 1, 2}, // 2
-		{int(m_gameBoard[1][3].getPosY()), int(m_gameBoard[1][3].getPosX() -20),  int(m_gameBoard[1][3].getPosY() +90), int(m_gameBoard[1][3].getPosX() +50), m_gameBoard[1][3].getPosX(), m_gameBoard[1][3].getPosY(), false, 1, 3},// 3
-		{int(m_gameBoard[1][4].getPosY()), int(m_gameBoard[1][4].getPosX() -20),  int(m_gameBoard[1][4].getPosY() +90), int(m_gameBoard[1][4].getPosX() +50), m_gameBoard[1][4].getPosX(), m_gameBoard[1][4].getPosY(), false, 1, 4},// 4
-		{int(m_gameBoard[1][5].getPosY()), int(m_gameBoard[1][5].getPosX() -20),  int(m_gameBoard[1][5].getPosY() +90), int(m_gameBoard[1][5].getPosX() +50), m_gameBoard[1][5].getPosX(), m_gameBoard[1][5].getPosY(), false, 1, 5},// 5
-		{int(m_gameBoard[1][6].getPosY()), int(m_gameBoard[1][6].getPosX() -20),  int(m_gameBoard[1][6].getPosY() +90), int(m_gameBoard[1][6].getPosX() +50), m_gameBoard[1][6].getPosX(), m_gameBoard[1][6].getPosY(), false, 1, 6},// 6
-		{int(m_gameBoard[1][7].getPosY()), int(m_gameBoard[1][7].getPosX() -20),  int(m_gameBoard[1][7].getPosY() +90), int(m_gameBoard[1][7].getPosX() +50), m_gameBoard[1][7].getPosX(), m_gameBoard[1][7].getPosY(), false, 1 ,7},//7
-		{int(m_gameBoard[1][8].getPosY()), int(m_gameBoard[1][8].getPosX() -20),  int(m_gameBoard[1][8].getPosY() +90), int(m_gameBoard[1][8].getPosX() +50), m_gameBoard[1][8].getPosX(), m_gameBoard[1][8].getPosY(), false, 1, 8},//8
-		{int(m_gameBoard[1][9].getPosY()), int(m_gameBoard[1][9].getPosX() -20),  int(m_gameBoard[1][9].getPosY() +90), int(m_gameBoard[1][9].getPosX() +50), m_gameBoard[1][9].getPosX(), m_gameBoard[1][9].getPosY(), false, 1 , 9},// 9
-		{int(m_gameBoard[1][10].getPosY()), int(m_gameBoard[1][10].getPosX() -20),  int(m_gameBoard[1][10].getPosY() +90), int(m_gameBoard[1][10].getPosX() +50),m_gameBoard[1][10].getPosX(), m_gameBoard[1][10].getPosY(), false, 1, 10},// 10
-		{int(m_gameBoard[1][11].getPosY()), int(m_gameBoard[1][11].getPosX() -20),  int(m_gameBoard[1][11].getPosY() +90), int(m_gameBoard[1][11].getPosX() +50), m_gameBoard[1][11].getPosX(), m_gameBoard[1][11].getPosY(), false, 1, 11},// 11
-		{int(m_gameBoard[1][12].getPosY()), int(m_gameBoard[1][12].getPosX() -20),  int(m_gameBoard[1][12].getPosY() +90), int(m_gameBoard[1][12].getPosX() +50), m_gameBoard[1][12].getPosX(), m_gameBoard[1][12].getPosY(), false, 1, 12},// 12
-		{int(m_gameBoard[1][13].getPosY()), int(m_gameBoard[1][13].getPosX() -20),  int(m_gameBoard[1][13].getPosY() +90), int(m_gameBoard[1][13].getPosX() +50), m_gameBoard[1][13].getPosX(), m_gameBoard[1][13].getPosY(), false, 1, 13},// 13
-		{int(m_gameBoard[1][14].getPosY()), int(m_gameBoard[1][14].getPosX() -20),  int(m_gameBoard[1][14].getPosY() +90), int(m_gameBoard[1][14].getPosX() +50), m_gameBoard[1][14].getPosX(), m_gameBoard[1][14].getPosY(), false, 1, 14},// 14
+		{int(m_gameBoard[1][0].getPosY()-1.0f), int(m_gameBoard[1][0].getPosX() -20.0f),  int(m_gameBoard[1][0].getPosY() +100.0f), int(m_gameBoard[1][0].getPosX() +50.0f), m_gameBoard[1][0].getPosX(), m_gameBoard[1][0].getPosY(), false, 1, 0}, //GOLDMINE
+
+		{int(m_gameBoard[1][1].getPosY()-1.0f), int(m_gameBoard[1][1].getPosX() -20),  int(m_gameBoard[1][1].getPosY() +90), int(m_gameBoard[1][1].getPosX() +50), m_gameBoard[1][1].getPosX(), m_gameBoard[1][1].getPosY(), false, 1, 1}, //1
+		{int(m_gameBoard[1][2].getPosY()-1.0f), int(m_gameBoard[1][2].getPosX() -20),  int(m_gameBoard[1][2].getPosY() +90), int(m_gameBoard[1][2].getPosX() +50), m_gameBoard[1][2].getPosX(), m_gameBoard[1][2].getPosY(), false, 1, 2}, // 2
+		{int(m_gameBoard[1][3].getPosY()-1.0f), int(m_gameBoard[1][3].getPosX() -20),  int(m_gameBoard[1][3].getPosY() +90), int(m_gameBoard[1][3].getPosX() +50), m_gameBoard[1][3].getPosX(), m_gameBoard[1][3].getPosY(), false, 1, 3},// 3
+		{int(m_gameBoard[1][4].getPosY()-1.0f), int(m_gameBoard[1][4].getPosX() -20),  int(m_gameBoard[1][4].getPosY() +90), int(m_gameBoard[1][4].getPosX() +50), m_gameBoard[1][4].getPosX(), m_gameBoard[1][4].getPosY(), false, 1, 4},// 4
+		{int(m_gameBoard[1][5].getPosY()-1.0f), int(m_gameBoard[1][5].getPosX() -20),  int(m_gameBoard[1][5].getPosY() +90), int(m_gameBoard[1][5].getPosX() +50), m_gameBoard[1][5].getPosX(), m_gameBoard[1][5].getPosY(), false, 1, 5},// 5
+		{int(m_gameBoard[1][6].getPosY()-1.0f), int(m_gameBoard[1][6].getPosX() -20),  int(m_gameBoard[1][6].getPosY() +90), int(m_gameBoard[1][6].getPosX() +50), m_gameBoard[1][6].getPosX(), m_gameBoard[1][6].getPosY(), false, 1, 6},// 6
+		{int(m_gameBoard[1][7].getPosY()-1.0f), int(m_gameBoard[1][7].getPosX() -20),  int(m_gameBoard[1][7].getPosY() +90), int(m_gameBoard[1][7].getPosX() +50), m_gameBoard[1][7].getPosX(), m_gameBoard[1][7].getPosY(), false, 1 ,7},//7
+		{int(m_gameBoard[1][8].getPosY()-1.0f), int(m_gameBoard[1][8].getPosX() -20),  int(m_gameBoard[1][8].getPosY() +90), int(m_gameBoard[1][8].getPosX() +50), m_gameBoard[1][8].getPosX(), m_gameBoard[1][8].getPosY(), false, 1, 8},//8
+		{int(m_gameBoard[1][9].getPosY()-1.0f), int(m_gameBoard[1][9].getPosX() -20),  int(m_gameBoard[1][9].getPosY() +90), int(m_gameBoard[1][9].getPosX() +50), m_gameBoard[1][9].getPosX(), m_gameBoard[1][9].getPosY(), false, 1 , 9},// 9
+		{int(m_gameBoard[1][10].getPosY()-1.0f), int(m_gameBoard[1][10].getPosX() -20),  int(m_gameBoard[1][10].getPosY() +90), int(m_gameBoard[1][10].getPosX() +50),m_gameBoard[1][10].getPosX(), m_gameBoard[1][10].getPosY(), false, 1, 10},// 10
+		{int(m_gameBoard[1][11].getPosY()-1.0f), int(m_gameBoard[1][11].getPosX() -20),  int(m_gameBoard[1][11].getPosY() +90), int(m_gameBoard[1][11].getPosX() +50), m_gameBoard[1][11].getPosX(), m_gameBoard[1][11].getPosY(), false, 1, 11},// 11
+		{int(m_gameBoard[1][12].getPosY()-1.0f), int(m_gameBoard[1][12].getPosX() -20),  int(m_gameBoard[1][12].getPosY() +90), int(m_gameBoard[1][12].getPosX() +50), m_gameBoard[1][12].getPosX(), m_gameBoard[1][12].getPosY(), false, 1, 12},// 12
+		{int(m_gameBoard[1][13].getPosY()-1.0f), int(m_gameBoard[1][13].getPosX() -20),  int(m_gameBoard[1][13].getPosY() +90), int(m_gameBoard[1][13].getPosX() +50), m_gameBoard[1][13].getPosX(), m_gameBoard[1][13].getPosY(), false, 1, 13},// 13
+		{int(m_gameBoard[1][14].getPosY()-1.0f), int(m_gameBoard[1][14].getPosX() -20),  int(m_gameBoard[1][14].getPosY() +90), int(m_gameBoard[1][14].getPosX() +50), m_gameBoard[1][14].getPosX(), m_gameBoard[1][14].getPosY(), false, 1, 14},// 14
+
+		{int(m_gameBoard[1][15].getPosY()-1.0f), int(m_gameBoard[1][15].getPosX() -20.0f),  int(m_gameBoard[1][15].getPosY() +100.0f), int(m_gameBoard[1][15].getPosX() +50.0f), m_gameBoard[1][15].getPosX(), m_gameBoard[1][15].getPosY(), false, 1, 15}, //GOLDMINE
 		//Row 3
-		{int(m_gameBoard[2][1].getPosY()), int(m_gameBoard[2][1].getPosX() -20),  int(m_gameBoard[2][1].getPosY() +100), int(m_gameBoard[2][1].getPosX() +50), m_gameBoard[2][1].getPosX(), m_gameBoard[2][1].getPosY(), false, 2, 1}, //1
-		{int(m_gameBoard[2][2].getPosY()), int(m_gameBoard[2][2].getPosX() -20),  int(m_gameBoard[2][2].getPosY() +100), int(m_gameBoard[2][2].getPosX() +50), m_gameBoard[2][2].getPosX(), m_gameBoard[2][2].getPosY(), false, 2, 2}, // 2
-		{int(m_gameBoard[2][3].getPosY()), int(m_gameBoard[2][3].getPosX() -20),  int(m_gameBoard[2][3].getPosY() +100), int(m_gameBoard[2][3].getPosX() +50), m_gameBoard[2][3].getPosX(), m_gameBoard[2][3].getPosY(), false, 2, 3},// 3
-		{int(m_gameBoard[2][4].getPosY()), int(m_gameBoard[2][4].getPosX() -20),  int(m_gameBoard[2][4].getPosY() +100), int(m_gameBoard[2][4].getPosX() +50), m_gameBoard[2][4].getPosX(), m_gameBoard[2][4].getPosY(), false, 2, 4},// 4
-		{int(m_gameBoard[2][5].getPosY()), int(m_gameBoard[2][5].getPosX() -20),  int(m_gameBoard[2][5].getPosY() +100), int(m_gameBoard[2][5].getPosX() +50), m_gameBoard[2][5].getPosX(), m_gameBoard[2][5].getPosY(), false, 2, 5},// 5
-		{int(m_gameBoard[2][6].getPosY()), int(m_gameBoard[2][6].getPosX() -20),  int(m_gameBoard[2][6].getPosY() +100), int(m_gameBoard[2][6].getPosX() +50), m_gameBoard[2][6].getPosX(), m_gameBoard[2][6].getPosY(), false, 2, 6},// 6
-		{int(m_gameBoard[2][7].getPosY()), int(m_gameBoard[2][7].getPosX() -20),  int(m_gameBoard[2][7].getPosY() +100), int(m_gameBoard[2][7].getPosX() +50), m_gameBoard[2][7].getPosX(), m_gameBoard[2][7].getPosY(), false, 2, 7},//7
-		{int(m_gameBoard[2][8].getPosY()), int(m_gameBoard[2][8].getPosX() -20),  int(m_gameBoard[2][8].getPosY() +100), int(m_gameBoard[2][8].getPosX() +50), m_gameBoard[2][8].getPosX(), m_gameBoard[2][8].getPosY(), false, 2, 8},//8
-		{int(m_gameBoard[2][9].getPosY()), int(m_gameBoard[2][9].getPosX() -20),  int(m_gameBoard[2][9].getPosY() +100), int(m_gameBoard[2][9].getPosX() +50), m_gameBoard[2][9].getPosX(), m_gameBoard[2][9].getPosY(), false, 2, 9},// 9
-		{int(m_gameBoard[2][10].getPosY()), int(m_gameBoard[2][10].getPosX() -20),  int(m_gameBoard[2][10].getPosY() +100), int(m_gameBoard[2][10].getPosX() +50),m_gameBoard[2][10].getPosX(), m_gameBoard[2][10].getPosY(), false, 2, 10},// 10
-		{int(m_gameBoard[2][11].getPosY()), int(m_gameBoard[2][11].getPosX() -20),  int(m_gameBoard[2][11].getPosY() +100), int(m_gameBoard[2][11].getPosX() +50), m_gameBoard[2][11].getPosX(), m_gameBoard[2][11].getPosY(), false, 2, 11},// 11
-		{int(m_gameBoard[2][12].getPosY()), int(m_gameBoard[2][12].getPosX() -20),  int(m_gameBoard[2][12].getPosY() +100), int(m_gameBoard[2][12].getPosX() +50), m_gameBoard[2][12].getPosX(), m_gameBoard[2][12].getPosY(), false, 2, 12},// 12
-		{int(m_gameBoard[2][13].getPosY()), int(m_gameBoard[2][13].getPosX() -20),  int(m_gameBoard[2][13].getPosY() +100), int(m_gameBoard[2][13].getPosX() +50), m_gameBoard[2][13].getPosX(), m_gameBoard[2][13].getPosY(), false, 2, 13},// 13
-		{int(m_gameBoard[2][14].getPosY()), int(m_gameBoard[2][14].getPosX() -20),  int(m_gameBoard[2][14].getPosY() +100), int(m_gameBoard[2][14].getPosX() +50), m_gameBoard[2][14].getPosX(), m_gameBoard[2][14].getPosY(), false, 2, 14},// 14
+		{int(m_gameBoard[2][0].getPosY()-1.0f), int(m_gameBoard[2][0].getPosX() -20.0f),  int(m_gameBoard[2][0].getPosY() +100.0f), int(m_gameBoard[2][0].getPosX() +50.0f), m_gameBoard[2][0].getPosX(), m_gameBoard[2][0].getPosY(), false, 2, 0}, //GOLDMINE
+
+		{int(m_gameBoard[2][1].getPosY()-1.0f), int(m_gameBoard[2][1].getPosX() -20),  int(m_gameBoard[2][1].getPosY() +100), int(m_gameBoard[2][1].getPosX() +50), m_gameBoard[2][1].getPosX(), m_gameBoard[2][1].getPosY(), false, 2, 1}, //1
+		{int(m_gameBoard[2][2].getPosY()-1.0f), int(m_gameBoard[2][2].getPosX() -20),  int(m_gameBoard[2][2].getPosY() +100), int(m_gameBoard[2][2].getPosX() +50), m_gameBoard[2][2].getPosX(), m_gameBoard[2][2].getPosY(), false, 2, 2}, // 2
+		{int(m_gameBoard[2][3].getPosY()-1.0f), int(m_gameBoard[2][3].getPosX() -20),  int(m_gameBoard[2][3].getPosY() +100), int(m_gameBoard[2][3].getPosX() +50), m_gameBoard[2][3].getPosX(), m_gameBoard[2][3].getPosY(), false, 2, 3},// 3
+		{int(m_gameBoard[2][4].getPosY()-1.0f), int(m_gameBoard[2][4].getPosX() -20),  int(m_gameBoard[2][4].getPosY() +100), int(m_gameBoard[2][4].getPosX() +50), m_gameBoard[2][4].getPosX(), m_gameBoard[2][4].getPosY(), false, 2, 4},// 4
+		{int(m_gameBoard[2][5].getPosY()-1.0f), int(m_gameBoard[2][5].getPosX() -20),  int(m_gameBoard[2][5].getPosY() +100), int(m_gameBoard[2][5].getPosX() +50), m_gameBoard[2][5].getPosX(), m_gameBoard[2][5].getPosY(), false, 2, 5},// 5
+		{int(m_gameBoard[2][6].getPosY()-1.0f), int(m_gameBoard[2][6].getPosX() -20),  int(m_gameBoard[2][6].getPosY() +100), int(m_gameBoard[2][6].getPosX() +50), m_gameBoard[2][6].getPosX(), m_gameBoard[2][6].getPosY(), false, 2, 6},// 6
+		{int(m_gameBoard[2][7].getPosY()-1.0f), int(m_gameBoard[2][7].getPosX() -20),  int(m_gameBoard[2][7].getPosY() +100), int(m_gameBoard[2][7].getPosX() +50), m_gameBoard[2][7].getPosX(), m_gameBoard[2][7].getPosY(), false, 2, 7},//7
+		{int(m_gameBoard[2][8].getPosY()-1.0f), int(m_gameBoard[2][8].getPosX() -20),  int(m_gameBoard[2][8].getPosY() +100), int(m_gameBoard[2][8].getPosX() +50), m_gameBoard[2][8].getPosX(), m_gameBoard[2][8].getPosY(), false, 2, 8},//8
+		{int(m_gameBoard[2][9].getPosY()-1.0f), int(m_gameBoard[2][9].getPosX() -20),  int(m_gameBoard[2][9].getPosY() +100), int(m_gameBoard[2][9].getPosX() +50), m_gameBoard[2][9].getPosX(), m_gameBoard[2][9].getPosY(), false, 2, 9},// 9
+		{int(m_gameBoard[2][10].getPosY()-1.0f), int(m_gameBoard[2][10].getPosX() -20),  int(m_gameBoard[2][10].getPosY() +100), int(m_gameBoard[2][10].getPosX() +50),m_gameBoard[2][10].getPosX(), m_gameBoard[2][10].getPosY(), false, 2, 10},// 10
+		{int(m_gameBoard[2][11].getPosY()-1.0f), int(m_gameBoard[2][11].getPosX() -20),  int(m_gameBoard[2][11].getPosY() +100), int(m_gameBoard[2][11].getPosX() +50), m_gameBoard[2][11].getPosX(), m_gameBoard[2][11].getPosY(), false, 2, 11},// 11
+		{int(m_gameBoard[2][12].getPosY()-1.0f), int(m_gameBoard[2][12].getPosX() -20),  int(m_gameBoard[2][12].getPosY() +100), int(m_gameBoard[2][12].getPosX() +50), m_gameBoard[2][12].getPosX(), m_gameBoard[2][12].getPosY(), false, 2, 12},// 12
+		{int(m_gameBoard[2][13].getPosY()-1.0f), int(m_gameBoard[2][13].getPosX() -20),  int(m_gameBoard[2][13].getPosY() +100), int(m_gameBoard[2][13].getPosX() +50), m_gameBoard[2][13].getPosX(), m_gameBoard[2][13].getPosY(), false, 2, 13},// 13
+		{int(m_gameBoard[2][14].getPosY()-1.0f), int(m_gameBoard[2][14].getPosX() -20),  int(m_gameBoard[2][14].getPosY() +100), int(m_gameBoard[2][14].getPosX() +50), m_gameBoard[2][14].getPosX(), m_gameBoard[2][14].getPosY(), false, 2, 14},// 14
+
+		{int(m_gameBoard[2][15].getPosY()), int(m_gameBoard[2][15].getPosX() -20.0f),  int(m_gameBoard[2][15].getPosY() +100.0f), int(m_gameBoard[2][15].getPosX() +50.0f), m_gameBoard[2][15].getPosX(), m_gameBoard[2][15].getPosY(), false, 2, 15}, //GOLDMINE
 		//Row 4
-		{int(m_gameBoard[3][1].getPosY()), int(m_gameBoard[3][1].getPosX() -20),  int(m_gameBoard[3][1].getPosY() +100), int(m_gameBoard[3][1].getPosX() +50), m_gameBoard[3][1].getPosX(), m_gameBoard[3][1].getPosY(), false, 3, 1}, //1
-		{int(m_gameBoard[3][2].getPosY()), int(m_gameBoard[3][2].getPosX() -20),  int(m_gameBoard[3][2].getPosY() +100), int(m_gameBoard[3][2].getPosX() +50), m_gameBoard[3][2].getPosX(), m_gameBoard[3][2].getPosY(), false, 3, 2}, // 2
-		{int(m_gameBoard[3][3].getPosY()), int(m_gameBoard[3][3].getPosX() -20),  int(m_gameBoard[3][3].getPosY() +100), int(m_gameBoard[3][3].getPosX() +50), m_gameBoard[3][3].getPosX(), m_gameBoard[3][3].getPosY(), false, 3, 3},// 3
-		{int(m_gameBoard[3][4].getPosY()), int(m_gameBoard[3][4].getPosX() -20),  int(m_gameBoard[3][4].getPosY() +100), int(m_gameBoard[3][4].getPosX() +50), m_gameBoard[3][4].getPosX(), m_gameBoard[3][4].getPosY(), false, 3, 4},// 4
-		{int(m_gameBoard[3][5].getPosY()), int(m_gameBoard[3][5].getPosX() -20),  int(m_gameBoard[3][5].getPosY() +100), int(m_gameBoard[3][5].getPosX() +50), m_gameBoard[3][5].getPosX(), m_gameBoard[3][5].getPosY(), false, 3, 5},// 5
-		{int(m_gameBoard[3][6].getPosY()), int(m_gameBoard[3][6].getPosX() -20),  int(m_gameBoard[3][6].getPosY() +100), int(m_gameBoard[3][6].getPosX() +50), m_gameBoard[3][6].getPosX(), m_gameBoard[3][6].getPosY(), false, 3, 6},// 6
-		{int(m_gameBoard[3][7].getPosY()), int(m_gameBoard[3][7].getPosX() -20),  int(m_gameBoard[3][7].getPosY() +100), int(m_gameBoard[3][7].getPosX() +50), m_gameBoard[3][7].getPosX(), m_gameBoard[3][7].getPosY(), false, 3, 7},//7
-		{int(m_gameBoard[3][8].getPosY()), int(m_gameBoard[3][8].getPosX() -20),  int(m_gameBoard[3][8].getPosY() +100), int(m_gameBoard[3][8].getPosX() +50), m_gameBoard[3][8].getPosX(), m_gameBoard[3][8].getPosY(), false, 3, 8},//8
-		{int(m_gameBoard[3][9].getPosY()), int(m_gameBoard[3][9].getPosX() -20),  int(m_gameBoard[3][9].getPosY() +100), int(m_gameBoard[3][9].getPosX() +50), m_gameBoard[3][9].getPosX(), m_gameBoard[3][9].getPosY(), false, 3, 9},// 9
-		{int(m_gameBoard[3][10].getPosY()), int(m_gameBoard[3][10].getPosX() -20),  int(m_gameBoard[3][10].getPosY() +100), int(m_gameBoard[3][10].getPosX() +50),m_gameBoard[3][10].getPosX(), m_gameBoard[3][10].getPosY(), false, 3, 10},// 10
-		{int(m_gameBoard[3][11].getPosY()), int(m_gameBoard[3][11].getPosX() -20),  int(m_gameBoard[3][11].getPosY() +100), int(m_gameBoard[3][11].getPosX() +50), m_gameBoard[3][11].getPosX(), m_gameBoard[3][11].getPosY(), false, 3, 11},// 11
-		{int(m_gameBoard[3][12].getPosY()), int(m_gameBoard[3][12].getPosX() -20),  int(m_gameBoard[3][12].getPosY() +100), int(m_gameBoard[3][12].getPosX() +50), m_gameBoard[3][12].getPosX(), m_gameBoard[3][12].getPosY(), false, 3, 12},// 12
-		{int(m_gameBoard[3][13].getPosY()), int(m_gameBoard[3][13].getPosX() -20),  int(m_gameBoard[3][13].getPosY() +100), int(m_gameBoard[3][13].getPosX() +50), m_gameBoard[3][13].getPosX(), m_gameBoard[3][13].getPosY(), false, 3, 13},// 13
-		{int(m_gameBoard[3][14].getPosY()), int(m_gameBoard[3][14].getPosX() -20),  int(m_gameBoard[3][14].getPosY() +100), int(m_gameBoard[3][14].getPosX() +50), m_gameBoard[3][14].getPosX(), m_gameBoard[3][14].getPosY(), false, 3, 14},// 14
+		{int(m_gameBoard[3][0].getPosY()), int(m_gameBoard[3][0].getPosX() -20.0f),  int(m_gameBoard[3][0].getPosY() +100.0f), int(m_gameBoard[3][0].getPosX() +50.0f), m_gameBoard[3][0].getPosX(), m_gameBoard[3][0].getPosY(), false, 3, 0}, //GOLDMINE
+
+		{int(m_gameBoard[3][1].getPosY()-1.0f), int(m_gameBoard[3][1].getPosX() -20),  int(m_gameBoard[3][1].getPosY() +100), int(m_gameBoard[3][1].getPosX() +50), m_gameBoard[3][1].getPosX(), m_gameBoard[3][1].getPosY(), false, 3, 1}, //1
+		{int(m_gameBoard[3][2].getPosY()-1.0f), int(m_gameBoard[3][2].getPosX() -20),  int(m_gameBoard[3][2].getPosY() +100), int(m_gameBoard[3][2].getPosX() +50), m_gameBoard[3][2].getPosX(), m_gameBoard[3][2].getPosY(), false, 3, 2}, // 2
+		{int(m_gameBoard[3][3].getPosY()-1.0f), int(m_gameBoard[3][3].getPosX() -20),  int(m_gameBoard[3][3].getPosY() +100), int(m_gameBoard[3][3].getPosX() +50), m_gameBoard[3][3].getPosX(), m_gameBoard[3][3].getPosY(), false, 3, 3},// 3
+		{int(m_gameBoard[3][4].getPosY()-1.0f), int(m_gameBoard[3][4].getPosX() -20),  int(m_gameBoard[3][4].getPosY() +100), int(m_gameBoard[3][4].getPosX() +50), m_gameBoard[3][4].getPosX(), m_gameBoard[3][4].getPosY(), false, 3, 4},// 4
+		{int(m_gameBoard[3][5].getPosY()-1.0f), int(m_gameBoard[3][5].getPosX() -20),  int(m_gameBoard[3][5].getPosY() +100), int(m_gameBoard[3][5].getPosX() +50), m_gameBoard[3][5].getPosX(), m_gameBoard[3][5].getPosY(), false, 3, 5},// 5
+		{int(m_gameBoard[3][6].getPosY()-1.0f), int(m_gameBoard[3][6].getPosX() -20),  int(m_gameBoard[3][6].getPosY() +100), int(m_gameBoard[3][6].getPosX() +50), m_gameBoard[3][6].getPosX(), m_gameBoard[3][6].getPosY(), false, 3, 6},// 6
+		{int(m_gameBoard[3][7].getPosY()-1.0f), int(m_gameBoard[3][7].getPosX() -20),  int(m_gameBoard[3][7].getPosY() +100), int(m_gameBoard[3][7].getPosX() +50), m_gameBoard[3][7].getPosX(), m_gameBoard[3][7].getPosY(), false, 3, 7},//7
+		{int(m_gameBoard[3][8].getPosY()-1.0f), int(m_gameBoard[3][8].getPosX() -20),  int(m_gameBoard[3][8].getPosY() +100), int(m_gameBoard[3][8].getPosX() +50), m_gameBoard[3][8].getPosX(), m_gameBoard[3][8].getPosY(), false, 3, 8},//8
+		{int(m_gameBoard[3][9].getPosY()-1.0f), int(m_gameBoard[3][9].getPosX() -20),  int(m_gameBoard[3][9].getPosY() +100), int(m_gameBoard[3][9].getPosX() +50), m_gameBoard[3][9].getPosX(), m_gameBoard[3][9].getPosY(), false, 3, 9},// 9
+		{int(m_gameBoard[3][10].getPosY()-1.0f), int(m_gameBoard[3][10].getPosX() -20),  int(m_gameBoard[3][10].getPosY() +100), int(m_gameBoard[3][10].getPosX() +50),m_gameBoard[3][10].getPosX(), m_gameBoard[3][10].getPosY(), false, 3, 10},// 10
+		{int(m_gameBoard[3][11].getPosY()-1.0f), int(m_gameBoard[3][11].getPosX() -20),  int(m_gameBoard[3][11].getPosY() +100), int(m_gameBoard[3][11].getPosX() +50), m_gameBoard[3][11].getPosX(), m_gameBoard[3][11].getPosY(), false, 3, 11},// 11
+		{int(m_gameBoard[3][12].getPosY()-1.0f), int(m_gameBoard[3][12].getPosX() -20),  int(m_gameBoard[3][12].getPosY() +100), int(m_gameBoard[3][12].getPosX() +50), m_gameBoard[3][12].getPosX(), m_gameBoard[3][12].getPosY(), false, 3, 12},// 12
+		{int(m_gameBoard[3][13].getPosY()-1.0f), int(m_gameBoard[3][13].getPosX() -20),  int(m_gameBoard[3][13].getPosY() +100), int(m_gameBoard[3][13].getPosX() +50), m_gameBoard[3][13].getPosX(), m_gameBoard[3][13].getPosY(), false, 3, 13},// 13
+		{int(m_gameBoard[3][14].getPosY()-1.0f), int(m_gameBoard[3][14].getPosX() -20),  int(m_gameBoard[3][14].getPosY() +100), int(m_gameBoard[3][14].getPosX() +50), m_gameBoard[3][14].getPosX(), m_gameBoard[3][14].getPosY(), false, 3, 14},// 14
+
+		{int(m_gameBoard[3][15].getPosY()), int(m_gameBoard[3][15].getPosX() -20.0f),  int(m_gameBoard[3][15].getPosY() +100.0f), int(m_gameBoard[3][15].getPosX() +50.0f), m_gameBoard[3][15].getPosX(), m_gameBoard[3][15].getPosY(), false, 3, 15}, //GOLDMINE
 		//Row 5
-		{int(m_gameBoard[4][1].getPosY()), int(m_gameBoard[4][1].getPosX() -20),  int(m_gameBoard[4][1].getPosY() +90), int(m_gameBoard[4][1].getPosX() +50), m_gameBoard[4][1].getPosX(), m_gameBoard[4][1].getPosY(), false, 4, 1}, //1
-		{int(m_gameBoard[4][2].getPosY()), int(m_gameBoard[4][2].getPosX() -20),  int(m_gameBoard[4][2].getPosY() +90), int(m_gameBoard[4][2].getPosX() +50), m_gameBoard[4][2].getPosX(), m_gameBoard[4][2].getPosY(), false, 4, 2}, // 2
-		{int(m_gameBoard[4][3].getPosY()), int(m_gameBoard[4][3].getPosX() -20),  int(m_gameBoard[4][3].getPosY() +90), int(m_gameBoard[4][3].getPosX() +50), m_gameBoard[4][3].getPosX(), m_gameBoard[4][3].getPosY(), false, 4, 3},// 3
-		{int(m_gameBoard[4][4].getPosY()), int(m_gameBoard[4][4].getPosX() -20),  int(m_gameBoard[4][4].getPosY() +90), int(m_gameBoard[4][4].getPosX() +50), m_gameBoard[4][4].getPosX(), m_gameBoard[4][4].getPosY(), false, 4, 4},// 4
-		{int(m_gameBoard[4][5].getPosY()), int(m_gameBoard[4][5].getPosX() -20),  int(m_gameBoard[4][5].getPosY() +90), int(m_gameBoard[4][5].getPosX() +50), m_gameBoard[4][5].getPosX(), m_gameBoard[4][5].getPosY(), false, 4, 5},// 5
-		{int(m_gameBoard[4][6].getPosY()), int(m_gameBoard[4][6].getPosX() -20),  int(m_gameBoard[4][6].getPosY() +90), int(m_gameBoard[4][6].getPosX() +50), m_gameBoard[4][6].getPosX(), m_gameBoard[4][6].getPosY(), false, 4, 6},// 6
-		{int(m_gameBoard[4][7].getPosY()), int(m_gameBoard[4][7].getPosX() -20),  int(m_gameBoard[4][7].getPosY() +90), int(m_gameBoard[4][7].getPosX() +50), m_gameBoard[4][7].getPosX(), m_gameBoard[4][7].getPosY(), false, 4, 7},//7
-		{int(m_gameBoard[4][8].getPosY()), int(m_gameBoard[4][8].getPosX() -20),  int(m_gameBoard[4][8].getPosY() +90), int(m_gameBoard[4][8].getPosX() +50), m_gameBoard[4][8].getPosX(), m_gameBoard[4][8].getPosY(), false, 4, 8},//8
-		{int(m_gameBoard[4][9].getPosY()), int(m_gameBoard[4][9].getPosX() -20),  int(m_gameBoard[4][9].getPosY() +90), int(m_gameBoard[4][9].getPosX() +50), m_gameBoard[4][9].getPosX(), m_gameBoard[4][9].getPosY(), false, 4, 9},// 9
-		{int(m_gameBoard[4][10].getPosY()), int(m_gameBoard[4][10].getPosX() -20),  int(m_gameBoard[4][10].getPosY() +90), int(m_gameBoard[4][10].getPosX() +50),m_gameBoard[4][10].getPosX(), m_gameBoard[4][10].getPosY(), false, 4, 10},// 10
-		{int(m_gameBoard[4][11].getPosY()), int(m_gameBoard[4][11].getPosX() -20),  int(m_gameBoard[4][11].getPosY() +90), int(m_gameBoard[4][11].getPosX() +50), m_gameBoard[4][11].getPosX(), m_gameBoard[4][11].getPosY(), false, 4, 11},// 11
-		{int(m_gameBoard[4][12].getPosY()), int(m_gameBoard[4][12].getPosX() -20),  int(m_gameBoard[4][12].getPosY() +90), int(m_gameBoard[4][12].getPosX() +50), m_gameBoard[4][12].getPosX(), m_gameBoard[4][12].getPosY(), false, 4, 12},// 12
-		{int(m_gameBoard[4][13].getPosY()), int(m_gameBoard[4][13].getPosX() -20),  int(m_gameBoard[4][13].getPosY() +90), int(m_gameBoard[4][13].getPosX() +50), m_gameBoard[4][13].getPosX(), m_gameBoard[4][13].getPosY(), false, 4, 13},// 13
-		{int(m_gameBoard[4][14].getPosY()), int(m_gameBoard[4][14].getPosX() -20),  int(m_gameBoard[4][14].getPosY() +90), int(m_gameBoard[4][14].getPosX() +50), m_gameBoard[4][14].getPosX(), m_gameBoard[4][14].getPosY(), false, 4, 14},// 14
+		{int(m_gameBoard[4][0].getPosY()), int(m_gameBoard[4][0].getPosX() -20.0f),  int(m_gameBoard[4][0].getPosY() +100.0f), int(m_gameBoard[4][0].getPosX() +50.0f), m_gameBoard[4][0].getPosX(), m_gameBoard[4][0].getPosY(), false, 4, 0}, //GOLDMINE
+
+		{int(m_gameBoard[4][1].getPosY()-1.0f), int(m_gameBoard[4][1].getPosX() -20),  int(m_gameBoard[4][1].getPosY() +90), int(m_gameBoard[4][1].getPosX() +50), m_gameBoard[4][1].getPosX(), m_gameBoard[4][1].getPosY(), false, 4, 1}, //1
+		{int(m_gameBoard[4][2].getPosY()-1.0f), int(m_gameBoard[4][2].getPosX() -20),  int(m_gameBoard[4][2].getPosY() +90), int(m_gameBoard[4][2].getPosX() +50), m_gameBoard[4][2].getPosX(), m_gameBoard[4][2].getPosY(), false, 4, 2}, // 2
+		{int(m_gameBoard[4][3].getPosY()-1.0f), int(m_gameBoard[4][3].getPosX() -20),  int(m_gameBoard[4][3].getPosY() +90), int(m_gameBoard[4][3].getPosX() +50), m_gameBoard[4][3].getPosX(), m_gameBoard[4][3].getPosY(), false, 4, 3},// 3
+		{int(m_gameBoard[4][4].getPosY()-1.0f), int(m_gameBoard[4][4].getPosX() -20),  int(m_gameBoard[4][4].getPosY() +90), int(m_gameBoard[4][4].getPosX() +50), m_gameBoard[4][4].getPosX(), m_gameBoard[4][4].getPosY(), false, 4, 4},// 4
+		{int(m_gameBoard[4][5].getPosY()-1.0f), int(m_gameBoard[4][5].getPosX() -20),  int(m_gameBoard[4][5].getPosY() +90), int(m_gameBoard[4][5].getPosX() +50), m_gameBoard[4][5].getPosX(), m_gameBoard[4][5].getPosY(), false, 4, 5},// 5
+		{int(m_gameBoard[4][6].getPosY()-1.0f), int(m_gameBoard[4][6].getPosX() -20),  int(m_gameBoard[4][6].getPosY() +90), int(m_gameBoard[4][6].getPosX() +50), m_gameBoard[4][6].getPosX(), m_gameBoard[4][6].getPosY(), false, 4, 6},// 6
+		{int(m_gameBoard[4][7].getPosY()-1.0f), int(m_gameBoard[4][7].getPosX() -20),  int(m_gameBoard[4][7].getPosY() +90), int(m_gameBoard[4][7].getPosX() +50), m_gameBoard[4][7].getPosX(), m_gameBoard[4][7].getPosY(), false, 4, 7},//7
+		{int(m_gameBoard[4][8].getPosY()-1.0f), int(m_gameBoard[4][8].getPosX() -20),  int(m_gameBoard[4][8].getPosY() +90), int(m_gameBoard[4][8].getPosX() +50), m_gameBoard[4][8].getPosX(), m_gameBoard[4][8].getPosY(), false, 4, 8},//8
+		{int(m_gameBoard[4][9].getPosY()-1.0f), int(m_gameBoard[4][9].getPosX() -20),  int(m_gameBoard[4][9].getPosY() +90), int(m_gameBoard[4][9].getPosX() +50), m_gameBoard[4][9].getPosX(), m_gameBoard[4][9].getPosY(), false, 4, 9},// 9
+		{int(m_gameBoard[4][10].getPosY()-1.0f), int(m_gameBoard[4][10].getPosX() -20),  int(m_gameBoard[4][10].getPosY() +90), int(m_gameBoard[4][10].getPosX() +50),m_gameBoard[4][10].getPosX(), m_gameBoard[4][10].getPosY(), false, 4, 10},// 10
+		{int(m_gameBoard[4][11].getPosY()-1.0f), int(m_gameBoard[4][11].getPosX() -20),  int(m_gameBoard[4][11].getPosY() +90), int(m_gameBoard[4][11].getPosX() +50), m_gameBoard[4][11].getPosX(), m_gameBoard[4][11].getPosY(), false, 4, 11},// 11
+		{int(m_gameBoard[4][12].getPosY()-1.0f), int(m_gameBoard[4][12].getPosX() -20),  int(m_gameBoard[4][12].getPosY() +90), int(m_gameBoard[4][12].getPosX() +50), m_gameBoard[4][12].getPosX(), m_gameBoard[4][12].getPosY(), false, 4, 12},// 12
+		{int(m_gameBoard[4][13].getPosY()-1.0f), int(m_gameBoard[4][13].getPosX() -20),  int(m_gameBoard[4][13].getPosY() +90), int(m_gameBoard[4][13].getPosX() +50), m_gameBoard[4][13].getPosX(), m_gameBoard[4][13].getPosY(), false, 4, 13},// 13
+		{int(m_gameBoard[4][14].getPosY()-1.0f), int(m_gameBoard[4][14].getPosX() -20),  int(m_gameBoard[4][14].getPosY() +90), int(m_gameBoard[4][14].getPosX() +50), m_gameBoard[4][14].getPosX(), m_gameBoard[4][14].getPosY(), false, 4, 14},// 14
+
+		{int(m_gameBoard[4][15].getPosY()), int(m_gameBoard[4][15].getPosX() -20.0f),  int(m_gameBoard[4][15].getPosY() +100.0f), int(m_gameBoard[4][15].getPosX() +50.0f), m_gameBoard[4][15].getPosX(), m_gameBoard[4][15].getPosY(), false, 4, 15}, //GOLDMINE
 	};
 
 	for(int i = 0; i < MAX_COL_BUTTONS; i++)
@@ -682,10 +702,10 @@ void GameEngine::InitMenu()
 	// T, L, B, R, X, Y, HIGHLIGHT, ROW, COL
 	RectData menu_buttons_pos[] = 
 	{
-		{0, 100, 115, 600, 360, 250, false, 0, 0},
-		{230, 100, 350, 500, 360, 350, false, 0, 0},
-		{121, 100, 230, 500, 360, 420, false, 0, 0},
-		{345, 100, 460, 300, 360, 500, false, 0, 0},
+		{0, 0, 100, 500, 350, 280,false, 0, 0},
+		{245, 0, 340, 500, 350, 350, false, 0, 0},
+		{121, 0, 240, 500, 350, 420, false, 0, 0},
+		{345, 0, 460, 300, 350, 500, false, 0, 0},
 	};
 
 	for(int i = 0; i < 4; i++)
@@ -734,8 +754,8 @@ void GameEngine::InitMenu()
 
 void GameEngine::Update(float dt)
 {
-	m_player[0].adjustCurrentSpecial(100);
-	m_player[1].adjustCurrentSpecial(100);
+	//m_player[0].adjustCurrentSpecial(100);
+	//m_player[1].adjustCurrentSpecial(100);
 	///////////////////////////////////////////////////////////////////////////////
 	//  INFO:  Used with tools to get animations working, leave this in
 	int animationOffsetLeft = 47;
@@ -792,30 +812,37 @@ void GameEngine::Update(float dt)
 
 			if(mouseState.rgbButtons[0])
 			{
-				for(int i = 0; i < 4; i++)
-					if(menuButtons[i].isHighlighted())
-						selected = i;
-
-				switch(selected)
+				if(!keyIsDown[DIK_J])
 				{
-				case 0:
-					m_gameState	= MENUCHARACTERSELECT;
-					break;
-				case 1:
-					m_gameState = OPTIONS;
-					break;
-				case 2:
-					m_gameState = MENUCREDITS;
-					break;
-				case 3:
-					m_gameState = QUIT;
-					break;
+					keyIsDown[DIK_J] = true;
+					selected = 99;
+
+					for(int i = 0; i < 4; i++)
+						if(menuButtons[i].isHighlighted())
+							selected = i;
+
+					switch(selected)
+					{
+					case 0:
+						m_gameState	= MENUCHARACTERSELECT;
+						break;
+					case 1:
+						m_gameState = OPTIONS;
+						break;
+					case 2:
+						m_gameState = MENUCREDITS;
+						break;
+					case 3:
+						m_gameState = QUIT;
+						break;
+					}
 				}
 			}
+			else
+				keyIsDown[DIK_J] = false;
 		}
 		break;
 	case MENUCHARACTERSELECT:
-		// HAVE 3 BUTTONS - 1 FOR EACH CHARACTER
 		if(!player1selected)
 		{
 			for(auto &Buttons: characterButtons)
@@ -1099,6 +1126,9 @@ void GameEngine::Update(float dt)
 					Buttons.setColor(D3DCOLOR_ARGB(255, 255, 255, 255));
 					Buttons.setHighlight(false);
 				}
+
+				
+
 				// Check for mouse click
 				if(mouseState.rgbButtons[0])
 				{
@@ -1164,6 +1194,13 @@ void GameEngine::Update(float dt)
 					Buttons.setColor(D3DCOLOR_ARGB(255, 255, 255, 255));
 					Buttons.setHighlight(false);
 				}
+
+				if(Buttons.col == 0)
+					Buttons.setColor(D3DCOLOR_ARGB(255, 255, 0, 0));
+
+				if(Buttons.col == 15)
+					Buttons.setColor(D3DCOLOR_ARGB(255, 255, 0, 0));
+
 				// Check if mouse is over GRID button and mouse was clicked
 				if(Buttons.isOn(cursor.x, cursor.y, 3) && (mouseState.rgbButtons[0]& 0x80) != 0 && !keyIsDown[DIK_P])
 				{
@@ -1419,6 +1456,12 @@ void GameEngine::Update(float dt)
 					Buttons.setHighlight(false);
 				}
 
+				if(Buttons.col == 0)
+					Buttons.setColor(D3DCOLOR_ARGB(255, 255, 0, 0));
+
+				if(Buttons.col == 15)
+					Buttons.setColor(D3DCOLOR_ARGB(255, 255, 0, 0));
+
 				if(Buttons.isOn(cursor.x, cursor.y, 3) && mouseState.rgbButtons[0] && !keyIsDown[DIK_P])
 				{
 					row = Buttons.row;
@@ -1559,8 +1602,10 @@ void GameEngine::Update(float dt)
 								}
 
 								if(m_player[1].getCharacterType() == BLACKMAGE) // Black hole
-									blackHoleAbility(row, col, 1);
+								{
 
+									blackHoleAbility(row, col, 1);
+								}
 								if(m_player[1].getCharacterType() == WARRIOR) // ??
 								{
 
@@ -1595,9 +1640,9 @@ void GameEngine::Update(float dt)
 			}
 		}
 
-		if(m_player[0].currentHealth < 0)
+		if(m_player[0].currentHealth <= 0)
 			m_gameState = PLAYER2WIN;
-		else if( m_player[1].currentHealth < 0)
+		else if( m_player[1].currentHealth <= 0)
 			m_gameState = PLAYER1WIN;
 
 		break;
@@ -2755,7 +2800,7 @@ void GameEngine::archerAbility1(bool done)
 }
 
 void GameEngine::blackHoleAbility(int row, int col, int a_player)
-{
+{	 
 	if(a_player == 0)
 	{
 		if(m_player[0].getCharacterType() == BLACKMAGE) // Black hole
@@ -5033,7 +5078,7 @@ void GameEngine::drawMenu(D3DXVECTOR3 position, D3DCOLOR a_color, RECT &a_rect)
 	D3DXMatrixIdentity(&rotMat);
 	D3DXMatrixIdentity(&worldMat);
 
-	D3DXMatrixScaling(&scaleMat, 1.0f, 1.0f, 0.0f);
+	D3DXMatrixScaling(&scaleMat, 0.5f, 0.5f, 0.5f);
 	D3DXMatrixTranslation(&transMat, position.x, position.y, 0.0f);
 	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
 	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
