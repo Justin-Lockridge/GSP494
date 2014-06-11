@@ -31,6 +31,7 @@ GameEngine::GameEngine(void)
 	player1selected					= false;
 	player2selected					= false;
 	number							= 0;
+	m_displayingHelpMenu			=	false;
 }
 
 GameEngine::~GameEngine()
@@ -110,11 +111,12 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	//////////////////////////////////////////////////////////////////////////
 	// Load a font for private use for this process
 	AddFontResourceEx(L"Old English Text MT.otf", FR_PRIVATE, 0);
-
+	AddFontResourceEx(L"Times New Roman.otf", FR_PRIVATE, 0);
 	// Load D3DXFont, each font style you want to support will need an ID3DXFont
 	D3DXCreateFont(m_pD3DDevice, 30, 0, FW_BOLD, 0, false, DEFAULT_CHARSET, 
 		OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, TEXT("Old English Text MT"), &m_pD3DFont);
-
+	D3DXCreateFont(m_pD3DDevice, 30, 0, FW_BOLD, 0, false, DEFAULT_CHARSET, 
+		OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, TEXT("Times New Roman"), &m_readableFont);
 	//////////////////////////////////////////////////////////////////////////
 	// Create Sprite Object and Textures
 	//////////////////////////////////////////////////////////////////////////
@@ -235,7 +237,10 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
 		D3DCOLOR_XRGB(255, 0, 255), &m_minotaurIconInfo, 0, &m_minotaurIcon);
 
-
+	
+	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"PlayerUIBackground.png", 0, 0, 0, 0, 
+		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
+		D3DCOLOR_XRGB(255, 0, 255), &m_helpMenuInfo, 0, &m_helpMenu);
 	/////////////////////////////////////////////////////
 	// Hover Info
 	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"ArcherUnitInfo.png", 0, 0, 0, 0, 
@@ -998,6 +1003,19 @@ void GameEngine::Update(float dt)
 			break;
 		};
 
+		if( buffer[DIK_H] &0x80 )
+		{
+			if( !keyIsDown[DIK_H] )
+			{
+				keyIsDown[DIK_H] = true;
+				if( m_displayingHelpMenu == true )
+					m_displayingHelpMenu	=	false;
+				else
+					m_displayingHelpMenu	=	true;
+			}
+		}
+		else
+			keyIsDown[DIK_H]	=	false;
 		/////////////////////////////////////////////////////////////////////////////
 		//  INFO:  Used as tools to get animations working, leave this in.
 		if( buffer[DIK_RIGHT] &0x80 )
@@ -3115,6 +3133,9 @@ void GameEngine::Render(float dt)
 				if( m_classAbilityAnimator.getAnimationActive() ){
 					drawAbilityAnimations();
 				}
+				/////////////////////////////////////////////////////////////////////
+				//  INFO:  Draws background for help menu
+				drawHelpMenuBackground();
 
 				myMouse.render(m_pD3DSprite, m_cursor, m_cursorInfo);
 
@@ -3145,6 +3166,7 @@ void GameEngine::Render(float dt)
 				break;
 			case BATTLE:
 				drawUIText(dt);
+				drawHelpMenuText();
 				break;
 			case PLAYER1WIN:
 				drawWinner(m_player[0]);
@@ -3176,6 +3198,7 @@ void GameEngine::Render(float dt)
 void GameEngine::Shutdown()
 {
 	// Release COM objects in the opposite order they were created in
+	SAFE_RELEASE(m_helpMenu);
 	SAFE_RELEASE(m_flameStrikeAbility);
 	SAFE_RELEASE(m_blackHoleAbility);
 	SAFE_RELEASE(m_minotaurUnit);
@@ -3227,7 +3250,9 @@ void GameEngine::Shutdown()
 	SAFE_RELEASE(m_endTurn);
 	//Font
 	SAFE_RELEASE(m_pD3DFont);
+	SAFE_RELEASE(m_readableFont);
 	RemoveFontResourceEx(L"Old English Text MT.ttf", FR_PRIVATE, 0);
+	RemoveFontResourceEx(L"Times New Roman.ttf", FR_PRIVATE, 0);
 	//Cursor & Main menu
 	SAFE_RELEASE(m_cursor);
 	SAFE_RELEASE(m_menuButtons);
@@ -4387,6 +4412,7 @@ void GameEngine::drawUIText(float dt)
 	rect.left = 170;
 	wchar_t buffer[128];
 
+	if ( !m_displayingHelpMenu ) {
 	for(int i = 0; i < 2; ++i)
 	{
 		rect.left += i * 250;
@@ -4413,7 +4439,7 @@ void GameEngine::drawUIText(float dt)
 	{
 		m_pD3DFont->DrawText(0, m_combatMessage, -1, &m_floatingTextRect, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 127, 0));
 	}
-
+	}
 	//Player can't afford unit
 	if(noGold)
 	{
@@ -5574,5 +5600,85 @@ void GameEngine::drawAbilityAnimations()
 				0, D3DCOLOR_ARGB(255, 255, 255, 255));
 		}
 		break;
+	}
+};
+
+void GameEngine::drawHelpMenuBackground(){
+	if( m_displayingHelpMenu ){
+		D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
+
+	D3DXMatrixIdentity(&transMat);
+	D3DXMatrixIdentity(&scaleMat);
+	D3DXMatrixIdentity(&rotMat);
+	D3DXMatrixIdentity(&worldMat);
+
+	D3DXMatrixScaling(&scaleMat, 1.3f, 1.1f, 0.0f);
+	D3DXMatrixTranslation(&transMat, 253, 170, 0.0f);
+	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+
+	m_pD3DSprite->SetTransform(&worldMat);
+
+	m_pD3DSprite->Draw(m_helpMenu, 0, &D3DXVECTOR3(float(m_helpMenuInfo.Width* 0.5f), float(m_helpMenuInfo.Height * 0.5f), 0.0f),
+		0, D3DCOLOR_ARGB(255, 255, 255, 255));
+	}
+};
+
+void GameEngine::drawHelpMenuText(){
+	RECT rect;
+	GetWindowRect(m_hWnd, &rect);
+	rect.top	=	50;
+	rect.right = 500 ;
+	rect.left	=	330 ;
+	rect.bottom =  100;
+	//rect.top = 40;			
+	//rect.left = 170;
+	wchar_t buffer[512];
+
+	if ( m_displayingHelpMenu ) {
+	
+		//rect.left += i * 250;
+		//rect.right += i * 250;
+		swprintf_s(buffer, 512, L"Help Menu");
+		m_readableFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 0, 0));
+	
+		rect.left = 110;
+		rect.top += 50;
+		swprintf_s(buffer, 512, L"Objective");
+		m_readableFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 0, 0));
+
+		rect.left += 30;
+		rect.top += 30;
+				swprintf_s(buffer, 512, L"Each player takes turn placing units on the battle \nfield.  Strategically place your army to defeat your \nenemy!!");
+		m_readableFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
+	
+		rect.left = 110;
+		rect.top += 90;
+		swprintf_s(buffer, 512, L"Gameplay");
+		m_readableFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 0, 0));
+
+		rect.left += 30;
+		rect.top += 30;
+		swprintf_s(buffer, 512, L"-Turn begins - Remaining gold mines produce gold\n-Play Phase - use mouse to place units on board\n-Abilities - can be used if you have enough special\n      (Acquire special by destroying enemy units)\n-End Turn - active units attack and use abilities");
+		m_readableFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
+
+				rect.left = 110;
+		rect.top += 150;
+				swprintf_s(buffer, 512, L"Unit Basics");
+		m_readableFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 0, 0));
+
+		rect.left += 30;
+		rect.top += 30;
+		swprintf_s(buffer, 512, L"-Play units within 4 spaces of your gold mines\n-Ranged Units - Stay in place, attack their lane\n-Melee Units - Advance the board, attack enemies \nwithin range");
+		m_readableFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
+		//rect.top = 470;
+	//rect.bottom = 575;
+	//rect.left += 250;
+//	rect.right += 250;
+//	swprintf_s(buffer, 128, L"Units\n\nAbilities");
+//	m_pD3DFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
+//	rect.left -= 620;
+	//swprintf_s(buffer, 128, L"Units\n\nAbilities");
+//	m_pD3DFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
 	}
 };
