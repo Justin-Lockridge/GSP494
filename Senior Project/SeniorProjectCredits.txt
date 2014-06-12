@@ -15,3 +15,7 @@ Warrior Unit (Paladin sheet) ripped by napalm - http://www.spriters-resource.com
 Marksman Unit (Rifleman, Metal Slug 4) ripped by Gussprint - http://www.spriters-resource.com/arcade/ms4/sheet/16306/
 
 Coins SFX by flowfx - http://www.freesfx.co.uk/sfx/coins
+
+Cleave ability animation - Strider - http://spritedatabase.net/file/208
+
+Cleave ability sound effect - http://soundbible.com/1008-Decapitation.html

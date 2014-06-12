@@ -232,6 +232,30 @@ void Unit::removeUnit()
 	occupied					= false;
 };
 
+void Unit::swapUnit( Unit copy ){
+	type			=		copy.type;
+	damage			=		copy.damage;
+	currentHealth	=		copy.currentHealth;
+	maxHealth		=		copy.maxHealth;
+	whoUnitBelongsTo	=		copy.whoUnitBelongsTo;
+	speed			=		copy.speed;
+	state			=		copy.state;
+	posX			=		copy.posX;
+	posY			=		copy.posY;
+	animationTimer	=		copy.animationTimer;
+	unitRect.top	=		copy.unitRect.top;
+	unitRect.left	=		copy.unitRect.left;
+	unitRect.right	=		copy.unitRect.right;
+	unitRect.bottom	=		copy.unitRect.bottom;
+
+	facingRight		=		copy.facingRight;
+	isActive		=		copy.isActive;
+	unitCanTakeAction	=	false;//copy.unitCanTakeAction;
+	isRanged			=	copy.isRanged;
+	unitCanUseAbility	=	copy.unitCanUseAbility;
+	occupied			=	copy.occupied;
+};
+
 void Unit::updateAnimations( float dt )
 {
 	if(isActive)

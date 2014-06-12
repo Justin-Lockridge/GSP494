@@ -41,6 +41,17 @@ void ClassAbilityAnimator::setClassAbilityAnimation( int ability, float x, float
 		//animationRect.right			=	400;
 		animationRect.bottom	=	150;
 		break;
+	case CLEAVE:
+		type					=	CLEAVE;
+		scaleX					=	0.40f;
+		scaleY					=	0.40f;
+		animationRect.top		=	0;
+		animationRect.left		=	0;
+		animationRect.right		=	140;
+		//animationRect.left			=	349;
+		//animationRect.right			=	400;
+		animationRect.bottom	=	150;
+		break;
 	}
 };
 
@@ -107,6 +118,31 @@ void ClassAbilityAnimator::updateClassAbilityAnimation( float dt ){
 					//}
 					break;
 				}
+			}
+			break;
+		case CLEAVE:
+			if( animationTimer > 0.12f ){
+				animationTimer	-=	0.12f;
+				switch( animationRect.left ){
+				case 0:
+					adjustAnimationRectLeftRight( 140, 140 );
+					break;
+				case 140:
+					adjustAnimationRectLeftRight( 135, 135 );
+					break;
+				case 275:
+					adjustAnimationRectLeftRight( 140, 140 );
+					break;
+				case 415:
+					setAnimationRect( 0, 0, 140, 150 );
+					activeTimer	=	0.0f;
+					animationActive	=	false;
+					break;
+				}
+				//if( activeTimer > 3.5f ){
+				//	animationActive	=	false;
+				//	activeTimer = 0.0f;
+				//}
 			}
 			break;
 		}

@@ -21,6 +21,7 @@ public:
 
 	void	addUnit(int t, int playerNumber);
 	void	removeUnit();
+	void	swapUnit( Unit copy );
 	void	updateAnimations( float dt );
 	void	setNewColumn( int c );
 	//////////////////////////////////////////////////////////

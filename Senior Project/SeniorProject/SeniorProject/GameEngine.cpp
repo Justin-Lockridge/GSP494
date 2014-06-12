@@ -21,6 +21,7 @@ GameEngine::GameEngine(void)
 	m_randomNumber					=	0;
 	selectedUnit					=	99;
 	textCount						=	0;
+	m_characterSelectTimer			=	0.0f;
 	noGold							=	false;
 	dontPlaceUnit					=	false;
 	firstTurn						=  true;
@@ -333,6 +334,10 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"Flames.png", 0, 0, 0, 0, 
 		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
 		D3DCOLOR_XRGB(255, 0, 255), &m_flameStrikeAbilityInfo, 0, &m_flameStrikeAbility);
+
+	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"Cleave.png", 0, 0, 0, 0, 
+		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
+		D3DCOLOR_XRGB(255, 0, 255), &m_cleaveAbilityInfo, 0, &m_cleaveAbility);
 	// Seed rand() with time
 	srand(timeGetTime());
 
@@ -371,6 +376,7 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	fmodSystem->createSound("MinotaurRoar.wav", FMOD_DEFAULT, 0, &minotaurRoar);
 	fmodSystem->createSound("Gold.mp3", FMOD_DEFAULT, 0, &goldCoins);
 	fmodSystem->createSound("LimitBreak.wav", FMOD_DEFAULT, 0, &warlockSpell);
+	fmodSystem->createSound("Cleave.wav", FMOD_DEFAULT, 0, &cleaveAbilitySFX);
 
 	for(int i = 0; i < 255; ++i)
 	{
@@ -754,12 +760,14 @@ void GameEngine::InitMenu()
 
 void GameEngine::Update(float dt)
 {
-	//m_player[0].adjustCurrentSpecial(100);
-	//m_player[1].adjustCurrentSpecial(100);
+	m_player[0].adjustCurrentSpecial(100);
+	m_player[1].adjustCurrentSpecial(100);
+	m_player[0].setGold( 1000 );
+	m_player[1].setGold( 1000 );
 	///////////////////////////////////////////////////////////////////////////////
 	//  INFO:  Used with tools to get animations working, leave this in
-	int animationOffsetLeft = 47;
-	int animationOffsetRight = 48;
+	int animationOffsetLeft = 140;
+	int animationOffsetRight = 140;
 	//////////////////////////////////////////////////////////////////////////
 	// Get and Acquire Keyboard Input
 	// Get the input device state
@@ -843,6 +851,7 @@ void GameEngine::Update(float dt)
 		}
 		break;
 	case MENUCHARACTERSELECT:
+		m_characterSelectTimer	+= dt;
 		if(!player1selected)
 		{
 			for(auto &Buttons: characterButtons)
@@ -858,15 +867,22 @@ void GameEngine::Update(float dt)
 					Buttons.setHighlight(false);
 				}
 
+				if( m_characterSelectTimer > 0.5f ){
 				if(mouseState.rgbButtons[0])
 				{
 					if(!keyIsDown[DIK_K])
 					{
 						keyIsDown[DIK_K] = true;
 
-						for(int i = 0; i < 3; i++)
-							if(characterButtons[i].isHighlighted())
+						for(int i = 0; i < 3; i++){
+							//////////////////////////////////////////////////////////////////////
+							//  INFO:  If a button is highlighted, use that character.  If
+							//			a button is not highlighted, do no select a character.
+							if(characterButtons[i].isHighlighted()){
 								selected = i;
+								break;
+							}
+						}
 
 						switch(selected)
 						{
@@ -887,6 +903,7 @@ void GameEngine::Update(float dt)
 				}
 				else
 					keyIsDown[DIK_K] = false;
+			}
 			}
 		}
 
@@ -983,7 +1000,6 @@ void GameEngine::Update(float dt)
 			fmodSystem->playSound( FMOD_CHANNEL_FREE, battleTheme, false, &channel);
 
 		fmodSystem->update();
-
 		///////////////////////////////////////////////////////////
 		//  INFO:  Check if player(s) click on the end turn button
 		for(auto & Buttons: endTurnButton)
@@ -1057,7 +1073,7 @@ void GameEngine::Update(float dt)
 				switch(m_tester)
 				{
 				case 1:
-					m_classAbilityAnimator.setClassAbilityAnimation( FLAMESTRIKE , m_gameBoard[0][0].getPosX(), m_gameBoard[0][0].getPosY() );
+					m_classAbilityAnimator.setClassAbilityAnimation( CLEAVE , m_gameBoard[0][0].getPosX(), m_gameBoard[0][0].getPosY() );
 					break;
 				default:
 					m_classAbilityAnimator.adjustAnimationRectLeftRight( animationOffsetLeft, animationOffsetRight );
@@ -1320,6 +1336,7 @@ void GameEngine::Update(float dt)
 							}
 							break;
 						case 4: // Ability 1
+							if( !m_classAbilityAnimator.getAnimationActive() ){
 							if(m_player[0].getCurrentSpecial() >= 50)
 							{
 								if(m_player[0].getCharacterType() == ARCHER) // Split shot = Kills 2 enemy units of player's choosing
@@ -1336,16 +1353,21 @@ void GameEngine::Update(float dt)
 									}
 								}
 
-								if(m_player[0].getCharacterType() == BLACKMAGE) // Black hole
+								if(m_player[0].getCharacterType() == BLACKMAGE) {// Black hole
+									fmodSystem->playSound( FMOD_CHANNEL_FREE, cleaveAbilitySFX, false, 0 );
 									blackHoleAbility(row, col, 0);
+								}
 
 								if(m_player[0].getCharacterType() == WARRIOR) // ??
 								{
-
+									fmodSystem->playSound( FMOD_CHANNEL_FREE, cleaveAbilitySFX, false, 0 );
+									cleaveAbility( PLAYERONE );
 								}
+							}
 							}
 							break;
 						case 5: // Ability 2
+							if( !m_classAbilityAnimator.getAnimationActive() ){
 							if(m_player[0].getCharacterType() == ARCHER) // Precision Shot
 							{
 								if(m_player[0].getCurrentSpecial() == 100)
@@ -1359,8 +1381,10 @@ void GameEngine::Update(float dt)
 								flameWaveAbility(row, col, 0);
 
 							if(m_player[0].getCharacterType() == WARRIOR)
-							{}
-
+							{
+								bolsterAbility( PLAYERONE );
+							}
+							}
 							break;
 						default:
 							break;
@@ -1584,6 +1608,7 @@ void GameEngine::Update(float dt)
 							}
 							break;
 						case 4: // Ability 1
+							if( !m_classAbilityAnimator.getAnimationActive() ){
 							if(m_player[1].getCurrentSpecial() >= 50)
 							{
 								//allow ability or don't based on meter
@@ -1608,12 +1633,14 @@ void GameEngine::Update(float dt)
 								}
 								if(m_player[1].getCharacterType() == WARRIOR) // ??
 								{
-
+									fmodSystem->playSound( FMOD_CHANNEL_FREE, cleaveAbilitySFX, false, 0 );
+									cleaveAbility( PLAYERTWO );
 								}
-
+							}
 							}
 							break;
 						case 5: // Ability 2
+							if( !m_classAbilityAnimator.getAnimationActive() ){
 							//Get row and destroy all units in that row
 							if(m_player[1].getCharacterType() == ARCHER) // Precision Shot
 							{
@@ -1628,10 +1655,13 @@ void GameEngine::Update(float dt)
 								flameWaveAbility(row, col, 1);
 
 							if(m_player[1].getCharacterType() == WARRIOR) // ??
-							{}
+							{
+								bolsterAbility( PLAYERTWO );
+							}
 							break;
 						default:
 							break;
+							}
 						}
 					}
 				}
@@ -2424,6 +2454,8 @@ void GameEngine::updateEventPhase(float dt)
 				m_arrowForAttackingUnitPosY	=	m_unit[m_attackingSpaceX][m_attackingSpaceX].getPosY() - 40;
 				if( m_unit[m_attackingSpaceX][m_attackingSpaceY].getPosX() > m_gameBoard[m_attackingSpaceX][m_moveToTarget].getPosX())
 				{
+					//m_unit[m_attackingSpaceX][m_moveToTarget].swapUnit( m_unit[m_attackingSpaceX][m_attackingSpaceY] );
+
 					moveUnit();
 				}
 			}
@@ -2656,9 +2688,10 @@ void GameEngine::resetUnitActions(int playerNumber)
 
 void GameEngine::moveUnit()
 {
-	m_unit[m_attackingSpaceX][m_moveToTarget].addUnit( m_unit[m_attackingSpaceX][m_attackingSpaceY].getType(), m_unit[m_attackingSpaceX][m_attackingSpaceY].getWhoUnitBelongsTo() );
-	m_unit[m_attackingSpaceX][m_moveToTarget].setCurrentHealth( m_unit[m_attackingSpaceX][m_attackingSpaceY].getCurrentHealth() );
-	m_unit[m_attackingSpaceX][m_moveToTarget].setMaxHealth( m_unit[m_attackingSpaceX][m_attackingSpaceY].getMaxHealth() );
+	m_unit[m_attackingSpaceX][m_moveToTarget].swapUnit( m_unit[m_attackingSpaceX][m_attackingSpaceY] );
+	//m_unit[m_attackingSpaceX][m_moveToTarget].addUnit( m_unit[m_attackingSpaceX][m_attackingSpaceY].getType(), m_unit[m_attackingSpaceX][m_attackingSpaceY].getWhoUnitBelongsTo() );
+	//m_unit[m_attackingSpaceX][m_moveToTarget].setCurrentHealth( m_unit[m_attackingSpaceX][m_attackingSpaceY].getCurrentHealth() );
+	//m_unit[m_attackingSpaceX][m_moveToTarget].setMaxHealth( m_unit[m_attackingSpaceX][m_attackingSpaceY].getMaxHealth() );
 	m_unit[m_attackingSpaceX][m_attackingSpaceY].removeUnit();
 	m_unitCurrentlyMoving = false;
 	m_unitCurrentlyAttacking	=	false;
@@ -2971,6 +3004,48 @@ void GameEngine::flameWaveAbility(int row, int col, int a_player)
 	}
 }
 
+void GameEngine::cleaveAbility( int activePlayer ){
+	int victim = -1;
+	if( activePlayer == PLAYERONE )
+		victim = PLAYERTWO;
+	else
+		victim = PLAYERONE;
+	if( m_player[activePlayer].getCurrentSpecial() > 49 ){
+		m_classAbilityAnimator.setAnimationActive( true );
+		m_classAbilityAnimator.setClassAbilityAnimation( CLEAVE , 100 , 100 );
+		//m_attackTargetSpaceX = row;
+		m_player[activePlayer].adjustCurrentSpecial(-50);
+		for( int i = 0; i < MAXBOARDHEIGHT; ++i ){
+			for( int j = 1; j < MAXBOARDWIDTH - 1; ++j ){
+				if( m_unit[i][j].getWhoUnitBelongsTo() == victim ){
+					m_unit[i][j].adjustCurrentHealth( - 15 );
+					if( m_unit[i][j].getCurrentHealth() < 1 )
+						m_unit[i][j].removeUnit();
+				}
+			}
+		}
+	}
+};
+
+void GameEngine::bolsterAbility( int activePlayer ){
+	if( m_player[activePlayer].getCurrentSpecial() > 99 ){
+		m_classAbilityAnimator.setAnimationActive( true );
+		m_classAbilityAnimator.setClassAbilityAnimation( BOLSTER , 100 , 100 );
+		//m_attackTargetSpaceX = row;
+		m_player[activePlayer].adjustCurrentSpecial(-100);
+		for( int i = 0; i < MAXBOARDHEIGHT; ++i ){
+			for( int j = 1; j < MAXBOARDWIDTH - 1; ++j ){
+				if( m_unit[i][j].getWhoUnitBelongsTo() == activePlayer ){
+					m_unit[i][j].setMaxHealth( m_unit[i][j].getMaxHealth() + 100 );
+					m_unit[i][j].adjustCurrentHealth( 100 );
+					m_unit[i][j].setSpeed( m_unit[i][j].getSpeed() + 1 );
+					m_unit[i][j].setDamage( m_unit[i][j].getDamage() + 15 );
+				}
+			}
+		}
+	}
+};
+
 void GameEngine::Render(float dt)
 {
 	// If the device was not created successfully, return
@@ -3243,6 +3318,7 @@ void GameEngine::Render(float dt)
 void GameEngine::Shutdown()
 {
 	// Release COM objects in the opposite order they were created in
+	SAFE_RELEASE(m_cleaveAbility);
 	SAFE_RELEASE(m_helpMenu);
 	SAFE_RELEASE(m_flameStrikeAbility);
 	SAFE_RELEASE(m_blackHoleAbility);
@@ -5613,7 +5689,7 @@ void GameEngine::drawHoverInfo(int thisButton , Character thisPlayer, D3DXVECTOR
 void GameEngine::drawAbilityAnimations()
 {
 	D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
-
+	int victim = -1;
 	D3DXMatrixIdentity(&transMat);
 	D3DXMatrixIdentity(&scaleMat);
 	D3DXMatrixIdentity(&rotMat);
@@ -5635,7 +5711,7 @@ void GameEngine::drawAbilityAnimations()
 	case FLAMESTRIKE:
 		for( int i = 0; i < MAXBOARDWIDTH; ++i ){
 			D3DXMatrixIdentity(&transMat);
-			D3DXMatrixTranslation(&transMat, m_unit[m_attackTargetSpaceX][i].getPosX() + 8, m_unit[m_attackTargetSpaceX][i].getPosY() - 12, 0.0f);			
+			D3DXMatrixTranslation(&transMat, m_gameBoard[m_attackTargetSpaceX][i].getPosX() + 8, m_gameBoard[m_attackTargetSpaceX][i].getPosY() - 12, 0.0f);			
 			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);	
 			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);	
 
@@ -5644,6 +5720,31 @@ void GameEngine::drawAbilityAnimations()
 				( m_classAbilityAnimator.getAnimationRect().bottom - m_classAbilityAnimator.getAnimationRect().top ) * 0.5f, 0.0f),
 				0, D3DCOLOR_ARGB(255, 255, 255, 255));
 		}
+		break;
+	case CLEAVE:
+		if( m_player[PLAYERONE].checkIfActivePlayer() )
+			victim	=	PLAYERTWO;
+		else
+			victim =	PLAYERONE;
+		for( int i = 0; i < MAXBOARDHEIGHT; ++i){
+			for( int j = 1; j < MAXBOARDWIDTH - 1; ++j){
+				if( m_unit[i][j].getWhoUnitBelongsTo() == victim ){
+					D3DXMatrixIdentity(&transMat);
+					D3DXMatrixIdentity(&worldMat);
+					D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX() + 8, m_unit[i][j].getPosY() + 5, 0.0f);			
+					D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);	
+					D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);	
+
+
+					m_pD3DSprite->SetTransform(&worldMat);
+					m_pD3DSprite->Draw(m_cleaveAbility, &m_classAbilityAnimator.getAnimationRect(), &D3DXVECTOR3( ( m_classAbilityAnimator.getAnimationRect().right - m_classAbilityAnimator.getAnimationRect().left ) * 0.5f,
+						( m_classAbilityAnimator.getAnimationRect().bottom - m_classAbilityAnimator.getAnimationRect().top ) * 0.5f, 0.0f),
+						0, D3DCOLOR_ARGB(255, 255, 255, 255));
+				}
+			}
+		}
+		break;
+	case BOLSTER:
 		break;
 	}
 };
