@@ -338,6 +338,10 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"Cleave.png", 0, 0, 0, 0, 
 		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
 		D3DCOLOR_XRGB(255, 0, 255), &m_cleaveAbilityInfo, 0, &m_cleaveAbility);
+
+	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"Bolster.png", 0, 0, 0, 0, 
+		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
+		D3DCOLOR_XRGB(255, 0, 255), &m_bolsterAbilityInfo, 0, &m_bolsterAbility);
 	// Seed rand() with time
 	srand(timeGetTime());
 
@@ -377,6 +381,7 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	fmodSystem->createSound("Gold.mp3", FMOD_DEFAULT, 0, &goldCoins);
 	fmodSystem->createSound("LimitBreak.wav", FMOD_DEFAULT, 0, &warlockSpell);
 	fmodSystem->createSound("Cleave.wav", FMOD_DEFAULT, 0, &cleaveAbilitySFX);
+	fmodSystem->createSound("cure.wav", FMOD_DEFAULT, 0, &bolsterAbilitySFX);
 
 	for(int i = 0; i < 255; ++i)
 	{
@@ -760,14 +765,14 @@ void GameEngine::InitMenu()
 
 void GameEngine::Update(float dt)
 {
-	//m_player[0].adjustCurrentSpecial(100);
-	//m_player[1].adjustCurrentSpecial(100);
-	//m_player[0].setGold( 1000 );
-	//m_player[1].setGold( 1000 );
+	m_player[0].adjustCurrentSpecial(100);
+	m_player[1].adjustCurrentSpecial(100);
+	m_player[0].setGold( 1000 );
+	m_player[1].setGold( 1000 );
 	///////////////////////////////////////////////////////////////////////////////
 	//  INFO:  Used with tools to get animations working, leave this in
-	int animationOffsetLeft = 140;
-	int animationOffsetRight = 140;
+	int animationOffsetLeft =  33;
+	int animationOffsetRight = 33;
 	//////////////////////////////////////////////////////////////////////////
 	// Get and Acquire Keyboard Input
 	// Get the input device state
@@ -1081,22 +1086,27 @@ void GameEngine::Update(float dt)
 
 
 				keyIsDown[DIK_RIGHT] = true;
-				m_tester++;
+				m_tester++;				
+				if(m_tester > 5 ){
+					animationOffsetLeft	=  33;
+					animationOffsetRight = 32;
+				}
 				switch(m_tester)
 				{
 				case 1:
-					m_classAbilityAnimator.setClassAbilityAnimation( CLEAVE , m_gameBoard[0][0].getPosX(), m_gameBoard[0][0].getPosY() );
+					m_classAbilityAnimator.setClassAbilityAnimation( BOLSTER , m_gameBoard[0][0].getPosX(), m_gameBoard[0][0].getPosY() );
 					break;
 				default:
 					m_classAbilityAnimator.adjustAnimationRectLeftRight( animationOffsetLeft, animationOffsetRight );
-					animationOffsetLeft	=	140;
-					animationOffsetRight	=	142;
+					//animationOffsetLeft	=	140;
+					//animationOffsetRight	=	142;
 					break;
 				case 4:
-					animationOffsetLeft		=	139;
-					animationOffsetRight	=	141;
+					//animationOffsetLeft		=	139;
+					//animationOffsetRight	=	141;
 					break;
 				}
+
 				m_unit[1][1].setUnitRect( m_unit[1][1].getUnitRect().top, m_unit[1][1].getUnitRect().left + animationOffsetLeft, m_unit[1][1].getUnitRect().right + animationOffsetRight, m_unit[1][1].getUnitRect().bottom );
 			}
 		}
@@ -1111,18 +1121,23 @@ void GameEngine::Update(float dt)
 				m_classAbilityAnimator.setAnimationActive( false );
 
 				keyIsDown[DIK_LEFT] = true;
-				m_tester--;
+				m_tester--;								
+				if(m_tester >= 5 ){
+					animationOffsetLeft	 = 33;
+					animationOffsetRight = 32;
+				}
 				switch(m_tester){
 				default:
 					m_classAbilityAnimator.adjustAnimationRectLeftRight( -animationOffsetLeft, -animationOffsetRight );
-					animationOffsetLeft		=	140;
-					animationOffsetRight	=	142;
+					//animationOffsetLeft		=	140;
+					//animationOffsetRight	=	142;
 					break;
 				case 4:
-					animationOffsetLeft		=	120;
-					animationOffsetRight	=	141;
+					//animationOffsetLeft		=	120;
+					//animationOffsetRight	=	141;
 					break;
 				}
+
 				m_unit[1][1].setUnitRect( m_unit[1][1].getUnitRect().top, m_unit[1][1].getUnitRect().left - animationOffsetLeft, m_unit[1][1].getUnitRect().right - animationOffsetRight, m_unit[1][1].getUnitRect().bottom );
 			}
 		}
@@ -1393,6 +1408,7 @@ void GameEngine::Update(float dt)
 
 									if(m_player[0].getCharacterType() == WARRIOR)
 									{
+										fmodSystem->playSound( FMOD_CHANNEL_FREE, bolsterAbilitySFX, false, 0 );
 										bolsterAbility( PLAYERONE );
 									}
 								}
@@ -1667,6 +1683,7 @@ void GameEngine::Update(float dt)
 
 									if(m_player[1].getCharacterType() == WARRIOR) // ??
 									{
+										fmodSystem->playSound( FMOD_CHANNEL_FREE, bolsterAbilitySFX, false, 0 );
 										bolsterAbility( PLAYERTWO );
 									}
 									break;
@@ -3330,6 +3347,7 @@ void GameEngine::Render(float dt)
 void GameEngine::Shutdown()
 {
 	// Release COM objects in the opposite order they were created in
+	SAFE_RELEASE(m_bolsterAbility);
 	SAFE_RELEASE(m_cleaveAbility);
 	SAFE_RELEASE(m_helpMenu);
 	SAFE_RELEASE(m_flameStrikeAbility);
@@ -5787,6 +5805,27 @@ void GameEngine::drawAbilityAnimations()
 		}
 		break;
 	case BOLSTER:
+		if( m_player[PLAYERONE].checkIfActivePlayer() )
+			victim	=	PLAYERONE;
+		else
+			victim =	PLAYERTWO;
+		for( int i = 0; i < MAXBOARDHEIGHT; ++i){
+			for( int j = 1; j < MAXBOARDWIDTH - 1; ++j){
+				if( m_unit[i][j].getWhoUnitBelongsTo() == victim ){
+					D3DXMatrixIdentity(&transMat);
+					D3DXMatrixIdentity(&worldMat);
+					D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX() + 8, m_unit[i][j].getPosY() + 5, 0.0f);			
+					D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);	
+					D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);	
+
+
+					m_pD3DSprite->SetTransform(&worldMat);
+					m_pD3DSprite->Draw(m_bolsterAbility, &m_classAbilityAnimator.getAnimationRect(), &D3DXVECTOR3( ( m_classAbilityAnimator.getAnimationRect().right - m_classAbilityAnimator.getAnimationRect().left ) * 0.5f,
+						( m_classAbilityAnimator.getAnimationRect().bottom - m_classAbilityAnimator.getAnimationRect().top ) * 0.5f, 0.0f),
+						0, D3DCOLOR_ARGB(255, 255, 255, 255));
+				}
+			}
+		}
 		break;
 	}
 };

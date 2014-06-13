@@ -97,11 +97,11 @@ class GameEngine
 	IDirect3DTexture9   * m_menuButtons,* m_menuBG,*	m_cursor,*m_battleBackgroundOne, *m_gamePiece, *m_archerCharacter, *m_blackMageCharacter, *m_playerUIBackground,
 									*m_goldMine, *m_archerUnit, *m_blackMageUnit, *m_arrow, *m_fireball, *m_archerArrow, *m_healthBar, *m_golemUnit, *m_warlock,
 									*m_lightning, *m_wolf, *m_thief, *m_warriorCharacter, *m_warriorUnitIcon, *m_marksmanUnit, *m_minotaurUnit, *m_blackHoleAbility,
-									*m_flameStrikeAbility, *m_helpMenu, *m_cleaveAbility;
+									*m_flameStrikeAbility, *m_helpMenu, *m_cleaveAbility, *m_bolsterAbility;
 	D3DXIMAGE_INFO		m_menuButtonsInfo,m_menuBGInfo,m_cursorInfo,m_battleBackgroundOneInfo, m_gamePieceInfo, m_archerCharacterInfo, m_blackMageCharacterInfo, m_playerUIBackgroundInfo,
 									m_goldMineInfo, m_archerUnitInfo, m_blackMageUnitInfo, m_arrowInfo, m_fireballInfo, m_archerArrowInfo, m_healthBarInfo, m_golemUnitInfo,
 									m_warlockInfo, m_lightningInfo, m_wolfInfo, m_thiefInfo, m_warriorCharacterInfo, m_warriorUnitIconInfo, m_marksmanUnitInfo, m_minotaurUnitInfo,
-									m_blackHoleAbilityInfo, m_flameStrikeAbilityInfo, m_helpMenuInfo, m_cleaveAbilityInfo;
+									m_blackHoleAbilityInfo, m_flameStrikeAbilityInfo, m_helpMenuInfo, m_cleaveAbilityInfo, m_bolsterAbilityInfo;
 
 	IDirect3DTexture9		*m_archerIcon, *m_golemIcon, *m_blackMageIcon, *m_thiefIcon, *m_wolfIcon, *m_blackHoleIcon, *m_wallIcon, *m_warlockIcon, *m_endTurn, *m_flameStrikeIcon,
 										*m_snipeIcon, *m_splitShotIcon, *m_wallIcon2, *m_archerHover, *m_wolfHover, *m_thiefHover, *m_wallHover, *m_blackMageHover, *m_golemHover, *m_warlockHover, 
@@ -132,7 +132,8 @@ class GameEngine
 	//  TODO:  
 	FMOD::System* fmodSystem;
 	FMOD::Sound* themeMusicOne, *battleTheme;
-	FMOD::Sound* hitMines, *arrowHit, *castFireball, *shootArrow, *fireballHit, *thunderStrike, *minotaurRoar, *goldCoins, *warlockSpell, *cleaveAbilitySFX;
+	FMOD::Sound* hitMines, *arrowHit, *castFireball, *shootArrow, *fireballHit, *thunderStrike, *minotaurRoar, *goldCoins, *warlockSpell, *cleaveAbilitySFX,
+		*bolsterAbilitySFX;
 	FMOD::Channel* mainChannel;
 	FMOD::Channel* channel;
 	bool keyIsDown[255];

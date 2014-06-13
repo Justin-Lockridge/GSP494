@@ -16,6 +16,8 @@ Marksman Unit (Rifleman, Metal Slug 4) ripped by Gussprint - http://www.spriters
 
 Coins SFX by flowfx - http://www.freesfx.co.uk/sfx/coins
 
+FFVII SFX - http://www.rpgamer.com/games/ff/ff7/ff7snd.html
+
 Cleave ability animation - Strider - http://spritedatabase.net/file/208
 
 Cleave ability sound effect - http://soundbible.com/1008-Decapitation.html

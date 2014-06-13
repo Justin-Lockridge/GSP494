@@ -55,6 +55,14 @@ void ClassAbilityAnimator::setClassAbilityAnimation( int ability, float x, float
 		break;
 	case BOLSTER:
 		type					=	BOLSTER;
+		scaleX					=	1.3f;
+		scaleY					=	1.0f;
+		animationRect.top		=	0;
+		animationRect.left		=	0;
+		animationRect.right		=	25;
+		//animationRect.left			=	349;
+		//animationRect.right			=	400;
+		animationRect.bottom	=	50;
 		break;
 	}
 };
@@ -150,8 +158,38 @@ void ClassAbilityAnimator::updateClassAbilityAnimation( float dt ){
 			}
 			break;
 		case BOLSTER:
-			if( animationTimer > 1.0f ){
-			animationActive = false;
+			if( animationTimer > 0.15f ){
+				animationTimer	-=	0.15f;
+				switch( animationRect.left ){
+				case 0:
+					adjustAnimationRectLeftRight( 33, 33 );
+					break;
+				case 33:
+					adjustAnimationRectLeftRight( 33, 33 );
+					break;
+				case 66:
+					adjustAnimationRectLeftRight( 33, 33 );
+					break;
+				case 99:
+					adjustAnimationRectLeftRight( 33, 32 );
+					break;
+				case 132:
+					adjustAnimationRectLeftRight( 33, 32 );
+					break;
+				case 165:
+					adjustAnimationRectLeftRight( 33, 32 );
+					break;
+				case 198:
+					adjustAnimationRectLeftRight( 33, 32 );
+					break;
+				case 231:
+					animationActive		=	false;
+					break;
+				}
+				//if( activeTimer > 3.5f ){
+				//	animationActive	=	false;
+				//	activeTimer = 0.0f;
+				//}
 			}
 			break;
 		}
