@@ -20,6 +20,7 @@ void ClassAbilityAnimator::setClassAbilityAnimation( int ability, float x, float
 	posY				=	y;
 	scaleX				=	1.0f;
 	scaleY				=	1.0f;
+	animationActive		=	true;
 	switch( ability ){
 	case BLACKHOLE:
 		type					=	BLACKHOLE;
@@ -51,6 +52,9 @@ void ClassAbilityAnimator::setClassAbilityAnimation( int ability, float x, float
 		//animationRect.left			=	349;
 		//animationRect.right			=	400;
 		animationRect.bottom	=	150;
+		break;
+	case BOLSTER:
+		type					=	BOLSTER;
 		break;
 	}
 };
@@ -143,6 +147,11 @@ void ClassAbilityAnimator::updateClassAbilityAnimation( float dt ){
 				//	animationActive	=	false;
 				//	activeTimer = 0.0f;
 				//}
+			}
+			break;
+		case BOLSTER:
+			if( animationTimer > 1.0f ){
+			animationActive = false;
 			}
 			break;
 		}

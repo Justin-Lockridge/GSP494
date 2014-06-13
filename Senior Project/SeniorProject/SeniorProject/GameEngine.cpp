@@ -1368,13 +1368,14 @@ void GameEngine::Update(float dt)
 							break;
 						case 5: // Ability 2
 							if( !m_classAbilityAnimator.getAnimationActive() ){
+								if(m_player[0].getCurrentSpecial() > 99)
+								{
 							if(m_player[0].getCharacterType() == ARCHER) // Precision Shot
 							{
-								if(m_player[0].getCurrentSpecial() == 100)
-								{
+							
 									m_player[0].adjustCurrentSpecial(-100);
 									m_player[1].adjustCurrentHealth(-100);
-								}
+							
 							}
 
 							if(m_player[0].getCharacterType() == BLACKMAGE) //  Flame Wave
@@ -1383,6 +1384,7 @@ void GameEngine::Update(float dt)
 							if(m_player[0].getCharacterType() == WARRIOR)
 							{
 								bolsterAbility( PLAYERONE );
+							}
 							}
 							}
 							break;
@@ -1609,58 +1611,61 @@ void GameEngine::Update(float dt)
 							break;
 						case 4: // Ability 1
 							if( !m_classAbilityAnimator.getAnimationActive() ){
-							if(m_player[1].getCurrentSpecial() >= 50)
-							{
-								//allow ability or don't based on meter
-								if(m_player[1].getCharacterType() == ARCHER) // Split shot = Kills 2 enemy units of player's choosing
+								if(m_player[1].getCurrentSpecial() >= 50)
 								{
-									archerAbility1(done);
-
-									if(!done && unitsAttacked != 2)
-										archerAbility1(done);
-									else
+									//allow ability or don't based on meter
+									if(m_player[1].getCharacterType() == ARCHER) // Split shot = Kills 2 enemy units of player's choosing
 									{
-										unitsAttacked = 0;
-										m_player[1].adjustCurrentSpecial(-50);
-										break;
+										archerAbility1(done);
+
+										if(!done && unitsAttacked != 2)
+											archerAbility1(done);
+										else
+										{
+											unitsAttacked = 0;
+											m_player[1].adjustCurrentSpecial(-50);
+											break;
+										}
+									}
+
+									if(m_player[1].getCharacterType() == BLACKMAGE) // Black hole
+									{
+
+										blackHoleAbility(row, col, 1);
+									}
+									if(m_player[1].getCharacterType() == WARRIOR) // ??
+									{
+										fmodSystem->playSound( FMOD_CHANNEL_FREE, cleaveAbilitySFX, false, 0 );
+										cleaveAbility( PLAYERTWO );
 									}
 								}
-
-								if(m_player[1].getCharacterType() == BLACKMAGE) // Black hole
-								{
-
-									blackHoleAbility(row, col, 1);
-								}
-								if(m_player[1].getCharacterType() == WARRIOR) // ??
-								{
-									fmodSystem->playSound( FMOD_CHANNEL_FREE, cleaveAbilitySFX, false, 0 );
-									cleaveAbility( PLAYERTWO );
-								}
-							}
 							}
 							break;
 						case 5: // Ability 2
 							if( !m_classAbilityAnimator.getAnimationActive() ){
-							//Get row and destroy all units in that row
-							if(m_player[1].getCharacterType() == ARCHER) // Precision Shot
-							{
-								if(m_player[1].getCurrentSpecial() == 100)
+								if(m_player[1].getCurrentSpecial() > 99)
 								{
-									m_player[1].adjustCurrentSpecial(-100);
-									m_player[0].adjustCurrentHealth(-100);
-								}
-							}
+									//Get row and destroy all units in that row
+									if(m_player[1].getCharacterType() == ARCHER) // Precision Shot
+									{
+										//if(m_player[1].getCurrentSpecial() == 100)
+										//	{
+										m_player[1].adjustCurrentSpecial(-100);
+										m_player[0].adjustCurrentHealth(-100);
+										//}
+									}
 
-							if(m_player[1].getCharacterType() == BLACKMAGE) //  Flame Wave
-								flameWaveAbility(row, col, 1);
+									if(m_player[1].getCharacterType() == BLACKMAGE) //  Flame Wave
+										flameWaveAbility(row, col, 1);
 
-							if(m_player[1].getCharacterType() == WARRIOR) // ??
-							{
-								bolsterAbility( PLAYERTWO );
-							}
-							break;
+									if(m_player[1].getCharacterType() == WARRIOR) // ??
+									{
+										bolsterAbility( PLAYERTWO );
+									}
+									break;
 						default:
 							break;
+								}
 							}
 						}
 					}
@@ -3018,7 +3023,7 @@ void GameEngine::cleaveAbility( int activePlayer ){
 		for( int i = 0; i < MAXBOARDHEIGHT; ++i ){
 			for( int j = 1; j < MAXBOARDWIDTH - 1; ++j ){
 				if( m_unit[i][j].getWhoUnitBelongsTo() == victim ){
-					m_unit[i][j].adjustCurrentHealth( - 15 );
+					m_unit[i][j].adjustCurrentHealth( -15 );
 					if( m_unit[i][j].getCurrentHealth() < 1 )
 						m_unit[i][j].removeUnit();
 				}
