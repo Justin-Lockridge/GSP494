@@ -224,12 +224,18 @@ public:
 	void drawBackground();
 	void drawGameBoard();
 	void drawPlayers();
+
 	void drawUIText(float dt);
+
 	void drawIcons(int, Character, D3DXVECTOR3, D3DCOLOR);
 	void drawButtonGrid(D3DXVECTOR3, D3DCOLOR);
+
 	void drawMenu(D3DXVECTOR3, D3DCOLOR, RECT &);
 	void drawCharacters(int, D3DXVECTOR3, D3DCOLOR, RECT &);
+	void drawPlayerChoice(int);
+
 	void drawWinner(Character);
+
 	void drawEndTurn(D3DXVECTOR3, D3DCOLOR, RECT &);
 	void drawHoverInfo(int, Character, D3DXVECTOR3, D3DCOLOR, int, float dt);
 	void drawAbilityAnimations();

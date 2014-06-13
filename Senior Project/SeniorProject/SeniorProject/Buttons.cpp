@@ -2,11 +2,11 @@
 
 Buttons::Buttons()
 {
-	highlight = false;
-	position.x = 0;
-	position.y = 0;
-	position.z = 0;
-	occupied = false;
+	highlight		= false;
+	position.x	= 0;
+	position.y		= 0;
+	position.z	= 0;
+	occupied		= false;
 }
 
 Buttons::~Buttons()
@@ -70,4 +70,3 @@ bool Buttons::isOn(float x, float y, int scale)
 	return (x < (position.x + (width / scale)) && x > (position.x -  (width / scale)) &&
 		y < (position.y + (height / scale)) && y > (position.y -  (height / scale)));
 }
-

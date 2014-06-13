@@ -238,7 +238,7 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
 		D3DCOLOR_XRGB(255, 0, 255), &m_minotaurIconInfo, 0, &m_minotaurIcon);
 
-	
+
 	D3DXCreateTextureFromFileEx(m_pD3DDevice, L"PlayerUIBackground.png", 0, 0, 0, 0, 
 		D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 
 		D3DCOLOR_XRGB(255, 0, 255), &m_helpMenuInfo, 0, &m_helpMenu);
@@ -732,12 +732,12 @@ void GameEngine::InitMenu()
 	}
 
 	characterButtons.clear();
-	// T, L, B, R, X, Y, HIGHLIGHT, ROW, COL
+	// T, L, B, R, X, Y, HIGHLIGHT, ROW, COL, moveX, moveY
 	RectData character_pos[] =
 	{
-		{200, 60, 400, 140, 100, 300, false, 0, 0},
-		{200, 260, 400, 340, 300, 300, false, 0, 0},
-		{200, 460, 400, 540, 500, 300, false, 0, 0},
+		{175, 40, 600, 170, -100, 300, false, 0, 0}, // archer x = 100 y = 250
+		{175, 200, 600, 420, 400, 0, false, 0, 0}, // black mage y = 300
+		{150, 550, 600, 800, 900, 300, false, 0, 0}, // warrior x = 600 y = 300
 	};
 
 	for(int i = 0; i < 3; i++)
@@ -760,10 +760,10 @@ void GameEngine::InitMenu()
 
 void GameEngine::Update(float dt)
 {
-	m_player[0].adjustCurrentSpecial(100);
-	m_player[1].adjustCurrentSpecial(100);
-	m_player[0].setGold( 1000 );
-	m_player[1].setGold( 1000 );
+	//m_player[0].adjustCurrentSpecial(100);
+	//m_player[1].adjustCurrentSpecial(100);
+	//m_player[0].setGold( 1000 );
+	//m_player[1].setGold( 1000 );
 	///////////////////////////////////////////////////////////////////////////////
 	//  INFO:  Used with tools to get animations working, leave this in
 	int animationOffsetLeft = 140;
@@ -856,6 +856,15 @@ void GameEngine::Update(float dt)
 		{
 			for(auto &Buttons: characterButtons)
 			{
+				if(Buttons.getPosition().x > -109.0f && Buttons.getPosition().x < 100.0f)
+					Buttons.setPosition( (Buttons.getPosition().x + 0.05f), Buttons.getPosition().y);
+
+				if(Buttons.getPosition().y > -1.0f && Buttons.getPosition().y < 300.0f)
+					Buttons.setPosition( Buttons.getPosition().x , (Buttons.getPosition().y + 0.05f) );
+
+				if(Buttons.getPosition().x > 599.0f && Buttons.getPosition().x < 901.0f)
+					Buttons.setPosition( (Buttons.getPosition().x - 0.05f), Buttons.getPosition().y);
+
 				if(Buttons.isOn(cursor.x, cursor.y, 3))
 				{
 					Buttons.setColor(D3DCOLOR_ARGB(255,255,255,0));
@@ -867,43 +876,46 @@ void GameEngine::Update(float dt)
 					Buttons.setHighlight(false);
 				}
 
-				if( m_characterSelectTimer > 0.5f ){
-				if(mouseState.rgbButtons[0])
+				if( m_characterSelectTimer > 0.5f )
 				{
-					if(!keyIsDown[DIK_K])
+					if(mouseState.rgbButtons[0])
 					{
-						keyIsDown[DIK_K] = true;
+						if(!keyIsDown[DIK_K])
+						{
+							keyIsDown[DIK_K] = true;
 
-						for(int i = 0; i < 3; i++){
-							//////////////////////////////////////////////////////////////////////
-							//  INFO:  If a button is highlighted, use that character.  If
-							//			a button is not highlighted, do no select a character.
-							if(characterButtons[i].isHighlighted()){
-								selected = i;
+							for(int i = 0; i < 3; i++)
+							{
+								//////////////////////////////////////////////////////////////////////
+								//  INFO:  If a button is highlighted, use that character.  If
+								//			a button is not highlighted, do no select a character.
+								if(characterButtons[i].isHighlighted())
+								{
+									selected = i;
+									break;
+								}
+							}
+
+							switch(selected)
+							{
+							case 0:
+								m_player[0].setCharacterType(1);
+								player1selected = true;
+								break;
+							case 1:
+								m_player[0].setCharacterType(2);
+								player1selected = true;
+								break;
+							case 2:
+								m_player[0].setCharacterType(0);
+								player1selected = true;
 								break;
 							}
 						}
-
-						switch(selected)
-						{
-						case 0:
-							m_player[0].setCharacterType(1);
-							player1selected = true;
-							break;
-						case 1:
-							m_player[0].setCharacterType(2);
-							player1selected = true;
-							break;
-						case 2:
-							m_player[0].setCharacterType(0);
-							player1selected = true;
-							break;
-						}
 					}
+					else
+						keyIsDown[DIK_K] = false;
 				}
-				else
-					keyIsDown[DIK_K] = false;
-			}
 			}
 		}
 
@@ -1143,8 +1155,6 @@ void GameEngine::Update(float dt)
 					Buttons.setHighlight(false);
 				}
 
-				
-
 				// Check for mouse click
 				if(mouseState.rgbButtons[0])
 				{
@@ -1337,55 +1347,55 @@ void GameEngine::Update(float dt)
 							break;
 						case 4: // Ability 1
 							if( !m_classAbilityAnimator.getAnimationActive() ){
-							if(m_player[0].getCurrentSpecial() >= 50)
-							{
-								if(m_player[0].getCharacterType() == ARCHER) // Split shot = Kills 2 enemy units of player's choosing
+								if(m_player[0].getCurrentSpecial() >= 50)
 								{
-									archerAbility1(done);
-
-									if(!done && unitsAttacked != 2)
-										archerAbility1(done);
-									else
+									if(m_player[0].getCharacterType() == ARCHER) // Split shot = Kills 2 enemy units of player's choosing
 									{
-										unitsAttacked = 0;
-										m_player[0].adjustCurrentSpecial(-50);
-										break;
+										archerAbility1(done);
+
+										if(!done && unitsAttacked != 2)
+											archerAbility1(done);
+										else
+										{
+											unitsAttacked = 0;
+											m_player[0].adjustCurrentSpecial(-50);
+											break;
+										}
+									}
+
+									if(m_player[0].getCharacterType() == BLACKMAGE) {// Black hole
+										fmodSystem->playSound( FMOD_CHANNEL_FREE, cleaveAbilitySFX, false, 0 );
+										blackHoleAbility(row, col, 0);
+									}
+
+									if(m_player[0].getCharacterType() == WARRIOR) // ??
+									{
+										fmodSystem->playSound( FMOD_CHANNEL_FREE, cleaveAbilitySFX, false, 0 );
+										cleaveAbility( PLAYERONE );
 									}
 								}
-
-								if(m_player[0].getCharacterType() == BLACKMAGE) {// Black hole
-									fmodSystem->playSound( FMOD_CHANNEL_FREE, cleaveAbilitySFX, false, 0 );
-									blackHoleAbility(row, col, 0);
-								}
-
-								if(m_player[0].getCharacterType() == WARRIOR) // ??
-								{
-									fmodSystem->playSound( FMOD_CHANNEL_FREE, cleaveAbilitySFX, false, 0 );
-									cleaveAbility( PLAYERONE );
-								}
-							}
 							}
 							break;
 						case 5: // Ability 2
 							if( !m_classAbilityAnimator.getAnimationActive() ){
 								if(m_player[0].getCurrentSpecial() > 99)
 								{
-							if(m_player[0].getCharacterType() == ARCHER) // Precision Shot
-							{
-							
-									m_player[0].adjustCurrentSpecial(-100);
-									m_player[1].adjustCurrentHealth(-100);
-							
-							}
+									if(m_player[0].getCharacterType() == ARCHER) // Precision Shot
+									{
 
-							if(m_player[0].getCharacterType() == BLACKMAGE) //  Flame Wave
-								flameWaveAbility(row, col, 0);
+										m_player[0].adjustCurrentSpecial(-100);
+										m_player[1].adjustCurrentHealth(-100);
 
-							if(m_player[0].getCharacterType() == WARRIOR)
-							{
-								bolsterAbility( PLAYERONE );
-							}
-							}
+									}
+
+									if(m_player[0].getCharacterType() == BLACKMAGE) //  Flame Wave
+										flameWaveAbility(row, col, 0);
+
+									if(m_player[0].getCharacterType() == WARRIOR)
+									{
+										bolsterAbility( PLAYERONE );
+									}
+								}
 							}
 							break;
 						default:
@@ -1648,11 +1658,8 @@ void GameEngine::Update(float dt)
 									//Get row and destroy all units in that row
 									if(m_player[1].getCharacterType() == ARCHER) // Precision Shot
 									{
-										//if(m_player[1].getCurrentSpecial() == 100)
-										//	{
 										m_player[1].adjustCurrentSpecial(-100);
 										m_player[0].adjustCurrentHealth(-100);
-										//}
 									}
 
 									if(m_player[1].getCharacterType() == BLACKMAGE) //  Flame Wave
@@ -3063,8 +3070,8 @@ void GameEngine::Render(float dt)
 			if(SUCCEEDED(m_pD3DSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_SORT_DEPTH_FRONTTOBACK)))
 			{
 				D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
-				int fuckyou = 0;
-				int fuckyou2 = 0;
+				int changer1 = 0;
+				int changer2 = 0;
 				///////////////////////////////////////////////////
 				//  INFO:  For drawing graphics
 				switch(m_gameState)
@@ -3105,21 +3112,20 @@ void GameEngine::Render(float dt)
 					m_pD3DSprite->Draw(m_menuBG, 0, &D3DXVECTOR3(m_menuBGInfo.Width * 0.5f, m_menuBGInfo.Height * 0.5f, 0.0f),
 						0, D3DXCOLOR(255,255, 255,255));
 					//Character select buttons
-
 					for(auto& Buttons: characterButtons)
 					{
 						if(!player1selected)
-							drawCharacters(fuckyou, D3DXVECTOR3(Buttons.getPosition().x, Buttons.getPosition().y, 0.0f), Buttons.getColor(), Buttons.getRect());
+							drawCharacters(changer1, D3DXVECTOR3(Buttons.getPosition().x, Buttons.getPosition().y, 0.0f), Buttons.getColor(), Buttons.getRect());
 
-						fuckyou += 1;
+						changer1 += 1;
 					}
-
+					//Player 2
 					for(auto& Buttons: characterButtons)
 					{
 						if(player1selected)
-							drawCharacters(fuckyou2, D3DXVECTOR3(Buttons.getPosition().x, Buttons.getPosition().y, 0.0f), Buttons.getColor(), Buttons.getRect());
+							drawCharacters(changer2, D3DXVECTOR3(Buttons.getPosition().x, Buttons.getPosition().y, 0.0f), Buttons.getColor(), Buttons.getRect());
 
-						fuckyou2 += 1;
+						changer2 += 1;
 					}
 					break;
 				case MENUCREDITS:
@@ -3284,6 +3290,7 @@ void GameEngine::Render(float dt)
 				m_pD3DFont->DrawText(0, buffer, -1, &cursorRect, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 255, 0));*/
 				break;
 			case MENUCHARACTERSELECT:
+				drawPlayerChoice(m_player[0].getCharacterType());
 				break;
 			case MENUCREDITS:
 				break;
@@ -4539,32 +4546,32 @@ void GameEngine::drawUIText(float dt)
 	wchar_t buffer[128];
 
 	if ( !m_displayingHelpMenu ) {
-	for(int i = 0; i < 2; ++i)
-	{
-		rect.left += i * 250;
-		rect.right += i * 250;
-		swprintf_s(buffer, 128, L"Health:   %d \ %d\nSpecial:  %d / %d\nGold:      %d", m_player[i].getCurrentHealth(), m_player[i].getMaxHealth(), m_player[i].getCurrentSpecial(), m_player[i].getMaxSpecial(), m_player[i].getGold());
+		for(int i = 0; i < 2; ++i)
+		{
+			rect.left += i * 250;
+			rect.right += i * 250;
+			swprintf_s(buffer, 128, L"Health:   %d \ %d\nSpecial:  %d / %d\nGold:      %d", m_player[i].getCurrentHealth(), m_player[i].getMaxHealth(), m_player[i].getCurrentSpecial(), m_player[i].getMaxSpecial(), m_player[i].getGold());
+			m_pD3DFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
+		}
+		rect.top = 470;
+		rect.bottom = 575;
+		rect.left += 250;
+		rect.right += 250;
+		swprintf_s(buffer, 128, L"Units\n\nAbilities");
 		m_pD3DFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
-	}
-	rect.top = 470;
-	rect.bottom = 575;
-	rect.left += 250;
-	rect.right += 250;
-	swprintf_s(buffer, 128, L"Units\n\nAbilities");
-	m_pD3DFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
-	rect.left -= 620;
-	swprintf_s(buffer, 128, L"Units\n\nAbilities");
-	m_pD3DFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
+		rect.left -= 620;
+		swprintf_s(buffer, 128, L"Units\n\nAbilities");
+		m_pD3DFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
 
-	if(m_floatingTextActive && !m_combatMessageActive)
-	{
-		swprintf_s(buffer, 128, L"%d", m_damageType);
-		m_pD3DFont->DrawText(0, buffer, -1, &m_floatingTextRect, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 0, 0));
-	}
-	if( m_combatMessageActive )
-	{
-		m_pD3DFont->DrawText(0, m_combatMessage, -1, &m_floatingTextRect, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 127, 0));
-	}
+		if(m_floatingTextActive && !m_combatMessageActive)
+		{
+			swprintf_s(buffer, 128, L"%d", m_damageType);
+			m_pD3DFont->DrawText(0, buffer, -1, &m_floatingTextRect, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 0, 0));
+		}
+		if( m_combatMessageActive )
+		{
+			m_pD3DFont->DrawText(0, m_combatMessage, -1, &m_floatingTextRect, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 127, 0));
+		}
 	}
 	//Player can't afford unit
 	if(noGold)
@@ -5181,8 +5188,8 @@ void GameEngine::drawCharacters(int a_number, D3DXVECTOR3 position, D3DCOLOR a_c
 	//draw archer
 	if(a_number == 0)
 	{
-		D3DXMatrixScaling(&scaleMat, 0.2f, 0.2f, 0.0f);
-		D3DXMatrixTranslation(&transMat, position.x, position.y, 0.0f);
+		D3DXMatrixScaling(&scaleMat, 0.2f, 0.17f, 0.0f);
+		D3DXMatrixTranslation(&transMat, position.x, position.y- 40.0f, 0.0f);
 		D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
 		D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
 
@@ -5208,7 +5215,7 @@ void GameEngine::drawCharacters(int a_number, D3DXVECTOR3 position, D3DCOLOR a_c
 	if(a_number == 1)
 	{
 		D3DXMatrixScaling(&scaleMat, 0.2f, 0.35f, 0.0f);
-		D3DXMatrixTranslation(&transMat, position.x+100.0f, position.y, 0.0f);
+		D3DXMatrixTranslation(&transMat, position.x, position.y, 0.0f);
 		D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
 		D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
 
@@ -5217,6 +5224,36 @@ void GameEngine::drawCharacters(int a_number, D3DXVECTOR3 position, D3DCOLOR a_c
 		m_pD3DSprite->Draw(m_blackMageCharacter, 0, &D3DXVECTOR3(m_blackMageCharacterInfo.Width * 0.5f, m_blackMageCharacterInfo.Height * 0.5f, 0.0f),
 			0, a_color);
 	}
+}
+
+void GameEngine::drawPlayerChoice(int playerChoice)
+{
+	RECT rect;
+	GetWindowRect(m_hWnd, &rect);
+	rect.right = rect.right - rect.left;
+	rect.bottom = rect.bottom - rect.top;
+	rect.top = 500;			
+	rect.left = 75;
+	wchar_t buffer[128];
+
+	if(playerChoice == 0) //WARRIOR
+	{
+		swprintf_s(buffer, 128, L"Player 1: WARRIOR");
+		m_pD3DFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 0, 0));
+	}
+
+	if(playerChoice == 1) // ARCHER
+	{
+		swprintf_s(buffer, 128, L"Player 1: ARCHER");
+		m_pD3DFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 255, 0));
+	}
+
+	if(playerChoice == 2) // BLACKMAGE
+	{
+		swprintf_s(buffer, 128, L"Player 1: BLACKMAGE");
+		m_pD3DFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 255, 255));
+	}
+
 }
 
 void GameEngine::drawWinner(Character a_player)
@@ -5758,20 +5795,20 @@ void GameEngine::drawHelpMenuBackground(){
 	if( m_displayingHelpMenu ){
 		D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
 
-	D3DXMatrixIdentity(&transMat);
-	D3DXMatrixIdentity(&scaleMat);
-	D3DXMatrixIdentity(&rotMat);
-	D3DXMatrixIdentity(&worldMat);
+		D3DXMatrixIdentity(&transMat);
+		D3DXMatrixIdentity(&scaleMat);
+		D3DXMatrixIdentity(&rotMat);
+		D3DXMatrixIdentity(&worldMat);
 
-	D3DXMatrixScaling(&scaleMat, 1.3f, 1.1f, 0.0f);
-	D3DXMatrixTranslation(&transMat, 253, 170, 0.0f);
-	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
-	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
+		D3DXMatrixScaling(&scaleMat, 1.3f, 1.1f, 0.0f);
+		D3DXMatrixTranslation(&transMat, 253, 170, 0.0f);
+		D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
+		D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
 
-	m_pD3DSprite->SetTransform(&worldMat);
+		m_pD3DSprite->SetTransform(&worldMat);
 
-	m_pD3DSprite->Draw(m_helpMenu, 0, &D3DXVECTOR3(float(m_helpMenuInfo.Width* 0.5f), float(m_helpMenuInfo.Height * 0.5f), 0.0f),
-		0, D3DCOLOR_ARGB(255, 255, 255, 255));
+		m_pD3DSprite->Draw(m_helpMenu, 0, &D3DXVECTOR3(float(m_helpMenuInfo.Width* 0.5f), float(m_helpMenuInfo.Height * 0.5f), 0.0f),
+			0, D3DCOLOR_ARGB(255, 255, 255, 255));
 	}
 };
 
@@ -5787,12 +5824,12 @@ void GameEngine::drawHelpMenuText(){
 	wchar_t buffer[512];
 
 	if ( m_displayingHelpMenu ) {
-	
+
 		//rect.left += i * 250;
 		//rect.right += i * 250;
 		swprintf_s(buffer, 512, L"Help Menu");
 		m_readableFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 0, 0));
-	
+
 		rect.left = 110;
 		rect.top += 50;
 		swprintf_s(buffer, 512, L"Objective");
@@ -5800,9 +5837,9 @@ void GameEngine::drawHelpMenuText(){
 
 		rect.left += 30;
 		rect.top += 30;
-				swprintf_s(buffer, 512, L"Each player takes turn placing units on the battle \nfield.  Strategically place your army to defeat your \nenemy!!");
+		swprintf_s(buffer, 512, L"Each player takes turn placing units on the battle \nfield.  Strategically place your army to defeat your \nenemy!!");
 		m_readableFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
-	
+
 		rect.left = 110;
 		rect.top += 90;
 		swprintf_s(buffer, 512, L"Gameplay");
@@ -5813,9 +5850,9 @@ void GameEngine::drawHelpMenuText(){
 		swprintf_s(buffer, 512, L"-Turn begins - Remaining gold mines produce gold\n-Play Phase - use mouse to place units on board\n-Abilities - can be used if you have enough special\n      (Acquire special by destroying enemy units)\n-End Turn - active units attack and use abilities");
 		m_readableFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
 
-				rect.left = 110;
+		rect.left = 110;
 		rect.top += 150;
-				swprintf_s(buffer, 512, L"Unit Basics");
+		swprintf_s(buffer, 512, L"Unit Basics");
 		m_readableFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 0, 0));
 
 		rect.left += 30;
@@ -5823,13 +5860,13 @@ void GameEngine::drawHelpMenuText(){
 		swprintf_s(buffer, 512, L"-Play units within 4 spaces of your gold mines\n-Ranged Units - Stay in place, attack their lane\n-Melee Units - Advance the board, attack enemies \nwithin range");
 		m_readableFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
 		//rect.top = 470;
-	//rect.bottom = 575;
-	//rect.left += 250;
-//	rect.right += 250;
-//	swprintf_s(buffer, 128, L"Units\n\nAbilities");
-//	m_pD3DFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
-//	rect.left -= 620;
-	//swprintf_s(buffer, 128, L"Units\n\nAbilities");
-//	m_pD3DFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
+		//rect.bottom = 575;
+		//rect.left += 250;
+		//	rect.right += 250;
+		//	swprintf_s(buffer, 128, L"Units\n\nAbilities");
+		//	m_pD3DFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
+		//	rect.left -= 620;
+		//swprintf_s(buffer, 128, L"Units\n\nAbilities");
+		//	m_pD3DFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
 	}
 };
