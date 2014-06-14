@@ -309,9 +309,27 @@ void Unit::updateAnimations( float dt )
 				}
 				break;
 			case MOVING:{
-
+				if( animationTimer > 1.10f )
+				{
+					animationTimer -= 1.10f;
+					setState( IDLE );
+					//switch(unitRect.left)
+					//{
+					//}
+				}
 						}
 						break;
+			case ATTACKING:
+								if( animationTimer > 1.10f )
+				{
+					animationTimer -= 1.10f;
+					setState( IDLE );
+					//switch(unitRect.left)
+					//{
+					//}
+				}
+				   
+				break;
 
 			}
 						 }
@@ -371,7 +389,18 @@ void Unit::updateAnimations( float dt )
 						break;
 					}
 				}
-				break;
+			case ATTACKING:{
+				if( animationTimer > 1.50f )
+				{
+					animationTimer -= 1.50f;
+					setState( IDLE );
+					//switch(unitRect.left)
+					//{
+					//}
+				}
+						}
+						break;
+						//break;
 			}
 					  }
 					  break;
@@ -554,7 +583,7 @@ void Unit::updateAnimations( float dt )
 				   }
 				   break;
 		case GOLEM:{
-							if( animationTimer > 1.10f )
+				if( animationTimer > 1.10f )
 				{
 					animationTimer -= 1.10f;
 					setState( IDLE );
