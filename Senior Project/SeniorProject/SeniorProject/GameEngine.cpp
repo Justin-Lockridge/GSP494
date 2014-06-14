@@ -22,6 +22,7 @@ GameEngine::GameEngine(void)
 	selectedUnit					=	99;
 	textCount						=	0;
 	m_characterSelectTimer			=	0.0f;
+	m_assassinTimer					=	0.0f;
 	noGold							=	false;
 	dontPlaceUnit					=	false;
 	firstTurn						=  true;
@@ -424,6 +425,7 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	//m_unit[0][5].addUnit( MINOTAUR, PLAYERONE );
 	//m_unit[2][12].addUnit( WARLOCK, PLAYERTWO );
 	//m_unit[1][4].addUnit( MARKSMAN, PLAYERONE );
+	m_assassinTimer		=	0.0f;
 }
 
 void GameEngine::InitGameBoard()
@@ -766,10 +768,10 @@ void GameEngine::InitMenu()
 
 void GameEngine::Update(float dt)
 {
-	m_player[0].adjustCurrentSpecial(100);
-	m_player[1].adjustCurrentSpecial(100);
-	m_player[0].setGold( 1000 );
-	m_player[1].setGold( 1000 );
+	//m_player[0].adjustCurrentSpecial(100);
+	//m_player[1].adjustCurrentSpecial(100);
+	//m_player[0].setGold( 1000 );
+	//m_player[1].setGold( 1000 );
 	///////////////////////////////////////////////////////////////////////////////
 	//  INFO:  Used with tools to get animations working, leave this in
 	int animationOffsetLeft =  33;
@@ -1737,6 +1739,18 @@ void GameEngine::Update(float dt)
 	int test = 0;
 	if( buffer[DIK_DOWN] & 0x80  )
 		test = 1;
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////
+	//  INFO:  Timer to offset Archer Assassination ability.  With this code, the target unit
+	//			dies when the assassin actually strikes.
+	if ( m_classAbilityAnimator.getType() == SPLITSHOT ){
+		m_assassinTimer	+=	dt;
+		if( m_assassinTimer > 0.8f ){
+			m_assassinTimer	=	0.0f;
+			fmodSystem->playSound( FMOD_CHANNEL_FREE, chop, false, 0 );
+			m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].removeUnit();
+		}
+	}
 }
 
 void GameEngine::updateAnimations(float dt)
@@ -2865,7 +2879,10 @@ void GameEngine::archerAbility1(bool done)
 					{
 						if(m_unit[a_row][a_col].occupied)
 						{
-							m_unit[a_row][a_col].removeUnit();
+							m_attackTargetSpaceX	=	a_row;
+							m_attackTargetSpaceY	=	a_col;
+							m_classAbilityAnimator.setClassAbilityAnimation( SPLITSHOT, m_unit[a_row][a_col].getPosX(), m_unit[a_row][a_col].getPosY() );
+							//m_unit[a_row][a_col].removeUnit();
 							unitsAttacked += 1;
 						}
 					}
@@ -5845,6 +5862,46 @@ void GameEngine::drawAbilityAnimations()
 				}
 			}
 		}
+		break;
+	case SPLITSHOT:
+		if( m_player[PLAYERONE].checkIfActivePlayer() )
+			victim	=	PLAYERTWO;
+		else
+			victim =	PLAYERONE;
+
+		
+		if( m_player[PLAYERONE].checkIfActivePlayer() ){
+			D3DXMatrixIdentity(&transMat);
+			D3DXMatrixIdentity(&worldMat);
+			D3DXMatrixTranslation(&transMat, m_classAbilityAnimator.getPosX() + 45, m_classAbilityAnimator.getPosY() + 10, 0.0f);			
+			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);	
+			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);	
+
+
+			m_pD3DSprite->SetTransform(&worldMat);
+			m_pD3DSprite->Draw(m_thief, &m_classAbilityAnimator.getAnimationRect(), &D3DXVECTOR3( ( m_classAbilityAnimator.getAnimationRect().right - m_classAbilityAnimator.getAnimationRect().left ) * 0.5f,
+				( m_classAbilityAnimator.getAnimationRect().bottom - m_classAbilityAnimator.getAnimationRect().top ) * 0.5f, 0.0f),
+				0, D3DCOLOR_ARGB(120, 0, 0, 0));
+
+		}
+		else{
+			D3DXMatrixIdentity(&scaleMat);
+			D3DXMatrixIdentity(&transMat);
+			D3DXMatrixIdentity(&worldMat);
+			D3DXMatrixTranslation(&transMat, m_classAbilityAnimator.getPosX() - 20, m_classAbilityAnimator.getPosY() + 10, 0.0f);	
+			D3DXMatrixScaling(&scaleMat, m_classAbilityAnimator.getScaleX() * -1, m_classAbilityAnimator.getScaleY(), 0.0f);	
+			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);	
+			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);	
+
+
+			m_pD3DSprite->SetTransform(&worldMat);
+			m_pD3DSprite->Draw(m_thief, &m_classAbilityAnimator.getAnimationRect(), &D3DXVECTOR3( ( m_classAbilityAnimator.getAnimationRect().right - m_classAbilityAnimator.getAnimationRect().left ) * 0.5f,
+				( m_classAbilityAnimator.getAnimationRect().bottom - m_classAbilityAnimator.getAnimationRect().top ) * 0.5f, 0.0f),
+				0, D3DCOLOR_ARGB(120, 0, 0, 0));
+
+		}
+		break;
+	case SNIPE:
 		break;
 	}
 };

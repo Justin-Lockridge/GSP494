@@ -74,7 +74,7 @@ class GameEngine
 	float			m_temporaryTimer, m_lightningTimer, m_unitAttackTimer;
 	int				m_attackingSpaceX, m_attackingSpaceY, m_attackTargetSpaceX, m_attackTargetSpaceY, m_moveToTarget, m_tester;
 
-	float			m_fireballRotation, m_floatingRectTopMax, m_floatingRectTimer, textCount, m_characterSelectTimer;
+	float			m_fireballRotation, m_floatingRectTopMax, m_floatingRectTimer, textCount, m_characterSelectTimer, m_assassinTimer;
 	RECT			m_floatingTextRect, m_healthRect, m_lightningRect;
 
 	bool			noGold, firstTurn, dontPlaceUnit, hoveredUnit, player1selected, player2selected;

@@ -64,6 +64,28 @@ void ClassAbilityAnimator::setClassAbilityAnimation( int ability, float x, float
 		//animationRect.right			=	400;
 		animationRect.bottom	=	50;
 		break;
+	case SPLITSHOT:
+		type					=	SPLITSHOT;
+		scaleX					=	1.2f;
+		scaleY					=	1.1f;
+		animationRect.top		=	0;
+		animationRect.left		=	0;
+		animationRect.right		=	35;
+		//animationRect.left			=	349;
+		//animationRect.right			=	400;
+		animationRect.bottom	=	50;
+		break;
+	case SNIPE:
+		//type					=	BOLSTER;
+		//scaleX					=	1.3f;
+		//scaleY					=	1.0f;
+		//animationRect.top		=	0;
+		//animationRect.left		=	0;
+		//animationRect.right		=	25;
+		////animationRect.left			=	349;
+		////animationRect.right			=	400;
+		//animationRect.bottom	=	50;
+		break;
 	}
 };
 
@@ -186,11 +208,77 @@ void ClassAbilityAnimator::updateClassAbilityAnimation( float dt ){
 					animationActive		=	false;
 					break;
 				}
-				//if( activeTimer > 3.5f ){
-				//	animationActive	=	false;
-				//	activeTimer = 0.0f;
-				//}
 			}
+			break;
+		case SPLITSHOT:
+				if(animationTimer > 0.06f){
+					animationTimer -= 0.06f;
+					switch(animationRect.left){
+					case 0:
+						adjustAnimationRectLeftRight( 32, 30 );
+						//setUnitRect(0, 32, 65, 50);
+						break;
+					case 32:
+						adjustAnimationRectLeftRight( 36, 42 );
+						//setUnitRect(0, 70, 105, 50);
+						break;
+					case 68:
+						adjustAnimationRectLeftRight( 40, 40 );
+						//setUnitRect(0, 110, 145, 50);
+						break;
+					case 108:
+						adjustAnimationRectLeftRight( 40, 40 );
+						//setUnitRect( 0, 150, 185, 50 );
+						break;
+					case 148:
+						adjustAnimationRectLeftRight( 30, 30 );
+						//setUnitRect( 0, 180, 215, 50 );
+						break;
+					case 178:
+						adjustAnimationRectLeftRight( 32, 32 );
+						//setUnitRect( 0, 210, 245, 50 );
+						break;
+					case 210:
+						adjustAnimationRectLeftRight( 34, 34 );
+						//unitRect.left	+=	30;
+						//unitRect.right	+=	30;
+						break;
+					case 244:
+						adjustAnimationRectLeftRight( 32, 32 );
+						//unitRect.left	+=	30;
+						//unitRect.right	+=	30;
+						break;
+					case 276:
+						adjustAnimationRectLeftRight( 32, 32 );
+						//unitRect.left	+=	30;
+						//unitRect.right	+=	30;
+						break;
+					case 308:
+						adjustAnimationRectLeftRight( 32, 32 );
+						//unitRect.top			=	0;
+						//unitRect.left			=	0;
+						//unitRect.right		=	35;
+						//unitRect.bottom	=	50;
+						//state	=	IDLE;
+						break;
+					case 340:
+						adjustAnimationRectLeftRight( 34, 38 );
+						break;
+					case 374:
+						adjustAnimationRectLeftRight( 45, 45 );
+						break;
+					case 419:
+						adjustAnimationRectLeftRight( 45, 45 );
+						break;
+					case 464:
+						animationActive	=	false;
+						animationTimer	=	0.0f;
+						type			=	-1;
+						break;
+					}
+				}
+			break;
+		case SNIPE:
 			break;
 		}
 	}
