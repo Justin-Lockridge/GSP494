@@ -49,6 +49,7 @@ public:
 	float	getPosY();
 	void	setUnitRect(int top, int left, int right, int bottom);
 	RECT	getUnitRect();
+	void	adjustUnitRectLeftRight( int leftAdjustment, int rightAdjustment );
 	void	setFacingRight(bool b);
 	bool	isFacingRight();
 	void	setIsActive(bool b);

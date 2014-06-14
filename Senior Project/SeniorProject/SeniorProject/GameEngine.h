@@ -71,7 +71,7 @@ class GameEngine
 	bool			m_unitCurrentlyAttacking, m_fireBallActive, m_arrowActive, m_floatingTextActive, m_unitCurrentlyMoving, m_lightningActive, m_combatMessageActive, m_attackWillHitPlayer,
 					m_displayingHelpMenu;
 	float			m_projectilePosX, m_projectilePosY, m_arrowForAttackingUnitPosX, m_arrowForAttackingUnitPosY;
-	float			m_temporaryTimer, m_lightningTimer;
+	float			m_temporaryTimer, m_lightningTimer, m_unitAttackTimer;
 	int				m_attackingSpaceX, m_attackingSpaceY, m_attackTargetSpaceX, m_attackTargetSpaceY, m_moveToTarget, m_tester;
 
 	float			m_fireballRotation, m_floatingRectTopMax, m_floatingRectTimer, textCount, m_characterSelectTimer;
@@ -133,7 +133,7 @@ class GameEngine
 	FMOD::System* fmodSystem;
 	FMOD::Sound* themeMusicOne, *battleTheme;
 	FMOD::Sound* hitMines, *arrowHit, *castFireball, *shootArrow, *fireballHit, *thunderStrike, *minotaurRoar, *goldCoins, *warlockSpell, *cleaveAbilitySFX,
-		*bolsterAbilitySFX;
+		*bolsterAbilitySFX, *chop;
 	FMOD::Channel* mainChannel;
 	FMOD::Channel* channel;
 	bool keyIsDown[255];

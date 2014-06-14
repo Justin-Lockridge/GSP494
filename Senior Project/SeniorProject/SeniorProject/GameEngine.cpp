@@ -382,6 +382,7 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	fmodSystem->createSound("LimitBreak.wav", FMOD_DEFAULT, 0, &warlockSpell);
 	fmodSystem->createSound("Cleave.wav", FMOD_DEFAULT, 0, &cleaveAbilitySFX);
 	fmodSystem->createSound("cure.wav", FMOD_DEFAULT, 0, &bolsterAbilitySFX);
+	fmodSystem->createSound("chop.wav", FMOD_DEFAULT, 0, &chop);
 
 	for(int i = 0; i < 255; ++i)
 	{
@@ -1775,7 +1776,9 @@ void GameEngine::updateEventPhase(float dt)
 				m_damageType				=		-1;
 				m_unitCurrentlyAttacking	=		false;
 				m_unit[m_attackingSpaceX][m_attackingSpaceY].setUnitCanUseAbility( false );
-				m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( IDLE );
+				if( m_unit[m_attackingSpaceX][m_attackingSpaceY].getState() != ATTACKING )
+					m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( IDLE );
+				//m_unitAttackTimer	=	0.0f;
 			}
 		}
 	}
@@ -1783,6 +1786,7 @@ void GameEngine::updateEventPhase(float dt)
 	//  INFO:  If no unit is attacking or moving, find the next unit to take action
 	if(!m_unitCurrentlyAttacking && !m_unitCurrentlyMoving && !m_floatingTextActive)
 	{
+		//m_unitAttackTimer	+=	dt;
 		if(m_gamePhase == PLAYERONE_EVENTPHASE)
 		{
 			for(int i = 0; i < MAXBOARDHEIGHT; ++i)
@@ -1919,10 +1923,12 @@ void GameEngine::updateEventPhase(float dt)
 							}
 							else
 							{
+								//if( m_unitAttackTimer > 0.5f ){
 								m_unitCurrentlyAttacking = true;
 								m_attackingSpaceX	=	i;
 								m_attackingSpaceY	=	j;
 								findNextTarget( i, j );
+								//}
 							}
 							return;
 						case GOLEM:
@@ -2344,6 +2350,7 @@ void GameEngine::updateEventPhase(float dt)
 				if( m_attackTargetSpaceY >= 0 )
 				{
 					m_damageType	=	m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage();
+					m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( IDLE );
 					if( m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getType() == THIEF )
 					{
 						m_randomNumber	=	rand()%2;
@@ -2388,6 +2395,7 @@ void GameEngine::updateEventPhase(float dt)
 				if( m_attackTargetSpaceX >= 0 ) 
 				{
 					m_damageType	=	m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage();
+					m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( IDLE );
 					if( m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getType() == THIEF )
 					{
 						m_randomNumber	=	rand()%2;
@@ -2438,6 +2446,7 @@ void GameEngine::updateEventPhase(float dt)
 		if( ( m_lightningRect.bottom - 1300 ) > m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getPosY() )
 		{
 			m_unit[m_attackingSpaceX][m_attackingSpaceY].setUnitCanTakeAction( false );
+			m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( IDLE );
 			m_lightningActive = false;
 			m_lightningRect.top		=	0;
 			m_lightningRect.left	=	0;
@@ -2505,6 +2514,12 @@ void GameEngine::updateEventPhase(float dt)
 			//  INFO:  Set data for floating text
 			if( !m_floatingTextActive )
 			{
+				if( m_unit[m_attackingSpaceX][m_attackingSpaceY].getState() != ATTACKING ){
+					///////////////////////////////////////////////////////////////////
+					//  INFO:  The Thief attack sound needs to be offset to match his animation.
+					//  TODO:  Find a better way / place to do this
+					if( m_unit[m_attackingSpaceX][m_attackingSpaceY].getType() == THIEF )
+						fmodSystem->playSound( FMOD_CHANNEL_FREE, chop, false, 0 );
 				m_floatingTextActive = true;
 				m_floatingRectTopMax	=	m_gameBoard[m_attackingSpaceX][m_attackingSpaceY].getPosY() - 35;
 				m_floatingTextRect.top = long(m_gameBoard[m_attackingSpaceX][m_attackTargetSpaceY].getPosY() - 10);
@@ -2524,6 +2539,7 @@ void GameEngine::updateEventPhase(float dt)
 				if( m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getCurrentHealth() < 1 )
 					destroyUnit();
 				//m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].removeUnit();
+				}
 			}
 		}
 	}
@@ -2536,6 +2552,7 @@ void GameEngine::findNextTarget( int row, int col )
 {
 	if ( col == 12 )
 		col = 12;
+	int tryingThis = m_gamePhase;
 	if(m_gamePhase == PLAYERONE_EVENTPHASE)
 	{
 		///////////////////////////////////////////////////////////////////////////////////
@@ -2590,6 +2607,7 @@ void GameEngine::findNextTarget( int row, int col )
 						else{
 							m_moveToTarget = col + i;
 							m_unit[row][col].setState( MOVING );
+							
 						}
 
 						break;
@@ -2722,6 +2740,7 @@ void GameEngine::moveUnit()
 	//m_unit[m_attackingSpaceX][m_moveToTarget].setCurrentHealth( m_unit[m_attackingSpaceX][m_attackingSpaceY].getCurrentHealth() );
 	//m_unit[m_attackingSpaceX][m_moveToTarget].setMaxHealth( m_unit[m_attackingSpaceX][m_attackingSpaceY].getMaxHealth() );
 	m_unit[m_attackingSpaceX][m_attackingSpaceY].removeUnit();
+	m_unit[m_attackingSpaceX][m_moveToTarget].setState( IDLE );
 	m_unitCurrentlyMoving = false;
 	m_unitCurrentlyAttacking	=	false;
 	m_unit[m_attackingSpaceX][m_moveToTarget].setPosX( m_gameBoard[m_attackingSpaceX][m_moveToTarget].getPosX());
