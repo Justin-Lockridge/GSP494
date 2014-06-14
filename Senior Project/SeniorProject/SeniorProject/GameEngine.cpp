@@ -382,7 +382,6 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	fmodSystem->createSound("LimitBreak.wav", FMOD_DEFAULT, 0, &warlockSpell);
 	fmodSystem->createSound("Cleave.wav", FMOD_DEFAULT, 0, &cleaveAbilitySFX);
 	fmodSystem->createSound("cure.wav", FMOD_DEFAULT, 0, &bolsterAbilitySFX);
-	fmodSystem->createSound("chop.wav", FMOD_DEFAULT, 0, &chop);
 
 	for(int i = 0; i < 255; ++i)
 	{
@@ -424,7 +423,6 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	//m_unit[0][5].addUnit( MINOTAUR, PLAYERONE );
 	//m_unit[2][12].addUnit( WARLOCK, PLAYERTWO );
 	//m_unit[1][4].addUnit( MARKSMAN, PLAYERONE );
-	m_unit[1][1].addUnit( THIEF, PLAYERONE );
 }
 
 void GameEngine::InitGameBoard()
@@ -1096,67 +1094,20 @@ void GameEngine::Update(float dt)
 				switch(m_tester)
 				{
 				case 1:
-					m_unit[1][1].setState( ATTACKING );
+					m_classAbilityAnimator.setClassAbilityAnimation( BOLSTER , m_gameBoard[0][0].getPosX(), m_gameBoard[0][0].getPosY() );
 					break;
-				case 2:
-					m_unit[1][1].adjustUnitRectLeftRight( 32, 30 );
-					break;
-				case 3:
-					m_unit[1][1].adjustUnitRectLeftRight( 36, 42 );
+				default:
+					m_classAbilityAnimator.adjustAnimationRectLeftRight( animationOffsetLeft, animationOffsetRight );
+					//animationOffsetLeft	=	140;
+					//animationOffsetRight	=	142;
 					break;
 				case 4:
-					m_unit[1][1].adjustUnitRectLeftRight( 40, 40 );
+					//animationOffsetLeft		=	139;
+					//animationOffsetRight	=	141;
 					break;
-				case 5:
-					m_unit[1][1].adjustUnitRectLeftRight( 40, 40 );
-					break;
-				case 6:
-					m_unit[1][1].adjustUnitRectLeftRight( 30, 30 );
-					break;
-				case 7:
-					m_unit[1][1].adjustUnitRectLeftRight( 32, 32 );
-					break;
-				case 8:
-					m_unit[1][1].adjustUnitRectLeftRight( 34, 34 );
-					break;
-				case 9:
-					m_unit[1][1].adjustUnitRectLeftRight( 32, 32 );
-					break;
-				case 10:
-					m_unit[1][1].adjustUnitRectLeftRight( 32, 32 );
-					break;
-				case 11:
-					m_unit[1][1].adjustUnitRectLeftRight( 32, 32 );
-					break;
-				case 12:
-					m_unit[1][1].adjustUnitRectLeftRight( 34, 38 );
-					//m_unit[1][1].setUnitRect( m_unit[1][1].getUnitRect().top, m_unit[1][1].getUnitRect().left, m_unit[1][1].getUnitRect().right, m_unit[1][1].getUnitRect().bottom + 5 );
-					break;
-				case 13:
-					m_unit[1][1].adjustUnitRectLeftRight( 45, 45 );
-					break;
-				case 14:
-					m_unit[1][1].adjustUnitRectLeftRight( 45, 45 );
-					break;
-				case 15:
-					m_tester = 0;
-					m_unit[1][1].setState( IDLE );
-					break;
-				//case 1:
-				//	m_classAbilityAnimator.setClassAbilityAnimation( BOLSTER , m_gameBoard[0][0].getPosX(), m_gameBoard[0][0].getPosY() );
-				//	break;
-				//default:
-				//	m_classAbilityAnimator.adjustAnimationRectLeftRight( animationOffsetLeft, animationOffsetRight );
-				//	//animationOffsetLeft	=	140;
-				//	//animationOffsetRight	=	142;
-				//	break;
-				//case 4:
-				//	//animationOffsetLeft		=	139;
-				//	//animationOffsetRight	=	141;
-				//	break;
 				}
 
-				//m_unit[1][1].setUnitRect( m_unit[1][1].getUnitRect().top, m_unit[1][1].getUnitRect().left + animationOffsetLeft, m_unit[1][1].getUnitRect().right + animationOffsetRight, m_unit[1][1].getUnitRect().bottom );
+				m_unit[1][1].setUnitRect( m_unit[1][1].getUnitRect().top, m_unit[1][1].getUnitRect().left + animationOffsetLeft, m_unit[1][1].getUnitRect().right + animationOffsetRight, m_unit[1][1].getUnitRect().bottom );
 			}
 		}
 		else
@@ -1176,60 +1127,18 @@ void GameEngine::Update(float dt)
 					animationOffsetRight = 32;
 				}
 				switch(m_tester){
-									case 1:
-					m_unit[1][1].setState( ATTACKING );
-					break;
-				case 2:
-					m_unit[1][1].adjustUnitRectLeftRight( -32, -30 );
-					break;
-				case 3:
-					m_unit[1][1].adjustUnitRectLeftRight( -36, -42 );
+				default:
+					m_classAbilityAnimator.adjustAnimationRectLeftRight( -animationOffsetLeft, -animationOffsetRight );
+					//animationOffsetLeft		=	140;
+					//animationOffsetRight	=	142;
 					break;
 				case 4:
-					m_unit[1][1].adjustUnitRectLeftRight( -40, -40 );
+					//animationOffsetLeft		=	120;
+					//animationOffsetRight	=	141;
 					break;
-				case 5:
-					m_unit[1][1].adjustUnitRectLeftRight( -40, -40 );
-					break;
-				case 6:
-					m_unit[1][1].adjustUnitRectLeftRight( -30, -30 );
-					break;
-				case 7:
-					m_unit[1][1].adjustUnitRectLeftRight( -32, -32 );
-					break;
-				case 8:
-					m_unit[1][1].adjustUnitRectLeftRight( -34, -34 );
-					break;
-				case 9:
-					m_unit[1][1].adjustUnitRectLeftRight( -32, -32 );
-					break;
-				case 10:
-					m_unit[1][1].adjustUnitRectLeftRight( -32, -32 );
-					break;
-				case 11:
-					m_unit[1][1].adjustUnitRectLeftRight( -32, -45 );
-					break;
-				case 12:
-					m_unit[1][1].adjustUnitRectLeftRight( -34, -38 );
-					break;
-				case 13:
-					m_unit[1][1].adjustUnitRectLeftRight( -45, -45 );
-					break;
-				case 14:
-					m_unit[1][1].adjustUnitRectLeftRight( -45, -45 );
-					break;
-				//default:
-				//	m_classAbilityAnimator.adjustAnimationRectLeftRight( -animationOffsetLeft, -animationOffsetRight );
-				//	//animationOffsetLeft		=	140;
-				//	//animationOffsetRight	=	142;
-				//	break;
-				//case 4:
-				//	//animationOffsetLeft		=	120;
-				//	//animationOffsetRight	=	141;
-				//	break;
 				}
 
-				//m_unit[1][1].setUnitRect( m_unit[1][1].getUnitRect().top, m_unit[1][1].getUnitRect().left - animationOffsetLeft, m_unit[1][1].getUnitRect().right - animationOffsetRight, m_unit[1][1].getUnitRect().bottom );
+				m_unit[1][1].setUnitRect( m_unit[1][1].getUnitRect().top, m_unit[1][1].getUnitRect().left - animationOffsetLeft, m_unit[1][1].getUnitRect().right - animationOffsetRight, m_unit[1][1].getUnitRect().bottom );
 			}
 		}
 		else
@@ -1866,9 +1775,7 @@ void GameEngine::updateEventPhase(float dt)
 				m_damageType				=		-1;
 				m_unitCurrentlyAttacking	=		false;
 				m_unit[m_attackingSpaceX][m_attackingSpaceY].setUnitCanUseAbility( false );
-				if( m_unit[m_attackingSpaceX][m_attackingSpaceY].getState() != ATTACKING )
-					m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( IDLE );
-				//m_unitAttackTimer	=	0.0f;
+				m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( IDLE );
 			}
 		}
 	}
@@ -1876,7 +1783,6 @@ void GameEngine::updateEventPhase(float dt)
 	//  INFO:  If no unit is attacking or moving, find the next unit to take action
 	if(!m_unitCurrentlyAttacking && !m_unitCurrentlyMoving && !m_floatingTextActive)
 	{
-		//m_unitAttackTimer	+=	dt;
 		if(m_gamePhase == PLAYERONE_EVENTPHASE)
 		{
 			for(int i = 0; i < MAXBOARDHEIGHT; ++i)
@@ -2013,12 +1919,10 @@ void GameEngine::updateEventPhase(float dt)
 							}
 							else
 							{
-								//if( m_unitAttackTimer > 0.5f ){
 								m_unitCurrentlyAttacking = true;
 								m_attackingSpaceX	=	i;
 								m_attackingSpaceY	=	j;
 								findNextTarget( i, j );
-								//}
 							}
 							return;
 						case GOLEM:
@@ -2440,7 +2344,6 @@ void GameEngine::updateEventPhase(float dt)
 				if( m_attackTargetSpaceY >= 0 )
 				{
 					m_damageType	=	m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage();
-					m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( IDLE );
 					if( m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getType() == THIEF )
 					{
 						m_randomNumber	=	rand()%2;
@@ -2485,7 +2388,6 @@ void GameEngine::updateEventPhase(float dt)
 				if( m_attackTargetSpaceX >= 0 ) 
 				{
 					m_damageType	=	m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage();
-					m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( IDLE );
 					if( m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getType() == THIEF )
 					{
 						m_randomNumber	=	rand()%2;
@@ -2536,7 +2438,6 @@ void GameEngine::updateEventPhase(float dt)
 		if( ( m_lightningRect.bottom - 1300 ) > m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getPosY() )
 		{
 			m_unit[m_attackingSpaceX][m_attackingSpaceY].setUnitCanTakeAction( false );
-			m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( IDLE );
 			m_lightningActive = false;
 			m_lightningRect.top		=	0;
 			m_lightningRect.left	=	0;
@@ -2604,12 +2505,6 @@ void GameEngine::updateEventPhase(float dt)
 			//  INFO:  Set data for floating text
 			if( !m_floatingTextActive )
 			{
-				if( m_unit[m_attackingSpaceX][m_attackingSpaceY].getState() != ATTACKING ){
-					///////////////////////////////////////////////////////////////////
-					//  INFO:  The Thief attack sound needs to be offset to match his animation.
-					//  TODO:  Find a better way / place to do this
-					if( m_unit[m_attackingSpaceX][m_attackingSpaceY].getType() == THIEF )
-						fmodSystem->playSound( FMOD_CHANNEL_FREE, chop, false, 0 );
 				m_floatingTextActive = true;
 				m_floatingRectTopMax	=	m_gameBoard[m_attackingSpaceX][m_attackingSpaceY].getPosY() - 35;
 				m_floatingTextRect.top = long(m_gameBoard[m_attackingSpaceX][m_attackTargetSpaceY].getPosY() - 10);
@@ -2629,7 +2524,6 @@ void GameEngine::updateEventPhase(float dt)
 				if( m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getCurrentHealth() < 1 )
 					destroyUnit();
 				//m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].removeUnit();
-				}
 			}
 		}
 	}
@@ -2642,7 +2536,6 @@ void GameEngine::findNextTarget( int row, int col )
 {
 	if ( col == 12 )
 		col = 12;
-	int tryingThis = m_gamePhase;
 	if(m_gamePhase == PLAYERONE_EVENTPHASE)
 	{
 		///////////////////////////////////////////////////////////////////////////////////
@@ -2697,7 +2590,6 @@ void GameEngine::findNextTarget( int row, int col )
 						else{
 							m_moveToTarget = col + i;
 							m_unit[row][col].setState( MOVING );
-							
 						}
 
 						break;
@@ -2830,7 +2722,6 @@ void GameEngine::moveUnit()
 	//m_unit[m_attackingSpaceX][m_moveToTarget].setCurrentHealth( m_unit[m_attackingSpaceX][m_attackingSpaceY].getCurrentHealth() );
 	//m_unit[m_attackingSpaceX][m_moveToTarget].setMaxHealth( m_unit[m_attackingSpaceX][m_attackingSpaceY].getMaxHealth() );
 	m_unit[m_attackingSpaceX][m_attackingSpaceY].removeUnit();
-	m_unit[m_attackingSpaceX][m_moveToTarget].setState( IDLE );
 	m_unitCurrentlyMoving = false;
 	m_unitCurrentlyAttacking	=	false;
 	m_unit[m_attackingSpaceX][m_moveToTarget].setPosX( m_gameBoard[m_attackingSpaceX][m_moveToTarget].getPosX());
