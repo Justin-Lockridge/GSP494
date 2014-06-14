@@ -478,8 +478,8 @@ void GameEngine::InitGameBoard()
 		{480, 170, 580, 255, 190, 500, false}, //unit 2
 		{480, 220, 580, 305, 240, 500, false}, //unit 3
 		{480, 270, 580, 355, 290, 500, false}, //unit 4
-		{561, 120, 650, 205, 140, 570, false}, //ability 1
-		{561, 170, 650, 255, 190, 570, false}, //ability 2
+		{561, 120, 650, 205, 140, 570, false}, //ability 1 // x = 140
+		{561, 170, 650, 255, 190, 570, false}, //ability 2 // x = 190
 	};
 
 	for(int i = 0; i < MAX_BATTLE_BUTTONS; i++)
@@ -713,10 +713,10 @@ void GameEngine::InitMenu()
 	// T, L, B, R, X, Y, HIGHLIGHT, ROW, COL
 	RectData menu_buttons_pos[] = 
 	{
-		{0, 0, 100, 500, 350, 280,false, 0, 0},
-		{245, 0, 340, 500, 350, 350, false, 0, 0},
-		{121, 0, 240, 500, 350, 420, false, 0, 0},
-		{345, 0, 460, 300, 350, 500, false, 0, 0},
+		{0, 0, 100, 500, 350, 280,false, 0, 0}, //START GAME
+		{240, 0, 340, 500, 350, 350, false, 0, 0}, // CREDITS
+		{121, 0, 230, 500, 350, 420, false, 0, 0}, // OPTIONS
+		{345, 0, 460, 300, 350, 500, false, 0, 0}, // QUIT
 	};
 
 	for(int i = 0; i < 4; i++)
@@ -740,9 +740,9 @@ void GameEngine::InitMenu()
 	// T, L, B, R, X, Y, HIGHLIGHT, ROW, COL, moveX, moveY
 	RectData character_pos[] =
 	{
-		{175, 40, 600, 170, -100, 300, false, 0, 0}, // archer x = 100 y = 250
-		{175, 200, 600, 420, 400, 0, false, 0, 0}, // black mage y = 300
-		{150, 550, 600, 800, 900, 300, false, 0, 0}, // warrior x = 600 y = 300
+		{175, 40, 600, 170, -100, 300, false, 0, 0}, // archer
+		{175, 200, 600, 420, 400, 0, false, 0, 0}, // black mage
+		{150, 550, 600, 800, 900, 300, false, 0, 0}, // warrior
 	};
 
 	for(int i = 0; i < 3; i++)
@@ -765,10 +765,10 @@ void GameEngine::InitMenu()
 
 void GameEngine::Update(float dt)
 {
-	m_player[0].adjustCurrentSpecial(100);
-	m_player[1].adjustCurrentSpecial(100);
-	m_player[0].setGold( 1000 );
-	m_player[1].setGold( 1000 );
+	//m_player[0].adjustCurrentSpecial(100);
+	//m_player[1].adjustCurrentSpecial(100);
+	//m_player[0].setGold( 1000 );
+	//m_player[1].setGold( 1000 );
 	///////////////////////////////////////////////////////////////////////////////
 	//  INFO:  Used with tools to get animations working, leave this in
 	int animationOffsetLeft =  33;
@@ -3110,7 +3110,10 @@ void GameEngine::Render(float dt)
 						0, D3DXCOLOR(255,255, 255,255));
 
 					for(auto& Buttons: menuButtons)
+					{
+
 						drawMenu(D3DXVECTOR3(Buttons.getPosition().x, Buttons.getPosition().y, 0.0f), Buttons.getColor(), Buttons.getRect());
+					}
 
 					break;
 				case MENUCHARACTERSELECT:
@@ -3294,17 +3297,6 @@ void GameEngine::Render(float dt)
 			switch(m_gameState)
 			{
 			case MENUMAIN:
-				//Drawing cursor positions onto screen
-				/*RECT cursorRect;
-				GetClientRect(m_hWnd, &cursorRect);
-				wchar_t buffer[128];
-				cursorRect.top = 470;
-				cursorRect.left = 300;
-				swprintf_s(buffer, 128, L"%f", cursor.x);
-				m_pD3DFont->DrawText(0, buffer, -1, &cursorRect, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 255, 0));
-				cursorRect.top = 500;
-				swprintf_s(buffer, 128, L"%f", cursor.y);
-				m_pD3DFont->DrawText(0, buffer, -1, &cursorRect, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 255, 0));*/
 				break;
 			case MENUCHARACTERSELECT:
 				drawPlayerChoice(m_player[0].getCharacterType());
@@ -4609,17 +4601,6 @@ void GameEngine::drawUIText(float dt)
 	}
 	else
 		textCount = 0;
-
-	////Drawing cursor positions onto screen
-	/*RECT cursorRect;
-	GetClientRect(m_hWnd, &cursorRect);
-	cursorRect.top = 470;
-	cursorRect.left = 300;
-	swprintf_s(buffer, 128, L"%f", cursor.x);
-	m_pD3DFont->DrawText(0, buffer, -1, &cursorRect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
-	cursorRect.top = 500;
-	swprintf_s(buffer, 128, L"%f", cursor.y);
-	m_pD3DFont->DrawText(0, buffer, -1, &cursorRect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));*/
 };
 // Change WARRIOR ABILITY icons to correct icons once recieved!!
 void GameEngine::drawIcons(int thisButton , Character thisPlayer, D3DXVECTOR3 position,D3DCOLOR a_color)
@@ -5184,7 +5165,7 @@ void GameEngine::drawMenu(D3DXVECTOR3 position, D3DCOLOR a_color, RECT &a_rect)
 	D3DXMatrixIdentity(&rotMat);
 	D3DXMatrixIdentity(&worldMat);
 
-	D3DXMatrixScaling(&scaleMat, 0.5f, 0.5f, 0.5f);
+	D3DXMatrixScaling(&scaleMat, 0.4f, 0.4f, 0.4f);
 	D3DXMatrixTranslation(&transMat, position.x, position.y, 0.0f);
 	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);
 	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);
@@ -5279,13 +5260,31 @@ void GameEngine::drawWinner(Character a_player)
 	RECT rect;
 	rect.right = 500;
 	rect.top = 35;
+
+	D3DCOLOR color;
+
 	if(a_player.getPlayerNumber() == 0)
 	{
-		m_pD3DFont->DrawText(0, L"Player One is VICTORIOUS!\nPress Enter To Return To Menu", -1, &rect, DT_TOP | DT_RIGHT | DT_NOCLIP , D3DCOLOR_ARGB(255, 255, 255, 0));
+		if(a_player.getCharacterType() == 0) // WARRIOR
+			m_pD3DFont->DrawText(0, L"Player ONE is VICTORIOUS!\nPress Enter To Return To Menu", -1, &rect, DT_TOP | DT_RIGHT | DT_NOCLIP , D3DCOLOR_ARGB(255, 255, 0, 0));
+
+		if(a_player.getCharacterType() == 1) // ARCHER
+			m_pD3DFont->DrawText(0, L"Player ONE is VICTORIOUS!\nPress Enter To Return To Menu", -1, &rect, DT_TOP | DT_RIGHT | DT_NOCLIP , D3DCOLOR_ARGB(255, 0, 255, 0));
+
+		if(a_player.getCharacterType() == 2) // BLACKMAGE
+			m_pD3DFont->DrawText(0, L"Player ONE is VICTORIOUS!\nPress Enter To Return To Menu", -1, &rect, DT_TOP | DT_RIGHT | DT_NOCLIP , D3DCOLOR_ARGB(255, 0, 255, 255));
 	}
 	else
 	{
-		m_pD3DFont->DrawText(0, L"Player Two is VICTORIOUS!\nPress Enter To Return To Menu", -1, &rect, DT_TOP | DT_RIGHT | DT_NOCLIP , D3DCOLOR_ARGB(255, 255, 255, 0));
+		if(a_player.getCharacterType() == 0) // WARRIOR
+			m_pD3DFont->DrawText(0, L"Player TWO is VICTORIOUS!\nPress Enter To Return To Menu", -1, &rect, DT_TOP | DT_RIGHT | DT_NOCLIP , D3DCOLOR_ARGB(255, 255, 0, 0));
+
+		if(a_player.getCharacterType() == 1) // ARCHER
+			m_pD3DFont->DrawText(0, L"Player TWO is VICTORIOUS!\nPress Enter To Return To Menu", -1, &rect, DT_TOP | DT_RIGHT | DT_NOCLIP , D3DCOLOR_ARGB(255, 0, 255, 0));
+
+		if(a_player.getCharacterType() == 2) // BLACKMAGE
+			m_pD3DFont->DrawText(0, L"Player TWO is VICTORIOUS!\nPress Enter To Return To Menu", -1, &rect, DT_TOP | DT_RIGHT | DT_NOCLIP , D3DCOLOR_ARGB(255, 0, 255, 255));
+	//	m_pD3DFont->DrawText(0, L"Player Two is VICTORIOUS!\nPress Enter To Return To Menu", -1, &rect, DT_TOP | DT_RIGHT | DT_NOCLIP , D3DCOLOR_ARGB(255, 255, 255, 0));
 	}
 }
 
