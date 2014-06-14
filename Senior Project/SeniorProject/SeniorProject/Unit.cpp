@@ -196,12 +196,12 @@ void Unit::addUnit(int t, int playerNumber)
 
 		unitRect.left			=	5;//og
 
-	//	unitRect.left			=	70;
+		//	unitRect.left			=	70;
 		unitRect.right			=	32;//og
-	//	unitRect.right			=	97;
+		//	unitRect.right			=	97;
 		unitRect.bottom			=	95;
-		
-	//	unitRect.bottom			=	175;
+
+		//	unitRect.bottom			=	175;
 
 		isRanged				=	true;
 		unitCanUseAbility		=	true;
@@ -260,6 +260,7 @@ void Unit::updateAnimations( float dt )
 {
 	if(isActive)
 	{
+		animationTimer += dt;
 		switch(type)
 		{
 		case NOUNIT:
@@ -268,8 +269,7 @@ void Unit::updateAnimations( float dt )
 			break;
 		case WALL:
 			break;
-		case WARRIORUNIT:
-			animationTimer += dt;
+		case WARRIORUNIT:{
 			switch( state )
 			{
 			case IDLE:
@@ -299,9 +299,9 @@ void Unit::updateAnimations( float dt )
 					case 588:
 						setUnitRect(0, 686, 750, 85);
 						break;
-				//	case 686:
-					//	setUnitRect(0, 784, 847, 85);
-					//	break;
+						//	case 686:
+						//	setUnitRect(0, 784, 847, 85);
+						//	break;
 					case 686:
 						setUnitRect(0, 0, 70, 85);
 						break;
@@ -310,13 +310,13 @@ void Unit::updateAnimations( float dt )
 				break;
 			case MOVING:{
 
-						 }
-				break;
+						}
+						break;
 
 			}
-			break;
-		case MARKSMAN:
-			animationTimer += dt;
+						 }
+						 break;
+		case MARKSMAN:{
 			switch( state )
 			{
 			case IDLE:
@@ -341,9 +341,9 @@ void Unit::updateAnimations( float dt )
 				}
 				break;
 			}
-			break;
-		case MINOTAUR:
-			animationTimer += dt;
+					  }
+					  break;
+		case MINOTAUR:{
 			switch( state )
 			{
 			case IDLE:
@@ -360,7 +360,7 @@ void Unit::updateAnimations( float dt )
 						break;
 					case 495:
 						setUnitRect(0, 635, 778, 180 );
-						
+
 						break;
 					case 635:
 						setUnitRect(0, 774, 920, 180 );
@@ -373,11 +373,37 @@ void Unit::updateAnimations( float dt )
 				}
 				break;
 			}
-			break;
-		case WOLF:
-			break;
-		case ARCHERUNIT:
-			animationTimer += dt;
+					  }
+					  break;
+		case WOLF:{
+				if( animationTimer > 1.10f )
+				{
+					animationTimer -= 1.10f;
+					setState( IDLE );
+					//switch(unitRect.left)
+					//{
+					//case 215:
+					//	setUnitRect( 0, 355, 494, 180 );
+					//	break;
+					//case 355:
+					//	setUnitRect(0, 495, 636, 180 );
+					//	break;
+					//case 495:
+					//	setUnitRect(0, 635, 778, 180 );
+
+					//	break;
+					//case 635:
+					//	setUnitRect(0, 774, 920, 180 );
+					//	//setUnitRect(0, 215, 352, 180 );
+					//	break;
+					//case 774:
+					//	setUnitRect(0, 215, 352, 180 );
+					//	break;
+					//}
+				}
+				  }
+				  break;
+		case ARCHERUNIT:{
 			switch(state)
 			{
 			case IDLE:
@@ -390,12 +416,12 @@ void Unit::updateAnimations( float dt )
 
 				if( unitRect.right > 250 )
 					setUnitRect( 15, 10, 70, 70 );
-				
+
 				break;
 			}
-			break;
-		case THIEF:
-			animationTimer += dt;
+						}
+						break;
+		case THIEF:{
 			switch( state )
 			{
 			case IDLE:
@@ -441,40 +467,131 @@ void Unit::updateAnimations( float dt )
 						break;
 					}
 				}
-			//break;
-			}
-			break;
-		case GOLEM:
-			break;
-		case BLACKMAGEUNIT:
-			animationTimer	+=	dt;
-			switch( state ) {
-			case IDLE:
-			if(animationTimer > 0.15f){
-				animationTimer	-=	0.15f;
-				switch(unitRect.left){
-				case 5:
-					unitRect.left	+=	70;
-					unitRect.right	+=	70;
-					break;
-				case 75:
-					unitRect.left	+=	65;
-					unitRect.right	+=	65;
-					break;
-				case 140:
-					unitRect.left	+=	65;
-					unitRect.right	+=	65;
-					break;
-				case 205:
-					setUnitRect(75, 5, 70, 145);
-					break;
+				break;
+			case MOVING:
+				if(animationTimer > 0.2f){
+					animationTimer -= 0.2f;
+					switch(unitRect.left){
+					case 110:
+						setUnitRect( 0, 150, 185, 50 );
+						break;
+					case 150:
+						setUnitRect( 0, 180, 215, 50 );
+						break;
+					case 180:
+						setUnitRect(0, 110, 145, 50);
+						break;
+					}
+				}
+				break;
+			case ATTACKING:
+				if(animationTimer > 0.06f){
+					animationTimer -= 0.06f;
+					switch(unitRect.left){
+					case 0:
+						adjustUnitRectLeftRight( 32, 30 );
+						//setUnitRect(0, 32, 65, 50);
+						break;
+					case 32:
+						adjustUnitRectLeftRight( 36, 42 );
+						//setUnitRect(0, 70, 105, 50);
+						break;
+					case 68:
+						adjustUnitRectLeftRight( 40, 40 );
+						//setUnitRect(0, 110, 145, 50);
+						break;
+					case 108:
+						adjustUnitRectLeftRight( 40, 40 );
+						//setUnitRect( 0, 150, 185, 50 );
+						break;
+					case 148:
+						adjustUnitRectLeftRight( 30, 30 );
+						//setUnitRect( 0, 180, 215, 50 );
+						break;
+					case 178:
+						adjustUnitRectLeftRight( 32, 32 );
+						//setUnitRect( 0, 210, 245, 50 );
+						break;
+					case 210:
+						adjustUnitRectLeftRight( 34, 34 );
+						//unitRect.left	+=	30;
+						//unitRect.right	+=	30;
+						break;
+					case 244:
+						adjustUnitRectLeftRight( 32, 32 );
+						//unitRect.left	+=	30;
+						//unitRect.right	+=	30;
+						break;
+					case 276:
+						adjustUnitRectLeftRight( 32, 32 );
+						//unitRect.left	+=	30;
+						//unitRect.right	+=	30;
+						break;
+					case 308:
+						adjustUnitRectLeftRight( 32, 32 );
+						//unitRect.top			=	0;
+						//unitRect.left			=	0;
+						//unitRect.right		=	35;
+						//unitRect.bottom	=	50;
+						//state	=	IDLE;
+						break;
+					case 340:
+						adjustUnitRectLeftRight( 34, 38 );
+						break;
+					case 374:
+						adjustUnitRectLeftRight( 45, 45 );
+						break;
+					case 419:
+						adjustUnitRectLeftRight( 45, 45 );
+						break;
+					case 464:
+						setState( IDLE );
+						break;
+					}
 				}
 				break;
 			}
+				   }
+				   break;
+		case GOLEM:{
+							if( animationTimer > 1.10f )
+				{
+					animationTimer -= 1.10f;
+					setState( IDLE );
+					//switch(unitRect.left)
+					//{
+					//}
+				}
+				   }
+				   break;
+		case BLACKMAGEUNIT:{
+			switch( state ) {
+			case IDLE:
+				if(animationTimer > 0.15f){
+					animationTimer	-=	0.15f;
+					switch(unitRect.left){
+					case 5:
+						unitRect.left	+=	70;
+						unitRect.right	+=	70;
+						break;
+					case 75:
+						unitRect.left	+=	65;
+						unitRect.right	+=	65;
+						break;
+					case 140:
+						unitRect.left	+=	65;
+						unitRect.right	+=	65;
+						break;
+					case 205:
+						setUnitRect(75, 5, 70, 145);
+						break;
+					}
+					break;
+				}
 			}
-			break;
-		case WARLOCK:
-			animationTimer += dt;
+						   }
+						   break;
+		case WARLOCK:{
 			switch( state )
 			{
 			case IDLE:
@@ -557,10 +674,11 @@ void Unit::updateAnimations( float dt )
 				break;
 			}
 			break;
+					 }
 		}
 	}
 };
-	
+
 void Unit::setType( int t )
 {
 	type	=	t;
@@ -625,6 +743,7 @@ int Unit::getSpeed()
 void Unit::setState( int s )
 {
 	state = s;
+	animationTimer		=	0.0f;
 	switch( type ){
 	case WARRIORUNIT:
 		break;
@@ -637,6 +756,23 @@ void Unit::setState( int s )
 	case ARCHERUNIT:
 		break;
 	case THIEF:
+		switch( state ){
+		case IDLE:
+			unitRect.top			=	0;
+			unitRect.left			=	0;
+			unitRect.right			=	35;
+			unitRect.bottom			=	50;
+			break;
+		case MOVING:
+			setUnitRect(0, 110, 145, 50);
+			break;
+		case ATTACKING:
+			unitRect.top			=	0;
+			unitRect.left			=	0;
+			unitRect.right			=	35;
+			unitRect.bottom			=	50;
+			break;
+		}
 		break;
 	case GOLEM:
 		break;
@@ -645,28 +781,28 @@ void Unit::setState( int s )
 	case WARLOCK:
 		switch( state ){
 		case IDLE:
-		unitRect.top			=	55;
-		unitRect.left			=	5;
-		unitRect.right			=	32;
-		unitRect.bottom			=	95;
+			unitRect.top			=	55;
+			unitRect.left			=	5;
+			unitRect.right			=	32;
+			unitRect.bottom			=	95;
 			break;
 		case ABILITY:
-		unitRect.top			=	95;
-		unitRect.left			=	5;
-		unitRect.right			=	32;
-		unitRect.bottom			=	135;
+			unitRect.top			=	95;
+			unitRect.left			=	5;
+			unitRect.right			=	32;
+			unitRect.bottom			=	135;
 			break;
 		case ATTACKING:
-					unitRect.top			=	95;
-		unitRect.left			=	5;
-		unitRect.right			=	32;
-		unitRect.bottom			=	135;
+			unitRect.top			=	95;
+			unitRect.left			=	5;
+			unitRect.right			=	32;
+			unitRect.bottom			=	135;
 			break;
 		case HIT:
-		unitRect.top			=	135;
-		unitRect.left			=	70;
-		unitRect.right			=	97;
-		unitRect.bottom			=	175;
+			unitRect.top			=	135;
+			unitRect.left			=	70;
+			unitRect.right			=	97;
+			unitRect.bottom			=	175;
 			break;
 		}
 		break;
@@ -711,6 +847,11 @@ void Unit::setUnitRect(int top, int left, int right, int bottom){
 RECT Unit::getUnitRect(){
 	return unitRect;
 }
+
+void Unit::adjustUnitRectLeftRight( int leftAdjustment, int rightAdjustment ){
+	unitRect.left	+=	leftAdjustment;
+	unitRect.right	+=	rightAdjustment;
+};
 
 void Unit::setFacingRight( bool b ){
 	facingRight	=	b;
