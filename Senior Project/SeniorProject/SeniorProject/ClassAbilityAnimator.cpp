@@ -76,15 +76,9 @@ void ClassAbilityAnimator::setClassAbilityAnimation( int ability, float x, float
 		animationRect.bottom	=	50;
 		break;
 	case SNIPE:
-		//type					=	BOLSTER;
-		//scaleX					=	1.3f;
-		//scaleY					=	1.0f;
-		//animationRect.top		=	0;
-		//animationRect.left		=	0;
-		//animationRect.right		=	25;
-		////animationRect.left			=	349;
-		////animationRect.right			=	400;
-		//animationRect.bottom	=	50;
+		type					=	SNIPE;
+		scaleX					=	3.0f;
+		scaleY					=	3.0f;
 		break;
 	}
 };
@@ -111,7 +105,7 @@ void ClassAbilityAnimator::updateClassAbilityAnimation( float dt ){
 					setAnimationRect( 0, 0, 250, 250 );
 					break;
 				}
-				if( activeTimer > 1.5f ){
+				if( activeTimer > 1.8f ){
 					animationActive	=	false;
 					activeTimer = 0.0f;
 				}
@@ -351,6 +345,8 @@ float ClassAbilityAnimator::getScaleY(){
 
 void ClassAbilityAnimator::setType( int t ){
 	type = t;
+	if( type == NONE )
+		animationActive	=	false;
 };
 
 int ClassAbilityAnimator::getType(){

@@ -133,7 +133,7 @@ class GameEngine
 	FMOD::System* fmodSystem;
 	FMOD::Sound* themeMusicOne, *battleTheme;
 	FMOD::Sound* hitMines, *arrowHit, *castFireball, *shootArrow, *fireballHit, *thunderStrike, *minotaurRoar, *goldCoins, *warlockSpell, *cleaveAbilitySFX,
-		*bolsterAbilitySFX, *chop;
+		*bolsterAbilitySFX, *chop, *blackHoleAbilitySFX, *flameWaveAbilitySFX;
 	FMOD::Channel* mainChannel;
 	FMOD::Channel* channel;
 	bool keyIsDown[255];

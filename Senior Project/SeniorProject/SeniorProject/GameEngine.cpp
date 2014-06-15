@@ -383,7 +383,9 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	fmodSystem->createSound("LimitBreak.wav", FMOD_DEFAULT, 0, &warlockSpell);
 	fmodSystem->createSound("Cleave.wav", FMOD_DEFAULT, 0, &cleaveAbilitySFX);
 	fmodSystem->createSound("cure.wav", FMOD_DEFAULT, 0, &bolsterAbilitySFX);
-	fmodSystem->createSound("chop.wav", FMOD_DEFAULT, 0, &chop);
+	fmodSystem->createSound("sword2.wav", FMOD_DEFAULT, 0, &chop);
+	fmodSystem->createSound("blizzloop.wav", FMOD_DEFAULT, 0, &blackHoleAbilitySFX);
+	fmodSystem->createSound("meteorimpact.wav", FMOD_DEFAULT, 0, &flameWaveAbilitySFX);
 
 	for(int i = 0; i < 255; ++i)
 	{
@@ -1382,7 +1384,7 @@ void GameEngine::Update(float dt)
 									}
 
 									if(m_player[0].getCharacterType() == BLACKMAGE) {// Black hole
-										fmodSystem->playSound( FMOD_CHANNEL_FREE, cleaveAbilitySFX, false, 0 );
+										fmodSystem->playSound( FMOD_CHANNEL_FREE, blackHoleAbilitySFX, false, 0 );
 										blackHoleAbility(row, col, 0);
 									}
 
@@ -1400,14 +1402,20 @@ void GameEngine::Update(float dt)
 								{
 									if(m_player[0].getCharacterType() == ARCHER) // Precision Shot
 									{
-
+										//m_arrowActive	=	true;
+										m_projectilePosX	=	50;
+										m_projectilePosY	=	75;
+										fmodSystem->playSound( FMOD_CHANNEL_FREE, shootArrow, false, 0 );
+										m_classAbilityAnimator.setClassAbilityAnimation( SNIPE, m_projectilePosX, m_projectilePosY );
 										m_player[0].adjustCurrentSpecial(-100);
-										m_player[1].adjustCurrentHealth(-100);
+										//m_player[1].adjustCurrentHealth(-100);
 
 									}
 
-									if(m_player[0].getCharacterType() == BLACKMAGE) //  Flame Wave
+									if(m_player[0].getCharacterType() == BLACKMAGE) {//  Flame Wave
+										fmodSystem->playSound( FMOD_CHANNEL_FREE, flameWaveAbilitySFX, false, 0 );
 										flameWaveAbility(row, col, 0);
+									}
 
 									if(m_player[0].getCharacterType() == WARRIOR)
 									{
@@ -1659,7 +1667,7 @@ void GameEngine::Update(float dt)
 
 									if(m_player[1].getCharacterType() == BLACKMAGE) // Black hole
 									{
-
+										fmodSystem->playSound( FMOD_CHANNEL_FREE, blackHoleAbilitySFX, false, 0 );
 										blackHoleAbility(row, col, 1);
 									}
 									if(m_player[1].getCharacterType() == WARRIOR) // ??
@@ -1677,12 +1685,17 @@ void GameEngine::Update(float dt)
 									//Get row and destroy all units in that row
 									if(m_player[1].getCharacterType() == ARCHER) // Precision Shot
 									{
+										m_projectilePosX	=	700;
+										m_projectilePosY	=	75;
+										fmodSystem->playSound( FMOD_CHANNEL_FREE, shootArrow, false, 0 );
+										m_classAbilityAnimator.setClassAbilityAnimation( SNIPE, m_projectilePosX, m_projectilePosY );
 										m_player[1].adjustCurrentSpecial(-100);
-										m_player[0].adjustCurrentHealth(-100);
 									}
 
-									if(m_player[1].getCharacterType() == BLACKMAGE) //  Flame Wave
+									if(m_player[1].getCharacterType() == BLACKMAGE){ //  Flame Wave
+										fmodSystem->playSound( FMOD_CHANNEL_FREE, flameWaveAbilitySFX, false, 0 );
 										flameWaveAbility(row, col, 1);
+									}
 
 									if(m_player[1].getCharacterType() == WARRIOR) // ??
 									{
@@ -1749,6 +1762,25 @@ void GameEngine::Update(float dt)
 			m_assassinTimer	=	0.0f;
 			fmodSystem->playSound( FMOD_CHANNEL_FREE, chop, false, 0 );
 			m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].removeUnit();
+			m_classAbilityAnimator.setType ( NONE );
+		}
+	}
+	else if ( m_classAbilityAnimator.getType() == SNIPE ){
+		if( m_player[0].checkIfActivePlayer() ){
+			m_projectilePosX	+=	300 * dt;
+			if( m_projectilePosX > 700 ){
+				fmodSystem->playSound( FMOD_CHANNEL_FREE, arrowHit, false, 0 );
+				m_player[1].adjustCurrentHealth( -100 );
+				m_classAbilityAnimator.setType( NONE );
+			}
+		}
+		else{
+			m_projectilePosX	-=	300 * dt;
+			if( m_projectilePosX < 100 ){
+				fmodSystem->playSound( FMOD_CHANNEL_FREE, arrowHit, false, 0 );
+				m_player[0].adjustCurrentHealth( -100 );
+				m_classAbilityAnimator.setType( NONE );
+			}
 		}
 	}
 }
@@ -4467,13 +4499,25 @@ void GameEngine::drawGameBoard()
 			D3DXMatrixIdentity(&scaleMat);
 			D3DXMatrixIdentity(&rotMat);
 			D3DXMatrixIdentity(&worldMat);
-			D3DXMatrixScaling(&scaleMat, 1.0f * flip, 1.0f, 1.0f);			// Scaling
-			D3DXMatrixTranslation(&transMat, m_projectilePosX, m_projectilePosY, 0.0f);			// Translation
-			D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
-			D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
-			m_pD3DSprite->SetTransform(&worldMat);
-			m_pD3DSprite->Draw(m_archerArrow, 0, &D3DXVECTOR3(m_archerArrowInfo.Width * 0.5f, m_archerArrowInfo.Height * 0.5f, 0.0f),
-				0, D3DCOLOR_ARGB(255, 255, 255, 255));
+
+			//if( m_classAbilityAnimator.getType() == SNIPE ){
+			//	D3DXMatrixScaling(&scaleMat, m_classAbilityAnimator.getScaleX() * flip, m_classAbilityAnimator.getScaleY(), 1.0f);			// Scaling
+			//	D3DXMatrixTranslation(&transMat, m_projectilePosX, m_projectilePosY, 0.0f);			// Translation
+			//	D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+			//	D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+			//	m_pD3DSprite->SetTransform(&worldMat);
+			//	m_pD3DSprite->Draw(m_archerArrow, 0, &D3DXVECTOR3(m_archerArrowInfo.Width * 0.5f, m_archerArrowInfo.Height * 0.5f, 0.0f),
+			//		0, D3DCOLOR_ARGB(255, 255, 255, 255));
+			//}
+			//else{
+				D3DXMatrixScaling(&scaleMat, 1.0f * flip, 1.0f, 1.0f);			// Scaling
+				D3DXMatrixTranslation(&transMat, m_projectilePosX, m_projectilePosY, 0.0f);			// Translation
+				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+				m_pD3DSprite->SetTransform(&worldMat);
+				m_pD3DSprite->Draw(m_archerArrow, 0, &D3DXVECTOR3(m_archerArrowInfo.Width * 0.5f, m_archerArrowInfo.Height * 0.5f, 0.0f),
+					0, D3DCOLOR_ARGB(255, 255, 255, 255));
+			//}
 		}
 		if(m_lightningActive){
 			D3DXMatrixIdentity(&transMat);
@@ -5902,6 +5946,18 @@ void GameEngine::drawAbilityAnimations()
 		}
 		break;
 	case SNIPE:
+		if( m_player[0].checkIfActivePlayer() ){
+				D3DXMatrixScaling(&scaleMat, m_classAbilityAnimator.getScaleX(), m_classAbilityAnimator.getScaleY(), 1.0f);			// Scaling
+		}
+		else
+			D3DXMatrixScaling(&scaleMat, m_classAbilityAnimator.getScaleX() * -1, m_classAbilityAnimator.getScaleY(), 1.0f);	
+		D3DXMatrixTranslation(&transMat, m_projectilePosX, m_projectilePosY, 0.0f);			// Translation
+		D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
+		D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
+		m_pD3DSprite->SetTransform(&worldMat);
+		m_pD3DSprite->Draw(m_archerArrow, 0, &D3DXVECTOR3(m_archerArrowInfo.Width * 0.5f, m_archerArrowInfo.Height * 0.5f, 0.0f),
+			0, D3DCOLOR_ARGB(255, 0, 0, 0));
+
 		break;
 	}
 };
