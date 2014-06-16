@@ -133,7 +133,7 @@ class GameEngine
 	FMOD::System* fmodSystem;
 	FMOD::Sound* themeMusicOne, *battleTheme;
 	FMOD::Sound* hitMines, *arrowHit, *castFireball, *shootArrow, *fireballHit, *thunderStrike, *minotaurRoar, *goldCoins, *warlockSpell, *cleaveAbilitySFX,
-		*bolsterAbilitySFX, *chop, *blackHoleAbilitySFX, *flameWaveAbilitySFX;
+		*bolsterAbilitySFX, *chop, *blackHoleAbilitySFX, *flameWaveAbilitySFX, *wolfAttackSFX;
 	FMOD::Channel* mainChannel;
 	FMOD::Channel* channel;
 	bool keyIsDown[255];
@@ -201,6 +201,7 @@ public:
 	void flameWaveAbility(int, int, int);
 	void cleaveAbility( int activePlayer );
 	void bolsterAbility( int activePlayer );
+	void meleeAttackSFX( int row, int col );
 	//////////////////////////////////////////////////////////////////////////
 	// Name:		Render
 	// Parameters:	float elapsedTime - Time that has elapsed since the last
