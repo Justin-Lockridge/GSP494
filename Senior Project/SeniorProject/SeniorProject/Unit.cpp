@@ -520,6 +520,22 @@ void Unit::updateAnimations( float dt )
 					setState( IDLE );
 						   }*/
 				break;
+			case HIT:
+				if( animationTimer > 0.12f ){
+					animationTimer	-=	0.12f;
+					switch( unitRect.left ){
+					case 30:
+						adjustUnitRectLeftRight( 110, 90 );
+						break;
+					case 140:
+						adjustUnitRectLeftRight( 90, 100 );
+						break;
+					case 230:
+						setState( IDLE );
+						break;
+					}
+				}
+				break;
 			}
 				  }
 				  break;
@@ -718,7 +734,7 @@ void Unit::updateAnimations( float dt )
 				}
 				break;
 			case HIT:
-							if( animationTimer > 1.10f )
+			if( animationTimer > 1.10f )
 			{
 				animationTimer -= 1.10f;
 				setState( IDLE );
@@ -953,6 +969,9 @@ void Unit::setState( int s )
 			break;
 		case ATTACKING:
 			setUnitRect( 160, 35, 180, 260 );
+			break;
+		case HIT:
+			setUnitRect( 820, 30, 135, 950 );
 			break;
 		}
 		break;

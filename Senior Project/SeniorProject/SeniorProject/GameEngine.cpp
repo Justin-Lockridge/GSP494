@@ -1097,15 +1097,17 @@ void GameEngine::Update(float dt)
 
 
 				keyIsDown[DIK_RIGHT] = true;
-				m_tester++;				
-				if(m_tester > 7 ){
+				m_tester++;		
+				animationOffsetLeft =  110;
+				animationOffsetRight = 90;
+				if(m_tester > 12 ){
 					animationOffsetLeft	=  33;
 					animationOffsetRight = 32;
 				}
 				switch(m_tester)
 				{
 				case 1:
-					m_unit[1][1].setState( MOVING );
+					m_unit[1][1].setState( HIT );
 					//m_unit[1][1].setUnitRect( 135, 15, 80, 190 );
 					break;
 				case 8:
@@ -1114,14 +1116,16 @@ void GameEngine::Update(float dt)
 					//m_classAbilityAnimator.setClassAbilityAnimation( BOLSTER , m_gameBoard[0][0].getPosX(), m_gameBoard[0][0].getPosY() );
 					break;
 				case 3:
-					m_unit[1][1].adjustUnitRectLeftRight( 160, 175 );
+					m_unit[1][1].adjustUnitRectLeftRight( 90, 100 );
 					break;
 				case 4:
-					m_unit[1][1].adjustUnitRectLeftRight( 180, 190 );
+					m_unit[1][1].setState( IDLE );
+					m_tester	=	0;
+					//m_unit[1][1].adjustUnitRectLeftRight( 180, 190 );
 					break;
-				case 5:
-					m_unit[1][1].adjustUnitRectLeftRight( 190, 170 );
-					break;
+				//case 5:
+				//	m_unit[1][1].adjustUnitRectLeftRight( 190, 170 );
+				//	break;
 				//case 6:
 				//	m_unit[1][1].adjustUnitRectLeftRight( 125, 130 );
 				//	break;
