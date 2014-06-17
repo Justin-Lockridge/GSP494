@@ -440,9 +440,12 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	////////////////////////////////////////////////////////
 	//  INFO:  Changed the gamestate manually for testing
 <<<<<<< HEAD
+<<<<<<< HEAD
 	//m_gameState = BATTLE;
 	m_gameState = MENUMAIN;
 =======
+=======
+>>>>>>> origin/master
 	m_gameState = MENUMAIN;
 
 >>>>>>> origin/master
@@ -456,17 +459,23 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	//m_unit[3][7].addUnit( WARLOCK, PLAYERTWO );
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	//m_unit[1][1].addUnit( BLACKMAGEUNIT, PLAYERONE );
 	//m_unit[1][6].addUnit( ARCHERUNIT, PLAYERTWO );
 	//m_unit[0][10].addUnit( WARLOCK, PLAYERTWO );
 	//m_unit[0][5].addUnit( MINOTAUR, PLAYERONE );
 	//m_unit[1][10].addUnit( BLACKMAGEUNIT, PLAYERTWO );
 =======
+=======
+>>>>>>> origin/master
 	//m_unit[1][1].addUnit( GOLEM, PLAYERONE );
 	//m_unit[1][6].addUnit( ARCHERUNIT, PLAYERTWO );
 	//m_unit[0][10].addUnit( WARLOCK, PLAYERTWO );
 	//m_unit[0][5].addUnit( MINOTAUR, PLAYERONE );
 	//m_unit[1][4].addUnit( BLACKMAGEUNIT, PLAYERTWO );
+<<<<<<< HEAD
+>>>>>>> origin/master
+=======
 >>>>>>> origin/master
 	//m_unit[1][4].addUnit( MARKSMAN, PLAYERONE );
 	m_assassinTimer		=	0.0f;
