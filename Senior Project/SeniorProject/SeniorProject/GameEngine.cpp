@@ -390,6 +390,8 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	fmodSystem->createSound("WolfAttack.wav", FMOD_DEFAULT, 0, &wolfAttackSFX);
 	fmodSystem->createSound("GolemAttackSFX.wav", FMOD_DEFAULT, 0, &golemAttackSFX);
 	fmodSystem->createSound("GolemWalkSFX.wav", FMOD_LOOP_NORMAL | FMOD_2D | FMOD_HARDWARE, 0, &golemWalkSFX);
+	fmodSystem->createSound("WarriorUnitWalkSFX.wav", FMOD_LOOP_NORMAL | FMOD_2D | FMOD_HARDWARE, 0, &warriorUnitWalkSFX);
+	fmodSystem->createSound("MinotaurWalkSFX.wav", FMOD_LOOP_NORMAL | FMOD_2D | FMOD_HARDWARE, 0, &minotaurWalkSFX);
 
 	for(int i = 0; i < 255; ++i)
 	{
@@ -423,14 +425,14 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 
 	//////////////////////////////////////////////////////
 	//  INFO:  For testing, leave this in
-	//m_player[0].setCharacterType( ARCHER );
+	//m_player[0].setCharacterType( WARRIOR );
 	//m_player[1].setCharacterType( BLACKMAGE );
 	//m_unit[2][2].addUnit(MINOTAUR, PLAYERONE);
 	//m_unit[3][3].addUnit(THIEF, PLAYERONE);
 	//m_unit[2][6].addUnit( WARLOCK, PLAYERONE );
 	//m_unit[3][7].addUnit( WARLOCK, PLAYERTWO );
 
-	//m_unit[1][1].addUnit( GOLEM, PLAYERONE );
+	//m_unit[1][1].addUnit( MINOTAUR, PLAYERONE );
 	//m_unit[1][6].addUnit( ARCHERUNIT, PLAYERTWO );
 	//m_unit[0][10].addUnit( WARLOCK, PLAYERTWO );
 	//m_unit[0][5].addUnit( MINOTAUR, PLAYERONE );
@@ -1113,35 +1115,56 @@ void GameEngine::Update(float dt)
 				switch(m_tester)
 				{
 				case 1:
-					m_unit[1][1].setState( MOVING );
+					m_unit[1][1].setState( ATTACKING );
 					//m_unit[1][1].setUnitRect( 135, 15, 80, 190 );
 					break;
-				case 9:
+				case 5:
 					m_tester	=	0;
 					m_unit[1][1].setState( IDLE );
 					//m_classAbilityAnimator.setClassAbilityAnimation( BOLSTER , m_gameBoard[0][0].getPosX(), m_gameBoard[0][0].getPosY() );
 					break;
-				case 2:
-					m_unit[1][1].adjustUnitRectLeftRight( 105, 120 );
+				case 6:
+					m_unit[1][1].adjustUnitRectLeftRight( 44, 45 );
 					break;
 				case 3:
-					m_unit[1][1].adjustUnitRectLeftRight( 105, 113 );
+					m_unit[1][1].adjustUnitRectLeftRight( 170, 190 );
 					//m_unit[1][1].adjustUnitRectLeftRight( 180, 190 );
 					break;
+				case 2:
+					m_unit[1][1].adjustUnitRectLeftRight( 157, 152 );
+					break;
 				case 4:
-					m_unit[1][1].adjustUnitRectLeftRight( 102, 120 );
+					m_unit[1][1].adjustUnitRectLeftRight( 170, 187 );
 					break;
-				case 5:
-					m_unit[1][1].adjustUnitRectLeftRight( 101, 118 );
-					break;
-				case 6:
-					m_unit[1][1].adjustUnitRectLeftRight( 105, 114 );
+				case 44:
+					m_unit[1][1].adjustUnitRectLeftRight( 45, 45 );
 					break;
 				case 7:
-					m_unit[1][1].adjustUnitRectLeftRight( 105, 118 );
+					m_unit[1][1].adjustUnitRectLeftRight( 48, 46 );
 					break;
 				case 8:
-					m_unit[1][1].adjustUnitRectLeftRight( 105, 118 );
+					m_unit[1][1].adjustUnitRectLeftRight( 50, 50 );
+					break;
+				case 9:
+					m_unit[1][1].adjustUnitRectLeftRight( 50, 50 );
+					break;
+				case 10:
+					m_unit[1][1].adjustUnitRectLeftRight( 45, 45 );
+					break;
+				case 111:
+					m_unit[1][1].adjustUnitRectLeftRight( 48, 48 );
+					break;
+				case 122:
+					m_unit[1][1].adjustUnitRectLeftRight( 285, 285 );
+					break;
+				case 13:
+					m_unit[1][1].adjustUnitRectLeftRight( 285, 285 );
+					break;
+				case 14:
+					m_unit[1][1].adjustUnitRectLeftRight( 285, 285 );
+					break;
+				case 15:
+					m_unit[1][1].adjustUnitRectLeftRight( 285, 285 );
 					break;
 				default:
 					m_unit[1][1].adjustUnitRectLeftRight( animationOffsetLeft, animationOffsetRight );
@@ -3242,6 +3265,12 @@ void GameEngine::meleeAttackSFX( int row, int col ){
 	case GOLEM:
 		fmodSystem->playSound( FMOD_CHANNEL_FREE, golemAttackSFX, false, 0 );
 		break;
+	case WARRIORUNIT:
+		fmodSystem->playSound( FMOD_CHANNEL_FREE, chop, false, 0 );
+		break;
+	case MINOTAUR:
+		fmodSystem->playSound( FMOD_CHANNEL_FREE, chop, false, 0 );
+		break;
 	}
 };
 
@@ -3254,6 +3283,12 @@ void GameEngine::movementSFX(int type){
 		case GOLEM:
 			//mainChannel->setVolume( 2.0f );
 			fmodSystem->playSound( FMOD_CHANNEL_FREE, golemWalkSFX, false, &mainChannel );
+			break;
+		case WARRIORUNIT:
+			fmodSystem->playSound( FMOD_CHANNEL_FREE, warriorUnitWalkSFX, false, &mainChannel );
+			break;
+		case MINOTAUR:
+			fmodSystem->playSound( FMOD_CHANNEL_FREE, minotaurWalkSFX, false, &mainChannel );
 			break;
 		}
 	}
