@@ -34,6 +34,7 @@ GameEngine::GameEngine(void)
 	player2selected					= false;
 	number							= 0;
 	m_displayingHelpMenu			=	false;
+	m_walkingSFXPlaying				=	false;
 }
 
 GameEngine::~GameEngine()
@@ -387,6 +388,8 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	fmodSystem->createSound("blizzloop.wav", FMOD_DEFAULT, 0, &blackHoleAbilitySFX);
 	fmodSystem->createSound("meteorimpact.wav", FMOD_DEFAULT, 0, &flameWaveAbilitySFX);
 	fmodSystem->createSound("WolfAttack.wav", FMOD_DEFAULT, 0, &wolfAttackSFX);
+	fmodSystem->createSound("GolemAttackSFX.wav", FMOD_DEFAULT, 0, &golemAttackSFX);
+	fmodSystem->createSound("GolemWalkSFX.wav", FMOD_LOOP_NORMAL | FMOD_2D | FMOD_HARDWARE, 0, &golemWalkSFX);
 
 	for(int i = 0; i < 255; ++i)
 	{
@@ -416,22 +419,22 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	m_fireballRotation = 0.0f;
 	////////////////////////////////////////////////////////
 	//  INFO:  Changed the gamestate manually for testing
-	m_gameState = BATTLE;
+	m_gameState = MENUMAIN;
 
 	//////////////////////////////////////////////////////
 	//  INFO:  For testing, leave this in
-	m_player[0].setCharacterType( ARCHER );
-	m_player[1].setCharacterType( BLACKMAGE );
+	//m_player[0].setCharacterType( ARCHER );
+	//m_player[1].setCharacterType( BLACKMAGE );
 	//m_unit[2][2].addUnit(MINOTAUR, PLAYERONE);
 	//m_unit[3][3].addUnit(THIEF, PLAYERONE);
 	//m_unit[2][6].addUnit( WARLOCK, PLAYERONE );
 	//m_unit[3][7].addUnit( WARLOCK, PLAYERTWO );
 
-	m_unit[1][1].addUnit( BLACKMAGEUNIT, PLAYERONE );
+	//m_unit[1][1].addUnit( GOLEM, PLAYERONE );
 	//m_unit[1][6].addUnit( ARCHERUNIT, PLAYERTWO );
 	//m_unit[0][10].addUnit( WARLOCK, PLAYERTWO );
 	//m_unit[0][5].addUnit( MINOTAUR, PLAYERONE );
-	m_unit[1][10].addUnit( BLACKMAGEUNIT, PLAYERTWO );
+	//m_unit[1][4].addUnit( BLACKMAGEUNIT, PLAYERTWO );
 	//m_unit[1][4].addUnit( MARKSMAN, PLAYERONE );
 	m_assassinTimer		=	0.0f;
 }
@@ -1101,8 +1104,8 @@ void GameEngine::Update(float dt)
 
 				keyIsDown[DIK_RIGHT] = true;
 				m_tester++;		
-				animationOffsetLeft =  70;
-				animationOffsetRight = 70;
+				animationOffsetLeft =  105;
+				animationOffsetRight = 120;
 				if(m_tester > 12 ){
 					animationOffsetLeft	=  33;
 					animationOffsetRight = 32;
@@ -1110,27 +1113,35 @@ void GameEngine::Update(float dt)
 				switch(m_tester)
 				{
 				case 1:
-					m_unit[1][1].setState( ATTACKING );
+					m_unit[1][1].setState( MOVING );
 					//m_unit[1][1].setUnitRect( 135, 15, 80, 190 );
 					break;
-				case 8:
+				case 9:
 					m_tester	=	0;
 					m_unit[1][1].setState( IDLE );
 					//m_classAbilityAnimator.setClassAbilityAnimation( BOLSTER , m_gameBoard[0][0].getPosX(), m_gameBoard[0][0].getPosY() );
 					break;
-				case 3:
-					m_unit[1][1].adjustUnitRectLeftRight( 70, 51 );
+				case 2:
+					m_unit[1][1].adjustUnitRectLeftRight( 105, 120 );
 					break;
-				case 6:
-					m_unit[1][1].setState( IDLE );
-					m_tester	=	0;
+				case 3:
+					m_unit[1][1].adjustUnitRectLeftRight( 105, 113 );
 					//m_unit[1][1].adjustUnitRectLeftRight( 180, 190 );
 					break;
 				case 4:
-					m_unit[1][1].adjustUnitRectLeftRight( 60, 61 );
+					m_unit[1][1].adjustUnitRectLeftRight( 102, 120 );
 					break;
 				case 5:
-					m_unit[1][1].adjustUnitRectLeftRight( 60, 72 );
+					m_unit[1][1].adjustUnitRectLeftRight( 101, 118 );
+					break;
+				case 6:
+					m_unit[1][1].adjustUnitRectLeftRight( 105, 114 );
+					break;
+				case 7:
+					m_unit[1][1].adjustUnitRectLeftRight( 105, 118 );
+					break;
+				case 8:
+					m_unit[1][1].adjustUnitRectLeftRight( 105, 118 );
 					break;
 				default:
 					m_unit[1][1].adjustUnitRectLeftRight( animationOffsetLeft, animationOffsetRight );
@@ -1160,8 +1171,8 @@ void GameEngine::Update(float dt)
 				keyIsDown[DIK_LEFT] = true;
 				m_tester--;								
 				if(m_tester >= 5 ){
-					animationOffsetLeft	 = 33;
-					animationOffsetRight = 32;
+					//animationOffsetLeft	 = 33;
+					//animationOffsetRight = 32;
 				}
 				switch(m_tester){
 				default:
@@ -1170,7 +1181,7 @@ void GameEngine::Update(float dt)
 					//animationOffsetLeft		=	140;
 					//animationOffsetRight	=	142;
 					break;
-				case 4:
+			//	case 4:
 					//animationOffsetLeft		=	120;
 					//animationOffsetRight	=	141;
 					break;
@@ -2595,6 +2606,7 @@ void GameEngine::updateEventPhase(float dt)
 		{
 			if( m_unit[m_attackingSpaceX][m_attackingSpaceY].getWhoUnitBelongsTo() == PLAYERONE )
 			{
+				movementSFX( m_unit[m_attackingSpaceX][m_attackingSpaceY].getType() );
 				m_unit[m_attackingSpaceX][m_attackingSpaceY].adjustPosX( 40 * dt );
 				m_arrowForAttackingUnitPosX	=	m_unit[m_attackingSpaceX][m_attackingSpaceY].getPosX() + 10;
 				m_arrowForAttackingUnitPosY	=	m_unit[m_attackingSpaceX][m_attackingSpaceX].getPosY() - 40;
@@ -2607,6 +2619,7 @@ void GameEngine::updateEventPhase(float dt)
 			}
 			else 
 			{
+				movementSFX( m_unit[m_attackingSpaceX][m_attackingSpaceY].getType() );
 				m_unit[m_attackingSpaceX][m_attackingSpaceY].adjustPosX( -40 * dt );
 				m_arrowForAttackingUnitPosX	=	m_unit[m_attackingSpaceX][m_attackingSpaceY].getPosX() + 10;
 				m_arrowForAttackingUnitPosY	=	m_unit[m_attackingSpaceX][m_attackingSpaceX].getPosY() - 40;
@@ -2853,6 +2866,10 @@ void GameEngine::resetUnitActions(int playerNumber)
 
 void GameEngine::moveUnit()
 {
+	if( m_walkingSFXPlaying ){
+		m_walkingSFXPlaying		=	false;
+		mainChannel->stop();
+	}
 	m_unit[m_attackingSpaceX][m_moveToTarget].swapUnit( m_unit[m_attackingSpaceX][m_attackingSpaceY] );
 	//m_unit[m_attackingSpaceX][m_moveToTarget].addUnit( m_unit[m_attackingSpaceX][m_attackingSpaceY].getType(), m_unit[m_attackingSpaceX][m_attackingSpaceY].getWhoUnitBelongsTo() );
 	//m_unit[m_attackingSpaceX][m_moveToTarget].setCurrentHealth( m_unit[m_attackingSpaceX][m_attackingSpaceY].getCurrentHealth() );
@@ -3222,6 +3239,23 @@ void GameEngine::meleeAttackSFX( int row, int col ){
 	case WOLF:
 		fmodSystem->playSound( FMOD_CHANNEL_FREE, wolfAttackSFX, false, 0 );
 		break;
+	case GOLEM:
+		fmodSystem->playSound( FMOD_CHANNEL_FREE, golemAttackSFX, false, 0 );
+		break;
+	}
+};
+
+void GameEngine::movementSFX(int type){
+//	m_walkingSFXPlaying		=	true;
+//	mainChannel->isPlaying(&m_walkingSFXPlaying);
+	if( !m_walkingSFXPlaying ){
+		m_walkingSFXPlaying		=	true;
+		switch( type ){
+		case GOLEM:
+			//mainChannel->setVolume( 2.0f );
+			fmodSystem->playSound( FMOD_CHANNEL_FREE, golemWalkSFX, false, &mainChannel );
+			break;
+		}
 	}
 };
 
