@@ -4,24 +4,24 @@ GameEngine::GameEngine(void)
 {
 	// Init or NULL objects before use to avoid any undefined behavior
 	m_bVsync						=	false;
-	m_pD3DObject					=	0;
-	m_pD3DDevice					=	0;
-	m_currTime						=	0;
-	m_prevTime						=	0;
+	m_pD3DObject				=	0;
+	m_pD3DDevice			=	0;
+	m_currTime					=	0;
+	m_prevTime					=	0;
 	m_FPS							=	0;
-	m_deltaTime						=	0;
-	m_gameState						=	0;
-	m_lightningActive				=	false;
-	m_combatMessageActive			=	false;
+	m_deltaTime					=	0;
+	m_gameState				=	0;
+	m_lightningActive			=	false;
+	m_combatMessageActive		=	false;
 	m_lightningRect.top				=	0;
 	m_lightningRect.left			=	0;
 	m_lightningRect.right			=	0;
-	m_lightningRect.bottom			=	0;
+	m_lightningRect.bottom		=	0;
 	m_lightningTimer				=	0.0f;
-	m_randomNumber					=	0;
+	m_randomNumber				=	0;
 	selectedUnit					=	99;
 	textCount						=	0;
-	m_characterSelectTimer			=	0.0f;
+	m_characterSelectTimer		=	0.0f;
 	m_assassinTimer					=	0.0f;
 	noGold							=	false;
 	dontPlaceUnit					=	false;
@@ -459,26 +459,26 @@ void GameEngine::InitGameBoard()
 				m_unit[i][j].setWhoUnitBelongsTo(PLAYERONE);
 				m_unit[i][j].setType(GOLDMINES);
 			}
-			else if (j == MAXBOARDWIDTH-1 )
+			else if (j ==  15 )
 			{
 				m_unit[i][j].addUnit(GOLDMINES, PLAYERTWO);
 				m_unit[i][j].setWhoUnitBelongsTo(PLAYERTWO);
 				m_unit[i][j].setType(GOLDMINES);
 			}
-			float testerX, testerY;
+			/*float testerX, testerY;
 			if(i == 0 && j == 14)
 			{
 				testerX = m_gameBoard[i][j].getPosX();
 				testerY = m_gameBoard[i][j].getPosY();
 				testerX += 0;
-			}
+			}*/
 		}
 	}
 	/////////////////////////////////////////////////////////
 	//  TODO:  Put this back in the loop.  For some reason, the last goldmine for player two wasn't being set so I did it here.
-	m_unit[4][MAXBOARDWIDTH].addUnit(GOLDMINES, PLAYERTWO);
-	m_unit[4][MAXBOARDWIDTH].setWhoUnitBelongsTo(PLAYERTWO);
-	m_unit[4][MAXBOARDWIDTH].setType(GOLDMINES);
+	//m_unit[4][MAXBOARDWIDTH].addUnit(GOLDMINES, PLAYERTWO);
+	//m_unit[4][MAXBOARDWIDTH].setWhoUnitBelongsTo(PLAYERTWO);
+	//m_unit[4][MAXBOARDWIDTH].setType(GOLDMINES);
 
 	player1_units.clear();
 	hoverButtons.clear();
@@ -873,13 +873,13 @@ void GameEngine::Update(float dt)
 			for(auto &Buttons: characterButtons)
 			{
 				if(Buttons.getPosition().x > -109.0f && Buttons.getPosition().x < 100.0f)
-					Buttons.setPosition( (Buttons.getPosition().x + 0.05f), Buttons.getPosition().y);
+					Buttons.setPosition( (Buttons.getPosition().x + 0.055f), Buttons.getPosition().y);
 
 				if(Buttons.getPosition().y > -1.0f && Buttons.getPosition().y < 300.0f)
-					Buttons.setPosition( Buttons.getPosition().x , (Buttons.getPosition().y + 0.05f) );
+					Buttons.setPosition( Buttons.getPosition().x , (Buttons.getPosition().y + 0.085f) );
 
 				if(Buttons.getPosition().x > 599.0f && Buttons.getPosition().x < 901.0f)
-					Buttons.setPosition( (Buttons.getPosition().x - 0.05f), Buttons.getPosition().y);
+					Buttons.setPosition( (Buttons.getPosition().x - 0.082f), Buttons.getPosition().y);
 
 				if(Buttons.isOn(cursor.x, cursor.y, 3))
 				{
@@ -1030,32 +1030,35 @@ void GameEngine::Update(float dt)
 		fmodSystem->update();
 		///////////////////////////////////////////////////////////
 		//  INFO:  Check if player(s) click on the end turn button
-		for(auto & Buttons: endTurnButton)
+		if(m_player[0].checkIfActivePlayer() || m_player[1].checkIfActivePlayer())
 		{
-			if(Buttons.isOn(cursor.x, cursor.y, 3))
-			{
-				Buttons.setColor(D3DCOLOR_ARGB(255, 255, 255, 0));
-				Buttons.setHighlight(true);
-			}
-			else
-			{
-				Buttons.setColor(D3DCOLOR_ARGB(255, 255, 255, 255));
-				Buttons.setHighlight(false);
-			}
-
-			if((mouseState.rgbButtons[0] & 0x80) != 0)
+			for(auto & Buttons: endTurnButton)
 			{
 				if(Buttons.isOn(cursor.x, cursor.y, 3))
 				{
-					if(!keyIsDown[DIK_9])
+					Buttons.setColor(D3DCOLOR_ARGB(255, 255, 255, 0));
+					Buttons.setHighlight(true);
+				}
+				else
+				{
+					Buttons.setColor(D3DCOLOR_ARGB(255, 255, 255, 255));
+					Buttons.setHighlight(false);
+				}
+
+				if((mouseState.rgbButtons[0] & 0x80) != 0)
+				{
+					if(Buttons.isOn(cursor.x, cursor.y, 3))
 					{
-						keyIsDown[DIK_9]  = true;
-						changePhase();
+						if(!keyIsDown[DIK_9])
+						{
+							keyIsDown[DIK_9]  = true;
+							changePhase();
+						}
 					}
 				}
+				else
+					keyIsDown[DIK_9] = false;
 			}
-			else
-				keyIsDown[DIK_9] = false;
 		}
 
 		switch(m_gamePhase)
@@ -3441,17 +3444,6 @@ void GameEngine::Render(float dt)
 			switch(m_gameState)
 			{
 			case MENUMAIN:
-				//Drawing cursor positions onto screen
-				/*RECT cursorRect;
-				GetClientRect(m_hWnd, &cursorRect);
-				wchar_t buffer[128];
-				cursorRect.top = 470;
-				cursorRect.left = 300;
-				swprintf_s(buffer, 128, L"%f", cursor.x);
-				m_pD3DFont->DrawText(0, buffer, -1, &cursorRect, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 255, 0));
-				cursorRect.top = 500;
-				swprintf_s(buffer, 128, L"%f", cursor.y);
-				m_pD3DFont->DrawText(0, buffer, -1, &cursorRect, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 255, 0));*/
 				break;
 			case MENUCHARACTERSELECT:
 				drawPlayerChoice(m_player[0].getCharacterType());
@@ -4728,7 +4720,7 @@ void GameEngine::drawUIText(float dt)
 			rect.left += i * 250;
 			rect.right += i * 250;
 			swprintf_s(buffer, 128, L"Health:   %d \ %d\nSpecial:  %d / %d\nGold:      %d", m_player[i].getCurrentHealth(), m_player[i].getMaxHealth(), m_player[i].getCurrentSpecial(), m_player[i].getMaxSpecial(), m_player[i].getGold());
-			m_pD3DFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
+			m_pD3DFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 255, 255));
 		}
 		rect.top = 470;
 		rect.bottom = 575;
@@ -4756,7 +4748,7 @@ void GameEngine::drawUIText(float dt)
 		RECT noMoney;
 		wchar_t noMonbuffer[64];
 		GetClientRect(m_hWnd, &noMoney);
-		noMoney.top = 470;
+		noMoney.top = 277;
 		noMoney.left = 300;
 		swprintf_s(noMonbuffer, 64, L"Not Enough GOLD!");
 		m_pD3DFont->DrawText(0, noMonbuffer, -1, &noMoney, DT_TOP| DT_LEFT | DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 0, 0));
@@ -4768,17 +4760,6 @@ void GameEngine::drawUIText(float dt)
 	}
 	else
 		textCount = 0;
-
-	////Drawing cursor positions onto screen
-	/*RECT cursorRect;
-	GetClientRect(m_hWnd, &cursorRect);
-	cursorRect.top = 470;
-	cursorRect.left = 300;
-	swprintf_s(buffer, 128, L"%f", cursor.x);
-	m_pD3DFont->DrawText(0, buffer, -1, &cursorRect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
-	cursorRect.top = 500;
-	swprintf_s(buffer, 128, L"%f", cursor.y);
-	m_pD3DFont->DrawText(0, buffer, -1, &cursorRect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));*/
 };
 // Change WARRIOR ABILITY icons to correct icons once recieved!!
 void GameEngine::drawIcons(int thisButton , Character thisPlayer, D3DXVECTOR3 position,D3DCOLOR a_color)
@@ -5440,11 +5421,25 @@ void GameEngine::drawWinner(Character a_player)
 	rect.top = 35;
 	if(a_player.getPlayerNumber() == 0)
 	{
-		m_pD3DFont->DrawText(0, L"Player One is VICTORIOUS!\nPress Enter To Return To Menu", -1, &rect, DT_TOP | DT_RIGHT | DT_NOCLIP , D3DCOLOR_ARGB(255, 255, 255, 0));
+		if(a_player.getCharacterType() == ARCHER)
+			m_readableFont->DrawText(0, L"Player One is VICTORIOUS!\nPress Enter To Return To Menu", -1, &rect, DT_TOP | DT_RIGHT | DT_NOCLIP , D3DCOLOR_ARGB(255, 0, 255, 0));
+
+		if(a_player.getCharacterType() == BLACKMAGE)
+			m_readableFont->DrawText(0, L"Player One is VICTORIOUS!\nPress Enter To Return To Menu", -1, &rect, DT_TOP | DT_RIGHT | DT_NOCLIP , D3DCOLOR_ARGB(255, 0, 255, 255));
+
+		if(a_player.getCharacterType() == WARRIOR)
+			m_readableFont->DrawText(0, L"Player One is VICTORIOUS!\nPress Enter To Return To Menu", -1, &rect, DT_TOP | DT_RIGHT | DT_NOCLIP , D3DCOLOR_ARGB(255, 255, 0, 0));
 	}
 	else
 	{
-		m_pD3DFont->DrawText(0, L"Player Two is VICTORIOUS!\nPress Enter To Return To Menu", -1, &rect, DT_TOP | DT_RIGHT | DT_NOCLIP , D3DCOLOR_ARGB(255, 255, 255, 0));
+		if(a_player.getCharacterType() == ARCHER)
+			m_readableFont->DrawText(0, L"Player Two is VICTORIOUS!\nPress Enter To Return To Menu", -1, &rect, DT_TOP | DT_RIGHT | DT_NOCLIP , D3DCOLOR_ARGB(255, 0, 255, 0));
+
+		if(a_player.getCharacterType() == BLACKMAGE)
+			m_readableFont->DrawText(0, L"Player Two is VICTORIOUS!\nPress Enter To Return To Menu", -1, &rect, DT_TOP | DT_RIGHT | DT_NOCLIP , D3DCOLOR_ARGB(255, 0, 255, 255));
+
+		if(a_player.getCharacterType() == WARRIOR)
+			m_readableFont->DrawText(0, L"Player Two is VICTORIOUS!\nPress Enter To Return To Menu", -1, &rect, DT_TOP | DT_RIGHT | DT_NOCLIP , D3DCOLOR_ARGB(255, 255, 0, 0));
 	}
 }
 
