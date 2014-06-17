@@ -35,6 +35,7 @@ GameEngine::GameEngine(void)
 	number							= 0;
 	m_displayingHelpMenu			=	false;
 	m_walkingSFXPlaying				=	false;
+	m_SFXPlaying					=	true;
 }
 
 GameEngine::~GameEngine()
@@ -392,6 +393,7 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	fmodSystem->createSound("GolemWalkSFX.wav", FMOD_LOOP_NORMAL | FMOD_2D | FMOD_HARDWARE, 0, &golemWalkSFX);
 	fmodSystem->createSound("WarriorUnitWalkSFX.wav", FMOD_LOOP_NORMAL | FMOD_2D | FMOD_HARDWARE, 0, &warriorUnitWalkSFX);
 	fmodSystem->createSound("MinotaurWalkSFX.wav", FMOD_LOOP_NORMAL | FMOD_2D | FMOD_HARDWARE, 0, &minotaurWalkSFX);
+	fmodSystem->createSound("BlockSFX.wav", FMOD_DEFAULT, 0, &blockSFX);
 
 	for(int i = 0; i < 255; ++i)
 	{
@@ -2325,7 +2327,7 @@ void GameEngine::updateEventPhase(float dt)
 	}
 	else if ( !m_unitCurrentlyMoving && !m_floatingTextActive ) 
 	{
-		m_temporaryTimer += dt;
+		//m_temporaryTimer += dt;
 		int flip = 1;
 		if(m_arrowActive)
 		{
@@ -2528,31 +2530,32 @@ void GameEngine::updateEventPhase(float dt)
 			{
 				if( m_attackTargetSpaceX >= 0 ) 
 				{
-					m_damageType	=	m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage();
-					//m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( IDLE );
-					if( m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getType() == THIEF )
-					{
-						m_randomNumber	=	rand()%2;
-						if( m_randomNumber == 0 ){
-							m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( IDLE );
-							m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].setState( HIT );
-							m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].adjustCurrentHealth(-m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage());
-						}
-						else{
-							m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( IDLE );
-							m_combatMessageActive	=	true;
-							swprintf_s(m_combatMessage, 128, L"Missed!!");
-						}
-					}
-					else {
-						m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( IDLE );
-						m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].setState( HIT );
-						m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].adjustCurrentHealth(-m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage());
-					}
+					combatRolls();
+					//m_damageType	=	m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage();
+					m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( IDLE );
+					//if( m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getType() == THIEF )
+					//{
+					//	m_randomNumber	=	rand()%2;
+					//	if( m_randomNumber == 0 ){
+					//		m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( IDLE );
+					//		m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].setState( HIT );
+					//		m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].adjustCurrentHealth(-m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage());
+					//	}
+					//	else{
+					//		m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( IDLE );
+					//		m_combatMessageActive	=	true;
+					//		swprintf_s(m_combatMessage, 128, L"Missed!!");
+					//	}
+					//}
+					//else {
+					//	m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( IDLE );
+					//	m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].setState( HIT );
+					//	m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].adjustCurrentHealth(-m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage());
+					//}
 					//////////////////////////////////////////////////////////////////////
 					//  INFO:  Remove attacked unit if health < 1
-					if( m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getCurrentHealth() < 1 )
-						destroyUnit();
+					//if( m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getCurrentHealth() < 1 )
+						//destroyUnit();
 					//m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].removeUnit();
 				}
 				else
@@ -2663,8 +2666,8 @@ void GameEngine::updateEventPhase(float dt)
 					///////////////////////////////////////////////////////////////////
 					//  INFO:  The Thief attack sound needs to be offset to match his animation.
 					//  TODO:  Find a better way / place to do this
-					if( m_unit[m_attackingSpaceX][m_attackingSpaceY].getType() == THIEF )
-						fmodSystem->playSound( FMOD_CHANNEL_FREE, chop, false, 0 );
+					//if( m_unit[m_attackingSpaceX][m_attackingSpaceY].getType() == THIEF )
+						//fmodSystem->playSound( FMOD_CHANNEL_FREE, chop, false, 0 );
 				m_floatingTextActive = true;
 				m_floatingRectTopMax	=	m_gameBoard[m_attackingSpaceX][m_attackingSpaceY].getPosY() - 35;
 				m_floatingTextRect.top = long(m_gameBoard[m_attackingSpaceX][m_attackTargetSpaceY].getPosY() - 10);
@@ -2697,6 +2700,32 @@ void GameEngine::updateEventPhase(float dt)
 	int test;
 	if(m_gamePhase == PLAYERTWO_EVENTPHASE)
 		test = 0;
+	if( m_unitCurrentlyAttacking && m_moveToTarget < 1 &&!m_SFXPlaying  ){
+		m_temporaryTimer += dt;
+		switch( m_unit[m_attackingSpaceX][m_attackingSpaceY].getType() ){
+		case WARRIORUNIT:
+			if( m_temporaryTimer > 0.25f ){
+				m_temporaryTimer	=	0.0f;
+				m_SFXPlaying		=	true;
+				fmodSystem->playSound( FMOD_CHANNEL_FREE, chop, false, 0 );
+			}
+			break;
+		case THIEF:
+			if( m_temporaryTimer > 0.85f ){
+				m_temporaryTimer	=	0.0f;
+				m_SFXPlaying		=	true;
+				fmodSystem->playSound( FMOD_CHANNEL_FREE, chop, false, 0 );
+			}
+			break;
+		case MINOTAUR:
+			if( m_temporaryTimer > 0.25f ){
+				m_temporaryTimer	=	0.0f;
+				m_SFXPlaying		=	true;
+				fmodSystem->playSound( FMOD_CHANNEL_FREE, chop, false, 0 );
+			}
+			break;
+		}
+	}
 };
 
 void GameEngine::findNextTarget( int row, int col )
@@ -2729,6 +2758,7 @@ void GameEngine::findNextTarget( int row, int col )
 			//if( ( col + 1 ) > MAXBOARDWIDTH )
 			if( ( col + 1 ) == MAXBOARDWIDTH-1 && ( m_unit[row][MAXBOARDWIDTH-1].getWhoUnitBelongsTo() < 0 ) ){
 				m_attackWillHitPlayer = true;
+				m_SFXPlaying	=	false;
 				m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( ATTACKING );
 				meleeAttackSFX( m_attackingSpaceX, m_attackingSpaceY );
 				return;
@@ -2739,6 +2769,7 @@ void GameEngine::findNextTarget( int row, int col )
 				m_attackTargetSpaceX	=	row;
 				m_attackTargetSpaceY	=	col + 1;
 				m_unitCurrentlyMoving	=	true;
+				m_SFXPlaying	=	false;
 				m_unit[row][col].setState( ATTACKING );
 				meleeAttackSFX( m_attackingSpaceX, m_attackingSpaceY );
 			}
@@ -2818,6 +2849,7 @@ void GameEngine::findNextTarget( int row, int col )
 		else{
 			if( ( col - 1 ) < 1 && m_unit[row][0].getWhoUnitBelongsTo() < PLAYERONE ){
 				m_attackWillHitPlayer	=	true;
+				m_SFXPlaying	=	false;
 				m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( ATTACKING );
 				meleeAttackSFX( m_attackingSpaceX, m_attackingSpaceY );
 				return;
@@ -2828,6 +2860,7 @@ void GameEngine::findNextTarget( int row, int col )
 				m_attackTargetSpaceX	=	row;
 				m_attackTargetSpaceY	=	col - 1;
 				m_unitCurrentlyMoving	=	true;
+				m_SFXPlaying	=	false;
 				m_unit[row][col].setState( ATTACKING );
 				meleeAttackSFX( m_attackingSpaceX, m_attackingSpaceY );
 			}
@@ -3270,10 +3303,10 @@ void GameEngine::meleeAttackSFX( int row, int col ){
 		fmodSystem->playSound( FMOD_CHANNEL_FREE, golemAttackSFX, false, 0 );
 		break;
 	case WARRIORUNIT:
-		fmodSystem->playSound( FMOD_CHANNEL_FREE, chop, false, 0 );
+		//fmodSystem->playSound( FMOD_CHANNEL_FREE, chop, false, 0 );
 		break;
 	case MINOTAUR:
-		fmodSystem->playSound( FMOD_CHANNEL_FREE, chop, false, 0 );
+	//	fmodSystem->playSound( FMOD_CHANNEL_FREE, chop, false, 0 );
 		break;
 	}
 };
@@ -3302,7 +3335,7 @@ void GameEngine::combatRolls(){
 	int critDamage		=	0;
 	m_damageType	=	m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage();
 	//m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( IDLE );
-
+	m_randomNumber	=	-1;
 	switch( m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getType() ){
 	default:
 		m_randomNumber	=	rand()%10;
@@ -3323,25 +3356,21 @@ void GameEngine::combatRolls(){
 		if( m_randomNumber == 0 ){
 			m_combatMessageActive = true;
 			swprintf_s(m_combatMessage, 128, L"Missed!!");
-			//m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].setState( HIT );
-			//m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].adjustCurrentHealth(-m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage());
 			///////////////////////////////////////////////////////////////////////////////////
 			//  INFO:  If attack misses, there is nothing else to do so return
 			return;
 		}
-		//else{
-		//	switch( m_unit[m_attackingSpaceX][m_attackingSpaceY].getType() ){
-		//	case ARCHERUNIT:
-		//		m_randomNumber	=	rand()%ARCHERUNITCRITCHANCE;
-		//		break;
-		//	case WOLF:
-		//		m_randomNumber	=	rand()%WOLFUNITCRITCHANCE;
-		//		break;
-		//	case THIEF:
-		//		m_randomNumber	=	rand()%THIEFUNITCRITCHANCE;
-		//		break;
-		//	}
-		//}
+		break;
+	case WARRIORUNIT:
+		m_randomNumber	=	rand()%WARRIORUNITBLOCKCHANCE;
+		if( m_randomNumber == 0 ){
+			m_combatMessageActive = true;
+			swprintf_s(m_combatMessage, 128, L"Blocked!!");
+			fmodSystem->playSound( FMOD_CHANNEL_FREE, blockSFX, false, 0 );
+			///////////////////////////////////////////////////////////////////////////////////
+			//  INFO:  If attack misses, there is nothing else to do so return
+			return;
+		}
 		break;
 	}
 	switch( m_unit[m_attackingSpaceX][m_attackingSpaceY].getType() ){
@@ -3350,6 +3379,10 @@ void GameEngine::combatRolls(){
 		//  INFO:  Standard attack.  Deal damage and return
 		m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].setState( HIT );
 		m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].adjustCurrentHealth(-m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage());
+		//////////////////////////////////////////////////////////////////////
+		//  INFO:  Remove attacked unit if health < 1
+		if( m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getCurrentHealth() < 1 )
+			destroyUnit();
 		return;
 	case ARCHERUNIT:
 		m_randomNumber	=	rand()%ARCHERUNITCRITCHANCE;
@@ -3371,7 +3404,7 @@ void GameEngine::combatRolls(){
 		//return;
 	}
 	else{
-				m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].setState( HIT );
+		m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].setState( HIT );
 		m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].adjustCurrentHealth(-m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage());
 	}
 

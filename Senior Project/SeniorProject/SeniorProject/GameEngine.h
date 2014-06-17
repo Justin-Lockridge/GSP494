@@ -77,7 +77,7 @@ class GameEngine
 	float			m_fireballRotation, m_floatingRectTopMax, m_floatingRectTimer, textCount, m_characterSelectTimer, m_assassinTimer;
 	RECT			m_floatingTextRect, m_healthRect, m_lightningRect;
 
-	bool			noGold, firstTurn, dontPlaceUnit, hoveredUnit, player1selected, player2selected, m_walkingSFXPlaying;
+	bool			noGold, firstTurn, dontPlaceUnit, hoveredUnit, player1selected, player2selected, m_walkingSFXPlaying, m_SFXPlaying;
 	//////////////////////////////////////////////////////////////////////////
 	// Direct3D Variables
 	//////////////////////////////////////////////////////////////////////////
@@ -133,7 +133,7 @@ class GameEngine
 	FMOD::System* fmodSystem;
 	FMOD::Sound* themeMusicOne, *battleTheme;
 	FMOD::Sound* hitMines, *arrowHit, *castFireball, *shootArrow, *fireballHit, *thunderStrike, *minotaurRoar, *goldCoins, *warlockSpell, *cleaveAbilitySFX,
-		*bolsterAbilitySFX, *chop, *blackHoleAbilitySFX, *flameWaveAbilitySFX, *wolfAttackSFX, *golemAttackSFX, *golemWalkSFX, *warriorUnitWalkSFX,
+		*bolsterAbilitySFX, *chop, *blackHoleAbilitySFX, *flameWaveAbilitySFX, *wolfAttackSFX, *golemAttackSFX, *golemWalkSFX, *warriorUnitWalkSFX, *blockSFX,
 		*minotaurWalkSFX;
 	FMOD::Channel* mainChannel;
 	FMOD::Channel* channel;
