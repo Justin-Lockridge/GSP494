@@ -441,59 +441,40 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	m_fireballRotation = 0.0f;
 	////////////////////////////////////////////////////////
 	//  INFO:  Changed the gamestate manually for testing
-<<<<<<< HEAD
-<<<<<<< HEAD
+
 	//m_gameState = BATTLE;
 	m_gameState = MENUMAIN;
-=======
-=======
->>>>>>> origin/master
-	m_gameState = MENUMAIN;
 
->>>>>>> origin/master
 	//////////////////////////////////////////////////////
 	//  INFO:  For testing, leave this in
 	//m_player[0].setCharacterType( WARRIOR );
 	//m_player[1].setCharacterType( BLACKMAGE );
-<<<<<<< HEAD
 	//m_unit[2][2].addUnit(MINOTAUR, PLAYERONE);
 	//m_unit[3][3].addUnit(THIEF, PLAYERONE);
 	//m_unit[2][6].addUnit( WARLOCK, PLAYERONE );
 	//m_unit[3][7].addUnit( WARLOCK, PLAYERTWO );
-
-<<<<<<< HEAD
-<<<<<<< HEAD
 	//m_unit[1][1].addUnit( BLACKMAGEUNIT, PLAYERONE );
 	//m_unit[1][6].addUnit( ARCHERUNIT, PLAYERTWO );
 	//m_unit[0][10].addUnit( WARLOCK, PLAYERTWO );
 	//m_unit[0][5].addUnit( MINOTAUR, PLAYERONE );
 	//m_unit[1][10].addUnit( BLACKMAGEUNIT, PLAYERTWO );
-=======
-=======
->>>>>>> origin/master
 	//m_unit[1][1].addUnit( GOLEM, PLAYERONE );
 	//m_unit[1][6].addUnit( ARCHERUNIT, PLAYERTWO );
 	//m_unit[0][10].addUnit( WARLOCK, PLAYERTWO );
 	//m_unit[0][5].addUnit( MINOTAUR, PLAYERONE );
 	//m_unit[1][4].addUnit( BLACKMAGEUNIT, PLAYERTWO );
-<<<<<<< HEAD
->>>>>>> origin/master
-=======
->>>>>>> origin/master
 	//m_unit[1][4].addUnit( MARKSMAN, PLAYERONE );
-=======
 	//m_unit[2][2].addUnit(WOLF, PLAYERONE);
 	//m_unit[2][3].addUnit(WOLF, PLAYERTWO);
 	//m_unit[2][6].addUnit( WOLF, PLAYERTWO );
 	//m_unit[3][2].addUnit( WOLF, PLAYERONE );
-
 	////m_unit[1][1].addUnit( MINOTAUR, PLAYERONE );
 	//m_unit[3][3].addUnit( WOLF, PLAYERTWO );
 	////m_unit[0][10].addUnit( WARLOCK, PLAYERTWO );
 	//m_unit[4][2].addUnit( WOLF, PLAYERONE );
 	//m_unit[4][3].addUnit( ARCHERUNIT, PLAYERTWO );
 	//m_unit[1][4].addUnit( ARCHERUNIT, PLAYERONE );
->>>>>>> 52b2d8e887913a85ab9f8fb3074bfbdbd3332ec7
+
 	m_assassinTimer		=	0.0f;
 }
 
@@ -2770,7 +2751,6 @@ void GameEngine::updateEventPhase(float dt)
 					//  TODO:  Find a better way / place to do this
 					if( m_unit[m_attackingSpaceX][m_attackingSpaceY].getType() == THIEF )
 						fmodSystem->playSound( FMOD_CHANNEL_FREE, chop, false, 0 );
-<<<<<<< HEAD
 					m_floatingTextActive = true;
 					m_floatingRectTopMax	=	m_gameBoard[m_attackingSpaceX][m_attackingSpaceY].getPosY() - 35;
 					m_floatingTextRect.top = long(m_gameBoard[m_attackingSpaceX][m_attackTargetSpaceY].getPosY() - 10);
@@ -2792,8 +2772,6 @@ void GameEngine::updateEventPhase(float dt)
 						destroyUnit();
 					//m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].removeUnit();
 
-
-=======
 				m_floatingTextActive = true;
 				m_floatingRectTopMax	=	m_gameBoard[m_attackingSpaceX][m_attackingSpaceY].getPosY() - 35;
 				m_floatingTextRect.top = long(m_gameBoard[m_attackingSpaceX][m_attackTargetSpaceY].getPosY() - 10);
@@ -2817,9 +2795,6 @@ void GameEngine::updateEventPhase(float dt)
 				//if( m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getCurrentHealth() < 1 )
 					//destroyUnit();
 				//m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].removeUnit();
-				
-				
->>>>>>> 52b2d8e887913a85ab9f8fb3074bfbdbd3332ec7
 				}
 			}
 		}
