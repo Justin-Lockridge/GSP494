@@ -427,17 +427,17 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	//  INFO:  For testing, leave this in
 	//m_player[0].setCharacterType( WARRIOR );
 	//m_player[1].setCharacterType( BLACKMAGE );
-	//m_unit[2][2].addUnit(MINOTAUR, PLAYERONE);
-	//m_unit[3][3].addUnit(THIEF, PLAYERONE);
-	//m_unit[2][6].addUnit( WARLOCK, PLAYERONE );
-	//m_unit[3][7].addUnit( WARLOCK, PLAYERTWO );
+	//m_unit[2][2].addUnit(WOLF, PLAYERONE);
+	//m_unit[2][3].addUnit(WOLF, PLAYERTWO);
+	//m_unit[2][6].addUnit( WOLF, PLAYERTWO );
+	//m_unit[3][2].addUnit( WOLF, PLAYERONE );
 
-	//m_unit[1][1].addUnit( MINOTAUR, PLAYERONE );
-	//m_unit[1][6].addUnit( ARCHERUNIT, PLAYERTWO );
-	//m_unit[0][10].addUnit( WARLOCK, PLAYERTWO );
-	//m_unit[0][5].addUnit( MINOTAUR, PLAYERONE );
-	//m_unit[1][4].addUnit( BLACKMAGEUNIT, PLAYERTWO );
-	//m_unit[1][4].addUnit( MARKSMAN, PLAYERONE );
+	////m_unit[1][1].addUnit( MINOTAUR, PLAYERONE );
+	//m_unit[3][3].addUnit( WOLF, PLAYERTWO );
+	////m_unit[0][10].addUnit( WARLOCK, PLAYERTWO );
+	//m_unit[4][2].addUnit( WOLF, PLAYERONE );
+	//m_unit[4][3].addUnit( ARCHERUNIT, PLAYERTWO );
+	//m_unit[1][4].addUnit( ARCHERUNIT, PLAYERONE );
 	m_assassinTimer		=	0.0f;
 }
 
@@ -2479,28 +2479,29 @@ void GameEngine::updateEventPhase(float dt)
 			{
 				if( m_attackTargetSpaceY >= 0 )
 				{
-					m_damageType	=	m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage();
-					m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( IDLE );
-					if( m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getType() == THIEF )
-					{
-						m_randomNumber	=	rand()%2;
-						if( m_randomNumber == 0 ){
-							m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].setState( HIT );
-							m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].adjustCurrentHealth(-m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage());
-						}
-						else{
-							m_combatMessageActive = true;
-							swprintf_s(m_combatMessage, 128, L"Missed!!");
-						}
-					}
-					else {
-						m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].setState( HIT );
-						m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].adjustCurrentHealth(-m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage());
-					}
-					//////////////////////////////////////////////////////////////////////
-					//  INFO:  Remove attacked unit if health < 1
-					if( m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getCurrentHealth() < 1 )
-						destroyUnit();
+					combatRolls();
+					//m_damageType	=	m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage();
+					//m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( IDLE );
+					//if( m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getType() == THIEF )
+					//{
+					//	m_randomNumber	=	rand()%2;
+					//	if( m_randomNumber == 0 ){
+					//		m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].setState( HIT );
+					//		m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].adjustCurrentHealth(-m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage());
+					//	}
+					//	else{
+					//		m_combatMessageActive = true;
+					//		swprintf_s(m_combatMessage, 128, L"Missed!!");
+					//	}
+					//}
+					//else {
+					//	m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].setState( HIT );
+					//	m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].adjustCurrentHealth(-m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage());
+					//}
+					////////////////////////////////////////////////////////////////////////
+					////  INFO:  Remove attacked unit if health < 1
+					//if( m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getCurrentHealth() < 1 )
+					//	destroyUnit();
 					//m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].removeUnit();
 				}
 				else
@@ -2625,7 +2626,7 @@ void GameEngine::updateEventPhase(float dt)
 	{///////////  INFO:  Melee Unit is moving
 		/////////////////////////////////////////////////////////////////////
 		//  INFO:  If m_moveToTarget > 0, then an enemy is not in front of this melee unit
-		if( m_moveToTarget > -1 ) 
+		if( m_moveToTarget > 0 ) 
 		{
 			if( m_unit[m_attackingSpaceX][m_attackingSpaceY].getWhoUnitBelongsTo() == PLAYERONE )
 			{
@@ -2673,16 +2674,19 @@ void GameEngine::updateEventPhase(float dt)
 				m_damageType	=	m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage();
 				m_arrowForAttackingUnitPosX	=	m_unit[m_attackingSpaceX][m_attackingSpaceY].getPosX() + 10;
 				m_arrowForAttackingUnitPosY	=	m_unit[m_attackingSpaceX][m_attackingSpaceY].getPosY() - 40;
-				m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].setState( HIT );
-				m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].adjustCurrentHealth(-m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage());
+				
+				combatRolls();
+				
+				//m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].setState( HIT );
+				//m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].adjustCurrentHealth(-m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage());
 				m_unitCurrentlyMoving	=	false;
 				m_unitCurrentlyAttacking	=	true;
 				m_unit[m_attackingSpaceX][m_attackingSpaceY].setUnitCanTakeAction(false);
 				m_unit[m_attackingSpaceX][m_moveToTarget].setUnitCanTakeAction(false);
 				//////////////////////////////////////////////////////////////////////
 				//  INFO:  Remove attacked unit if health < 1
-				if( m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getCurrentHealth() < 1 )
-					destroyUnit();
+				//if( m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getCurrentHealth() < 1 )
+					//destroyUnit();
 				//m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].removeUnit();
 				
 				
@@ -3292,6 +3296,91 @@ void GameEngine::movementSFX(int type){
 			break;
 		}
 	}
+};
+
+void GameEngine::combatRolls(){
+	int critDamage		=	0;
+	m_damageType	=	m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage();
+	//m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( IDLE );
+
+	switch( m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getType() ){
+	default:
+		m_randomNumber	=	rand()%10;
+		if( m_randomNumber == 0 ){
+			m_combatMessageActive = true;
+			swprintf_s(m_combatMessage, 128, L"Missed!!");
+			//m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].setState( HIT );
+			//m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].adjustCurrentHealth(-m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage());
+			///////////////////////////////////////////////////////////////////////////////////
+			//  INFO:  If attack misses, there is nothing else to do so return
+			return;
+		}
+		break;
+	case ARCHERUNIT:
+		break;
+	case THIEF:
+		m_randomNumber	=	rand()%2;
+		if( m_randomNumber == 0 ){
+			m_combatMessageActive = true;
+			swprintf_s(m_combatMessage, 128, L"Missed!!");
+			//m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].setState( HIT );
+			//m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].adjustCurrentHealth(-m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage());
+			///////////////////////////////////////////////////////////////////////////////////
+			//  INFO:  If attack misses, there is nothing else to do so return
+			return;
+		}
+		//else{
+		//	switch( m_unit[m_attackingSpaceX][m_attackingSpaceY].getType() ){
+		//	case ARCHERUNIT:
+		//		m_randomNumber	=	rand()%ARCHERUNITCRITCHANCE;
+		//		break;
+		//	case WOLF:
+		//		m_randomNumber	=	rand()%WOLFUNITCRITCHANCE;
+		//		break;
+		//	case THIEF:
+		//		m_randomNumber	=	rand()%THIEFUNITCRITCHANCE;
+		//		break;
+		//	}
+		//}
+		break;
+	}
+	switch( m_unit[m_attackingSpaceX][m_attackingSpaceY].getType() ){
+	default:
+		/////////////////////////////////////////////////////////////
+		//  INFO:  Standard attack.  Deal damage and return
+		m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].setState( HIT );
+		m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].adjustCurrentHealth(-m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage());
+		return;
+	case ARCHERUNIT:
+		m_randomNumber	=	rand()%ARCHERUNITCRITCHANCE;
+		break;
+	case WOLF:
+		m_randomNumber	=	rand()%WOLFUNITCRITCHANCE;
+		break;
+	case THIEF:
+		m_randomNumber	=	rand()%THIEFUNITCRITCHANCE;
+		break;
+	}
+	if( m_randomNumber	==	0 ){
+		m_randomNumber	=	-1;
+		m_combatMessageActive = true;
+		critDamage	=	( int )m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage() * 1.3f;
+		swprintf_s(m_combatMessage, 128, L"Critical!!\n    %d", critDamage);
+		m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].setState( HIT );
+		m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].adjustCurrentHealth( -critDamage );
+		//return;
+	}
+	else{
+				m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].setState( HIT );
+		m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].adjustCurrentHealth(-m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage());
+	}
+
+
+
+	//////////////////////////////////////////////////////////////////////
+	//  INFO:  Remove attacked unit if health < 1
+	if( m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getCurrentHealth() < 1 )
+		destroyUnit();
 };
 
 void GameEngine::Render(float dt)

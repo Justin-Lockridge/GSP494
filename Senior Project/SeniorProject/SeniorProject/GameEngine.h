@@ -204,6 +204,7 @@ public:
 	void bolsterAbility( int activePlayer );
 	void meleeAttackSFX( int row, int col );
 	void movementSFX(int type);
+	void combatRolls();
 	//////////////////////////////////////////////////////////////////////////
 	// Name:		Render
 	// Parameters:	float elapsedTime - Time that has elapsed since the last
