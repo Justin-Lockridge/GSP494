@@ -77,7 +77,7 @@ class GameEngine
 	float			m_fireballRotation, m_floatingRectTopMax, m_floatingRectTimer, textCount, m_characterSelectTimer, m_assassinTimer;
 	RECT			m_floatingTextRect, m_healthRect, m_lightningRect;
 
-	bool			noGold, firstTurn, dontPlaceUnit, hoveredUnit, player1selected, player2selected;
+	bool			noGold, firstTurn, dontPlaceUnit, hoveredUnit, player1selected, player2selected, m_walkingSFXPlaying;
 	//////////////////////////////////////////////////////////////////////////
 	// Direct3D Variables
 	//////////////////////////////////////////////////////////////////////////
@@ -105,11 +105,13 @@ class GameEngine
 
 	IDirect3DTexture9		*m_archerIcon, *m_golemIcon, *m_blackMageIcon, *m_thiefIcon, *m_wolfIcon, *m_blackHoleIcon, *m_wallIcon, *m_warlockIcon, *m_endTurn, *m_flameStrikeIcon,
 										*m_snipeIcon, *m_splitShotIcon, *m_wallIcon2, *m_archerHover, *m_wolfHover, *m_thiefHover, *m_wallHover, *m_blackMageHover, *m_golemHover, *m_warlockHover, 
-										*m_warriorIcon, * m_marksmanIcon, *m_minotaurIcon;
+										*m_warriorIcon, * m_marksmanIcon, *m_minotaurIcon, *m_bolsterIcon, *m_warriorHover, *m_minotaurHover, *m_marksmanHover, *m_cleaveAbilityIcon, *m_bolsterAbilityIcon;
 	D3DXIMAGE_INFO			m_archerIconInfo, m_golemIconInfo, m_blackMageIconInfo, m_thiefIconInfo, m_wolfIconInfo, m_blackHoleIconInfo, m_wallIconInfo,m_warlockIconInfo, m_endTurnInfo,
 										m_flameStrikeIconInfo, m_snipeIconInfo, m_splitShotIconInfo, m_wallIconInfo2,m_archerHoverInfo, m_wolfHoverInfo, m_thiefHoverInfo, m_wallHoverInfo, m_blackMageHoverInfo,
-										m_golemHoverInfo, m_warlockHoverInfo, m_warriorIconInfo, m_marksmanIconInfo, m_minotaurIconInfo;
-	D3DCOLOR				buttonColor;
+										m_golemHoverInfo, m_warlockHoverInfo, m_warriorIconInfo, m_marksmanIconInfo, m_minotaurIconInfo, m_bolsterIconInfo, m_warriorHoverInfo, m_minotaurHoverInfo,
+										m_marksmanHoverInfo, m_cleaveAbilityIconInfo, m_bolsterAbilityIconInfo;
+
+	D3DCOLOR			buttonColor;
 	int						selectedUnit;
 
 	//////////////////////////////////////////////////////////////////////////
@@ -133,7 +135,7 @@ class GameEngine
 	FMOD::System* fmodSystem;
 	FMOD::Sound* themeMusicOne, *battleTheme;
 	FMOD::Sound* hitMines, *arrowHit, *castFireball, *shootArrow, *fireballHit, *thunderStrike, *minotaurRoar, *goldCoins, *warlockSpell, *cleaveAbilitySFX,
-		*bolsterAbilitySFX, *chop, *blackHoleAbilitySFX, *flameWaveAbilitySFX, *wolfAttackSFX;
+		*bolsterAbilitySFX, *chop, *blackHoleAbilitySFX, *flameWaveAbilitySFX, *wolfAttackSFX, *golemAttackSFX, *golemWalkSFX;
 	FMOD::Channel* mainChannel;
 	FMOD::Channel* channel;
 	bool keyIsDown[255];
@@ -202,6 +204,7 @@ public:
 	void cleaveAbility( int activePlayer );
 	void bolsterAbility( int activePlayer );
 	void meleeAttackSFX( int row, int col );
+	void movementSFX(int type);
 	//////////////////////////////////////////////////////////////////////////
 	// Name:		Render
 	// Parameters:	float elapsedTime - Time that has elapsed since the last

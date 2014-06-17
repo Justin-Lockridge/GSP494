@@ -21,3 +21,5 @@ FFVII SFX - http://www.rpgamer.com/games/ff/ff7/ff7snd.html
 Cleave ability animation - Strider - http://spritedatabase.net/file/208
 
 Cleave ability sound effect - http://soundbible.com/1008-Decapitation.html
+
+Muscle Icon - <div>Icon made by <a href="http://www.freepik.com" alt="Freepik.com" title="Freepik.com">Freepik</a> from <a href="http://www.flaticon.com/free-icon/muscle-flex-outline_28728" title="Flaticon">www.flaticon.com</a></div>

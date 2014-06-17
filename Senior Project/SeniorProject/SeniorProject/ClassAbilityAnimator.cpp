@@ -7,10 +7,10 @@ ClassAbilityAnimator::ClassAbilityAnimator(){
 	scaleX					=		0.0f;
 	scaleY					=		0.0f;
 	type					=		-1;
-	animationRect.top		=		0.0f;
-	animationRect.left		=		0.0f;
-	animationRect.right		=		0.0f;
-	animationRect.bottom	=		0.0f;
+	animationRect.top		=		long(0.0f);
+	animationRect.left		=		long(0.0f);
+	animationRect.right		=		long(0.0f);
+	animationRect.bottom	=		long(0.0f);
 	animationActive			=		false;
 };
 
