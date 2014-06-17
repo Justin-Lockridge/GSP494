@@ -177,7 +177,7 @@ void Unit::addUnit(int t, int playerNumber)
 		currentHealth		=	80;
 		maxHealth			=	80;
 		animationTimer		=	0.0f;
-		unitRect.top			=	75;
+		unitRect.top			=	80;
 		unitRect.left			=	5;
 		unitRect.right		=	70;
 		unitRect.bottom	=	145;
@@ -776,19 +776,48 @@ void Unit::updateAnimations( float dt )
 						unitRect.right	+=	65;
 						break;
 					case 205:
-						setUnitRect(75, 5, 70, 145);
+						setUnitRect(80, 5, 70, 145);
 						break;
 					}
-					break;
+					
 				}
+				break;
+			case ATTACKING:{
+				if( animationTimer > 0.07f ){
+					animationTimer	-=	0.07f;
+					switch( unitRect.left ){
+					case 15:
+						adjustUnitRectLeftRight( 70, 70 );
+						break;
+					case 85:
+						adjustUnitRectLeftRight( 70, 51 );
+						break;
+					case 155:
+						adjustUnitRectLeftRight( 60, 61 );
+						break;
+					case 215:
+						adjustUnitRectLeftRight( 60, 72 );
+						break;
+					}
+				}
+						   }
+				break;
 			case HIT:
-				if( animationTimer > 1.10f )
+				if( animationTimer > 0.10f )
 				{
-					animationTimer -= 1.10f;
-					setState( IDLE );
-					//switch(unitRect.left)
-					//{
-					//}
+					animationTimer -= 0.1f;
+					switch(unitRect.left)
+					{
+					case 15:
+						adjustUnitRectLeftRight( 80, 70 );
+						break;
+					case 95:
+						adjustUnitRectLeftRight( 85, 85 );
+						break;
+					case 180:
+						setState( IDLE );
+						break;
+					}
 				}
 
 				break;
@@ -1013,6 +1042,29 @@ void Unit::setState( int s )
 	case GOLEM:
 		break;
 	case BLACKMAGEUNIT:
+		switch( state ){
+		case IDLE:
+			animationTimer		=	0.0f;
+			unitRect.top			=	80;
+			unitRect.left			=	5;
+			unitRect.right		=	70;
+			unitRect.bottom	=	145;
+			break;
+		case ATTACKING:
+			animationTimer			=	0.0f;
+			unitRect.top			=	445;
+			unitRect.left			=	15;
+			unitRect.right			=	85;
+			unitRect.bottom			=	510;
+			break;
+		case HIT:
+			animationTimer	=	0.0f;
+			unitRect.top			=	300;
+			unitRect.left			=	15;
+			unitRect.right		=	88;
+			unitRect.bottom	=	358;
+			break;
+		}
 		break;
 	case WARLOCK:
 		switch( state ){

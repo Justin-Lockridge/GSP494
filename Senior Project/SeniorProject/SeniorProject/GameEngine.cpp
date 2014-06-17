@@ -427,11 +427,11 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 	//m_unit[2][6].addUnit( WARLOCK, PLAYERONE );
 	//m_unit[3][7].addUnit( WARLOCK, PLAYERTWO );
 
-	m_unit[1][1].addUnit( WOLF, PLAYERONE );
+	m_unit[1][1].addUnit( BLACKMAGEUNIT, PLAYERONE );
 	//m_unit[1][6].addUnit( ARCHERUNIT, PLAYERTWO );
 	//m_unit[0][10].addUnit( WARLOCK, PLAYERTWO );
 	//m_unit[0][5].addUnit( MINOTAUR, PLAYERONE );
-	m_unit[1][3].addUnit( WOLF, PLAYERTWO );
+	m_unit[1][10].addUnit( BLACKMAGEUNIT, PLAYERTWO );
 	//m_unit[1][4].addUnit( MARKSMAN, PLAYERONE );
 	m_assassinTimer		=	0.0f;
 }
@@ -1098,8 +1098,8 @@ void GameEngine::Update(float dt)
 
 				keyIsDown[DIK_RIGHT] = true;
 				m_tester++;		
-				animationOffsetLeft =  110;
-				animationOffsetRight = 90;
+				animationOffsetLeft =  70;
+				animationOffsetRight = 70;
 				if(m_tester > 12 ){
 					animationOffsetLeft	=  33;
 					animationOffsetRight = 32;
@@ -1107,7 +1107,7 @@ void GameEngine::Update(float dt)
 				switch(m_tester)
 				{
 				case 1:
-					m_unit[1][1].setState( HIT );
+					m_unit[1][1].setState( ATTACKING );
 					//m_unit[1][1].setUnitRect( 135, 15, 80, 190 );
 					break;
 				case 8:
@@ -1116,19 +1116,19 @@ void GameEngine::Update(float dt)
 					//m_classAbilityAnimator.setClassAbilityAnimation( BOLSTER , m_gameBoard[0][0].getPosX(), m_gameBoard[0][0].getPosY() );
 					break;
 				case 3:
-					m_unit[1][1].adjustUnitRectLeftRight( 90, 100 );
+					m_unit[1][1].adjustUnitRectLeftRight( 70, 51 );
 					break;
-				case 4:
+				case 6:
 					m_unit[1][1].setState( IDLE );
 					m_tester	=	0;
 					//m_unit[1][1].adjustUnitRectLeftRight( 180, 190 );
 					break;
-				//case 5:
-				//	m_unit[1][1].adjustUnitRectLeftRight( 190, 170 );
-				//	break;
-				//case 6:
-				//	m_unit[1][1].adjustUnitRectLeftRight( 125, 130 );
-				//	break;
+				case 4:
+					m_unit[1][1].adjustUnitRectLeftRight( 60, 61 );
+					break;
+				case 5:
+					m_unit[1][1].adjustUnitRectLeftRight( 60, 72 );
+					break;
 				default:
 					m_unit[1][1].adjustUnitRectLeftRight( animationOffsetLeft, animationOffsetRight );
 					//m_classAbilityAnimator.adjustAnimationRectLeftRight( animationOffsetLeft, animationOffsetRight );
@@ -2021,6 +2021,8 @@ void GameEngine::updateEventPhase(float dt)
 							m_projectilePosX = m_gameBoard[i][j].getPosX()+5;
 							m_projectilePosY = m_gameBoard[i][j].getPosY()+10;
 							m_fireBallActive = true;
+							m_unitAttackTimer		=	0.0f;
+							m_unit[i][j].setState( ATTACKING );
 							findNextTarget( i, j );
 							fmodSystem->playSound( FMOD_CHANNEL_FREE, castFireball, false, 0);
 							return;
@@ -2229,6 +2231,8 @@ void GameEngine::updateEventPhase(float dt)
 							m_projectilePosX = m_gameBoard[i][j].getPosX()+5;
 							m_projectilePosY = m_gameBoard[i][j].getPosY()+10;
 							m_fireBallActive = true;
+							m_unitAttackTimer	=	0.0f;
+							m_unit[i][j].setState( ATTACKING );
 							findNextTarget( i, j );
 							fmodSystem->playSound( FMOD_CHANNEL_FREE, castFireball, false, 0);
 							return;
@@ -2294,10 +2298,19 @@ void GameEngine::updateEventPhase(float dt)
 		}
 		else if(m_fireBallActive)
 		{
+			//////////////////////////////////////////////////////////////////////
+			//  INFO:  If fireball is active, rotate it
+			m_fireballRotation += 1100 * dt * flip;
+			//////////////////////////////////////////////////////////////////////
+			//  INFO:  Added timer to move fireball after BLM unit has finished attack animation
+			m_unitAttackTimer	+= dt;
+			if( m_unitAttackTimer > 0.2f ){
+				//m_unitAttackTimer	=	0.0f;
 			if(m_gamePhase == PLAYERTWO_EVENTPHASE)
 				flip *= -1;
 			m_projectilePosX += 270 * dt * flip;
-			m_fireballRotation += 1100 * dt * flip;
+			
+			}
 		}
 		//	if(m_temporaryTimer > 2.0 ){
 		if ( m_attackWillHitPlayer )
@@ -2478,20 +2491,23 @@ void GameEngine::updateEventPhase(float dt)
 				if( m_attackTargetSpaceX >= 0 ) 
 				{
 					m_damageType	=	m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage();
-					m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( IDLE );
+					//m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( IDLE );
 					if( m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getType() == THIEF )
 					{
 						m_randomNumber	=	rand()%2;
 						if( m_randomNumber == 0 ){
+							m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( IDLE );
 							m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].setState( HIT );
 							m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].adjustCurrentHealth(-m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage());
 						}
 						else{
+							m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( IDLE );
 							m_combatMessageActive	=	true;
 							swprintf_s(m_combatMessage, 128, L"Missed!!");
 						}
 					}
 					else {
+						m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( IDLE );
 						m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].setState( HIT );
 						m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].adjustCurrentHealth(-m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage());
 					}
@@ -4370,16 +4386,16 @@ void GameEngine::drawGameBoard()
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////
 				//  INFO:  Adds an offset to draw unit in the center of the gamespace
 				if(m_unit[i][j].getWhoUnitBelongsTo() == PLAYERONE)
-					offset = 35;
+					offset = 9;
 				if(m_unit[i][j].getWhoUnitBelongsTo() == PLAYERTWO)
-					offset = -15;
+					offset = 9;
 				D3DXMatrixScaling(&scaleMat, 0.75f * flip, 0.74f, 0.0f);			// Scaling
-				D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX() + offset, m_unit[i][j].getPosY()+35, 0.0f);			// Translation
+				D3DXMatrixTranslation(&transMat, m_unit[i][j].getPosX() + offset , m_unit[i][j].getPosY() + 8, 0.0f);			// Translation
 				D3DXMatrixMultiply(&scaleMat, &scaleMat, &rotMat);		// Multiply scale and rotation, store in scale
 				D3DXMatrixMultiply(&worldMat, &scaleMat, &transMat);		// Multiply scale and translation, store in world
 				// Set Transform
 				m_pD3DSprite->SetTransform(&worldMat);
-				m_pD3DSprite->Draw(m_blackMageUnit, &m_unit[i][j].getUnitRect(), &D3DXVECTOR3(float(m_unit[i][j].getUnitRect().right) - float(m_unit[i][j].getUnitRect().left), float(m_unit[i][j].getUnitRect().bottom) - float(m_unit[i][j].getUnitRect().top), 0.0f),
+				m_pD3DSprite->Draw(m_blackMageUnit, &m_unit[i][j].getUnitRect(), &D3DXVECTOR3( ( float(m_unit[i][j].getUnitRect().right) - float(m_unit[i][j].getUnitRect().left) ) * 0.5f, ( float(m_unit[i][j].getUnitRect().bottom) - float(m_unit[i][j].getUnitRect().top) ) * 0.5f, 0.0f),
 					0, D3DCOLOR_ARGB(255, 255, 255, 255));
 				//////////////////////////////////////////////////////////////////////////////
 				//  INFO:  Draws black background for health bar
