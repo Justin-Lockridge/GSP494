@@ -803,6 +803,8 @@ void GameEngine::InitMenu()
 
 void GameEngine::Update(float dt)
 {
+	///////////////////////////////////////////////////////////////////
+	//  INFO:  Cheats
 	//m_player[0].adjustCurrentSpecial(100);
 	//m_player[1].adjustCurrentSpecial(100);
 	//m_player[0].setGold( 1000 );
@@ -2442,7 +2444,7 @@ void GameEngine::updateEventPhase(float dt)
 			//  INFO:  If player one's projectile hits player two
 			if( m_unit[m_attackingSpaceX][m_attackingSpaceY].checkIfRanged() )
 			{
-				if( m_projectilePosX > 700 )
+				if( m_projectilePosX > 700 && !m_lightningActive )
 				{
 					m_damageType	=	m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage();
 					m_player[1].adjustCurrentHealth( -m_damageType ); 
@@ -2460,12 +2462,25 @@ void GameEngine::updateEventPhase(float dt)
 					m_arrowActive	=	false;
 					m_fireBallActive	=	false;
 					m_lightningActive	=	false;
+					switch( m_unit[m_attackingSpaceX][m_attackingSpaceY].getType() ){
+					case ARCHERUNIT:
+						fmodSystem->playSound( FMOD_CHANNEL_FREE, arrowHit, false, 0 );
+						break;
+					case BLACKMAGEUNIT:
+						fmodSystem->playSound( FMOD_CHANNEL_FREE, fireballHit, false, 0 );
+						break;
+					case MARKSMAN:
+						fmodSystem->playSound( FMOD_CHANNEL_FREE, arrowHit, false, 0 );
+						break;
+					}
+					m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( IDLE );
 					m_unit[m_attackingSpaceX][m_attackingSpaceY].setUnitCanTakeAction( false );
 				}
 				///////////////////////////////////////////////////////////////////////////
 				//  INFO:  If player two's projectile hits player one
-				if( m_projectilePosX < 50 )
+				if( m_projectilePosX < 50 && !m_lightningActive )
 				{
+					m_unit[m_attackingSpaceX][m_attackingSpaceY].setState( IDLE );
 					m_damageType	=	m_unit[m_attackingSpaceX][m_attackingSpaceY].getDamage();
 					m_player[0].adjustCurrentHealth( -m_damageType ); 
 					//m_floatingTextActive	=	true;
@@ -2481,6 +2496,17 @@ void GameEngine::updateEventPhase(float dt)
 					m_arrowActive	=	false;
 					m_fireBallActive	=	false;
 					m_lightningActive	=	false;
+					switch( m_unit[m_attackingSpaceX][m_attackingSpaceY].getType() ){
+					case ARCHERUNIT:
+						fmodSystem->playSound( FMOD_CHANNEL_FREE, arrowHit, false, 0 );
+						break;
+					case BLACKMAGEUNIT:
+						fmodSystem->playSound( FMOD_CHANNEL_FREE, fireballHit, false, 0 );
+						break;
+					case MARKSMAN:
+						fmodSystem->playSound( FMOD_CHANNEL_FREE, arrowHit, false, 0 );
+						break;
+					}
 					m_unit[m_attackingSpaceX][m_attackingSpaceY].setUnitCanTakeAction( false );
 				}
 				if( m_lightningActive )
@@ -2834,6 +2860,10 @@ void GameEngine::findNextTarget( int row, int col )
 				//////////////////////////////////////////////////////////////////////////////////////////
 				//  INFO:  If loop is on last iter and there is no unit, deal damage to the player
 				if( i == ( MAXBOARDWIDTH - 1 ) ){
+					m_attackTargetSpaceX	=	row;
+					m_attackTargetSpaceY	=	MAXBOARDWIDTH-1;
+					//m_projectilePosX	=	m_unit[m_attackTargetSpaceX][m_attackingSpaceY].getPosX();
+					//m_projectilePosY	=	m_unit[m_attackTargetSpaceX][m_attackTargetSpaceY].getPosY();
 					m_attackWillHitPlayer	=	true;
 				}
 			}
