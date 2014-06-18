@@ -229,7 +229,7 @@ void Unit::removeUnit()
 	unitRect.left				=	0;
 	unitRect.right			=	0;
 	unitRect.bottom		=	0;
-	state						=	IDLE;
+	state						=	-1;
 	occupied					= false;
 };
 
