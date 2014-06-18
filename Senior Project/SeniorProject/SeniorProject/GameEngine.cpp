@@ -878,10 +878,10 @@ void GameEngine::Update(float dt)
 						m_gameState	= MENUCHARACTERSELECT;
 						break;
 					case 1:
-						m_gameState = OPTIONS;
+						m_gameState = MENUCREDITS;
 						break;
 					case 2:
-						m_gameState = MENUCREDITS;
+						m_gameState = OPTIONS;
 						break;
 					case 3:
 						m_gameState = QUIT;
@@ -3572,6 +3572,9 @@ void GameEngine::Render(float dt)
 					break;
 				case MENUCREDITS:
 					break;
+				case OPTIONS:
+					drawHelpMenuBackground();
+					break;
 				case BATTLE:
 					drawBackground();
 					drawPlayers();
@@ -3722,6 +3725,9 @@ void GameEngine::Render(float dt)
 				drawPlayerChoice(m_player[0].getCharacterType());
 				break;
 			case MENUCREDITS:
+				break;
+			case OPTIONS:
+				drawHelpMenuText();
 				break;
 			case BATTLE:
 				drawUIText(dt);
@@ -6312,7 +6318,7 @@ void GameEngine::drawAbilityAnimations()
 };
 
 void GameEngine::drawHelpMenuBackground(){
-	if( m_displayingHelpMenu ){
+	if( m_displayingHelpMenu || m_gameState == OPTIONS ){
 		D3DXMATRIX transMat, rotMat, scaleMat, worldMat;
 
 		D3DXMatrixIdentity(&transMat);
@@ -6343,7 +6349,7 @@ void GameEngine::drawHelpMenuText(){
 	//rect.left = 170;
 	wchar_t buffer[512];
 
-	if ( m_displayingHelpMenu ) {
+	if ( m_displayingHelpMenu || m_gameState == OPTIONS ) {
 
 		//rect.left += i * 250;
 		//rect.right += i * 250;
@@ -6358,7 +6364,7 @@ void GameEngine::drawHelpMenuText(){
 		rect.left += 30;
 		rect.top += 30;
 		swprintf_s(buffer, 512, L"Each player takes turn placing units on the battle \nfield.  Strategically place your army to defeat your \nenemy!!");
-		m_readableFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
+		m_readableFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 255, 255));
 
 		rect.left = 110;
 		rect.top += 90;
@@ -6368,7 +6374,7 @@ void GameEngine::drawHelpMenuText(){
 		rect.left += 30;
 		rect.top += 30;
 		swprintf_s(buffer, 512, L"-Turn begins - Remaining gold mines produce gold\n-Play Phase - use mouse to place units on board\n-Abilities - can be used if you have enough special\n      (Acquire special by destroying enemy units)\n-End Turn - active units attack and use abilities");
-		m_readableFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
+		m_readableFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 255, 255));
 
 		rect.left = 110;
 		rect.top += 150;
@@ -6378,7 +6384,7 @@ void GameEngine::drawHelpMenuText(){
 		rect.left += 30;
 		rect.top += 30;
 		swprintf_s(buffer, 512, L"-Play units within 5 spaces of your gold mines\n-Ranged Units - Stay in place, attack their lane\n-Melee Units - Advance the board, attack enemies \nwithin range");
-		m_readableFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
+		m_readableFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 255, 255));
 		//rect.top = 470;
 		//rect.bottom = 575;
 		//rect.left += 250;
