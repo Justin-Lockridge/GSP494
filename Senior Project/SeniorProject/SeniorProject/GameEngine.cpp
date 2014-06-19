@@ -895,9 +895,7 @@ void GameEngine::Update(float dt)
 					switch(selected)
 					{
 					case 0:
-						m_player[0].setCharacterType(WARRIOR);
-						//m_gameState	= MENUCHARACTERSELECT;
-						m_gameState = PLAYER1WIN;
+						m_gameState	= MENUCHARACTERSELECT;
 						break;
 					case 1:
 						m_gameState = MENUCREDITS;
