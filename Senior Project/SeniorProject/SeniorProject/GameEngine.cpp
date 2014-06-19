@@ -1270,51 +1270,54 @@ void GameEngine::Update(float dt)
 			bool locationFound = false;
 			bool unitFound = false;
 			// Check for mouse over UNIT buttons
-			for(auto &Buttons: player1_units)
+			if(m_gamePhase == PLAYERONE_PLAYPHASE)
 			{
-				if(Buttons.isOn(cursor.x, cursor.y, 3))
+				for(auto &Buttons: player1_units)
 				{
-					Buttons.setColor(D3DCOLOR_ARGB(255, 255, 255, 0));
-					Buttons.setHighlight(true);
+					if(Buttons.isOn(cursor.x, cursor.y, 3))
+					{
+						Buttons.setColor(D3DCOLOR_ARGB(255, 255, 255, 0));
+						Buttons.setHighlight(true);
+					}
+					else
+					{
+						Buttons.setColor(D3DCOLOR_ARGB(255, 255, 255, 255));
+						Buttons.setHighlight(false);
+					}
+
+					// Check for mouse click
+					if(mouseState.rgbButtons[0])
+					{
+						// Depending on which UNIT mouse is over we take that number
+						for(int i = 0; i < 6; i++)
+							if(player1_units[i].isHighlighted())
+							{
+								selected = i;
+								selectedUnit = selected;
+							}
+					}
+					//Checking which unit was selected and checks players gold
+					//Each unit has different amount of gold cost
+					dontPlaceUnit = false;
+
+					if(selected == 0 && m_player[0].getGold() < 100)
+						noGold = true;
+
+					if(selected == 1 && m_player[0].getGold() < 125)
+						noGold = true;
+
+					if(selected == 2 && m_player[0].getGold() < 250)
+						noGold = true;
+
+					if(selected == 3 && m_player[0].getGold() < 75)
+						noGold = true;
+
+					if(selected == 4 && m_player[0].getCurrentSpecial() < 50)
+						noSpecial = true;
+
+					if(selected == 5 && m_player[0].getCurrentSpecial() < 100)
+						noSpecial = true;
 				}
-				else
-				{
-					Buttons.setColor(D3DCOLOR_ARGB(255, 255, 255, 255));
-					Buttons.setHighlight(false);
-				}
-
-				// Check for mouse click
-				if(mouseState.rgbButtons[0])
-				{
-					// Depending on which UNIT mouse is over we take that number
-					for(int i = 0; i < 6; i++)
-						if(player1_units[i].isHighlighted())
-						{
-							selected = i;
-							selectedUnit = selected;
-						}
-				}
-				//Checking which unit was selected and checks players gold
-				//Each unit has different amount of gold cost
-				dontPlaceUnit = false;
-
-				if(selected == 0 && m_player[0].getGold() < 100)
-					noGold = true;
-
-				if(selected == 1 && m_player[0].getGold() < 125)
-					noGold = true;
-
-				if(selected == 2 && m_player[0].getGold() < 250)
-					noGold = true;
-
-				if(selected == 3 && m_player[0].getGold() < 75)
-					noGold = true;
-
-				if(selected == 4 && m_player[0].getCurrentSpecial() < 50)
-					noSpecial = true;
-
-				if(selected == 5 && m_player[0].getCurrentSpecial() < 100)
-					noSpecial = true;
 			}
 
 			for(auto &Buttons: hoverButtons)
@@ -1392,7 +1395,6 @@ void GameEngine::Update(float dt)
 
 				if(Buttons.col == 15)
 					Buttons.setColor(D3DCOLOR_ARGB(255, 255, 0, 0));
-
 				// Check if mouse is over GRID button and mouse was clicked
 				if(Buttons.isOn(cursor.x, cursor.y, 3) && (mouseState.rgbButtons[0]& 0x80) != 0 && !keyIsDown[DIK_P])
 				{
@@ -1540,7 +1542,7 @@ void GameEngine::Update(float dt)
 									if(m_player[0].getCharacterType() == BLACKMAGE && col != 0 && col != 15)  // Black hole
 									{
 										fmodSystem->playSound( FMOD_CHANNEL_FREE, blackHoleAbilitySFX, false, 0 );
-									
+
 										blackHoleAbility(row, col, 0);
 									}
 									else
@@ -1586,6 +1588,7 @@ void GameEngine::Update(float dt)
 							break;
 						}	
 					}
+
 				}
 				else if (!mouseState.rgbButtons[0] )
 					keyIsDown[DIK_P] = false;
@@ -1602,41 +1605,50 @@ void GameEngine::Update(float dt)
 			bool unitPlaced = false;
 			bool locationFound = false;
 
-			for(auto &Buttons: player2_units)
+			if(m_gamePhase == PLAYERTWO_PLAYPHASE)
 			{
-				if(Buttons.isOn(cursor.x, cursor.y, int(3.25) ) )
+				for(auto &Buttons: player2_units)
 				{
-					Buttons.setColor(D3DCOLOR_ARGB(255, 255, 255, 0));
-					Buttons.setHighlight(true);
+					if(Buttons.isOn(cursor.x, cursor.y, int(3) ) )
+					{
+						Buttons.setColor(D3DCOLOR_ARGB(255, 255, 255, 0));
+						Buttons.setHighlight(true);
+					}
+					else
+					{
+						Buttons.setColor(D3DCOLOR_ARGB(255, 255, 255, 255));
+						Buttons.setHighlight(false);
+					}
+
+					if(mouseState.rgbButtons[0])
+					{
+						for(int i = 0; i < 6; i++)
+							if(player2_units[i].isHighlighted())
+							{
+								selected = i;
+								selectedUnit = selected;
+							}
+					}
+					dontPlaceUnit = false;
+
+					if(selected == 0 && m_player[1].getGold() < 100)
+						noGold = true;
+
+					if(selected == 1 && m_player[1].getGold() < 125)
+						noGold = true;
+
+					if(selected == 2 && m_player[1].getGold() < 250)
+						noGold = true;
+
+					if(selected == 3 && m_player[1].getGold() < 75)
+						noGold = true;
+
+					if(selected == 4 && m_player[1].getCurrentSpecial() < 50)
+						noSpecial = true;
+
+					if(selected == 5 && m_player[1].getCurrentSpecial() < 100)
+						noSpecial = true;
 				}
-				else
-				{
-					Buttons.setColor(D3DCOLOR_ARGB(255, 255, 255, 255));
-					Buttons.setHighlight(false);
-				}
-
-				if(mouseState.rgbButtons[0])
-				{
-					for(int i = 0; i < 6; i++)
-						if(player2_units[i].isHighlighted())
-						{
-							selected = i;
-							selectedUnit = selected;
-						}
-				}
-				dontPlaceUnit = false;
-
-				if(selected == 0 && m_player[1].getGold() < 100)
-					noGold = true;
-
-				if(selected == 1 && m_player[1].getGold() < 125)
-					noGold = true;
-
-				if(selected == 2 && m_player[1].getGold() < 250)
-					noGold = true;
-
-				if(selected == 3 && m_player[1].getGold() < 75)
-					noGold = true;
 			}
 			//Used to dispaly hover info for units for second player
 			for(auto &Buttons: hoverButtons2)
@@ -1681,7 +1693,6 @@ void GameEngine::Update(float dt)
 				}
 				else
 				{
-
 					if(Buttons.isOn(cursor.x, cursor.y, 3) && Buttons.col > 9)
 					{
 						Buttons.setColor(D3DCOLOR_ARGB(255, 255, 255, 0));
@@ -1860,8 +1871,6 @@ void GameEngine::Update(float dt)
 										fmodSystem->playSound( FMOD_CHANNEL_FREE, blackHoleAbilitySFX, false, 0 );
 										blackHoleAbility(row, col, 1); 
 									}
-									else
-										cantUseHere = true;
 
 									if(m_player[1].getCharacterType() == WARRIOR) // Cleave
 									{
@@ -1889,12 +1898,7 @@ void GameEngine::Update(float dt)
 									if(m_player[1].getCharacterType() == BLACKMAGE) //  Flame Wave
 									{ 
 										fmodSystem->playSound( FMOD_CHANNEL_FREE, flameWaveAbilitySFX, false, 0 );
-										if(col != 0 && col != 15)
-										{
-											flameWaveAbility(row, col, 1);
-										}
-										else
-											cantUseHere = true;
+										flameWaveAbility(row, col, 1);
 									}
 
 									if(m_player[1].getCharacterType() == WARRIOR) // Bolster
@@ -5922,7 +5926,6 @@ void GameEngine::drawPlayerChoice(int playerChoice)
 		swprintf_s(buffer, 128, L"Player 1: BLACKMAGE");
 		m_pD3DFont->DrawText(0, buffer, -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 255, 255));
 	}
-
 }
 
 void GameEngine::drawWinner(Character a_player)
