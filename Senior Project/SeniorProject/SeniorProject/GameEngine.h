@@ -61,23 +61,23 @@ class GameEngine
 	//////////////////////////////////////////////////////////////////////////
 	// Application Variables
 	//////////////////////////////////////////////////////////////////////////
-	HWND			m_hWnd;												// Handle to the window
+	HWND		m_hWnd;												// Handle to the window
 	bool			m_bVsync;											// Boolean for vertical syncing
 	float			m_currTime;											// Time to render current frame
 	float			m_prevTime, m_deltaTime, m_frameTime;				// Time to render previous frame
 
-	int				m_FPS;												// Frames per second  
-	int				m_gamePhase, m_randomNumber, selectedHover, unitsAttacked, number;
+	int			m_FPS;												// Frames per second  
+	int			m_gamePhase, m_randomNumber, selectedHover, unitsAttacked, number;
 	bool			m_unitCurrentlyAttacking, m_fireBallActive, m_arrowActive, m_floatingTextActive, m_unitCurrentlyMoving, m_lightningActive, m_combatMessageActive, m_attackWillHitPlayer,
 					m_displayingHelpMenu;
 	float			m_projectilePosX, m_projectilePosY, m_arrowForAttackingUnitPosX, m_arrowForAttackingUnitPosY;
 	float			m_temporaryTimer, m_lightningTimer, m_unitAttackTimer;
-	int				m_attackingSpaceX, m_attackingSpaceY, m_attackTargetSpaceX, m_attackTargetSpaceY, m_moveToTarget, m_tester;
+	int			m_attackingSpaceX, m_attackingSpaceY, m_attackTargetSpaceX, m_attackTargetSpaceY, m_moveToTarget, m_tester;
 
-	float			m_fireballRotation, m_floatingRectTopMax, m_floatingRectTimer, textCount, m_characterSelectTimer, m_assassinTimer;
-	RECT			m_floatingTextRect, m_healthRect, m_lightningRect;
+	float			m_fireballRotation, m_floatingRectTopMax, m_floatingRectTimer, textCount, m_characterSelectTimer, m_assassinTimer, textCount1, textCount2;
+	RECT		m_floatingTextRect, m_healthRect, m_lightningRect;
 
-	bool			noGold, firstTurn, dontPlaceUnit, hoveredUnit, player1selected, player2selected, m_walkingSFXPlaying, m_SFXPlaying;
+	bool			noGold, firstTurn, dontPlaceUnit, hoveredUnit, player1selected, player2selected, m_walkingSFXPlaying, m_SFXPlaying, cantUseHere, noSpecial;
 	//////////////////////////////////////////////////////////////////////////
 	// Direct3D Variables
 	//////////////////////////////////////////////////////////////////////////
@@ -105,12 +105,14 @@ class GameEngine
 
 	IDirect3DTexture9		*m_archerIcon, *m_golemIcon, *m_blackMageIcon, *m_thiefIcon, *m_wolfIcon, *m_blackHoleIcon, *m_wallIcon, *m_warlockIcon, *m_endTurn, *m_flameStrikeIcon,
 										*m_snipeIcon, *m_splitShotIcon, *m_wallIcon2, *m_archerHover, *m_wolfHover, *m_thiefHover, *m_wallHover, *m_blackMageHover, *m_golemHover, *m_warlockHover, 
-										*m_warriorIcon, * m_marksmanIcon, *m_minotaurIcon, *m_bolsterIcon, *m_cleaveAbilityIcon, *m_marksmanHover, *m_minotaurHover, *m_warriorHover;
+										*m_warriorIcon, * m_marksmanIcon, *m_minotaurIcon, *m_bolsterIcon, *m_cleaveAbilityIcon, *m_marksmanHover, *m_minotaurHover, *m_warriorHover, *bm_winScreen,
+										*war_winScreen, * arch_winScreen;
 	D3DXIMAGE_INFO			m_archerIconInfo, m_golemIconInfo, m_blackMageIconInfo, m_thiefIconInfo, m_wolfIconInfo, m_blackHoleIconInfo, m_wallIconInfo,m_warlockIconInfo, m_endTurnInfo,
 										m_flameStrikeIconInfo, m_snipeIconInfo, m_splitShotIconInfo, m_wallIconInfo2,m_archerHoverInfo, m_wolfHoverInfo, m_thiefHoverInfo, m_wallHoverInfo, m_blackMageHoverInfo,
 										m_golemHoverInfo, m_warlockHoverInfo, m_warriorIconInfo, m_marksmanIconInfo, m_minotaurIconInfo, m_bolsterIconInfo, m_cleaveAbilityIconInfo, m_marksmanHoverInfo,
-										m_minotaurHoverInfo, m_warriorHoverInfo;
-	D3DCOLOR				buttonColor;
+										m_minotaurHoverInfo, m_warriorHoverInfo, bm_winScreenInfo, war_winScreenInfo, arch_winScreenInfo;
+
+	D3DCOLOR			buttonColor;
 	int						selectedUnit;
 
 	//////////////////////////////////////////////////////////////////////////
