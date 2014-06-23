@@ -3,43 +3,43 @@
 GameEngine::GameEngine(void)
 {
 	// Init or NULL objects before use to avoid any undefined behavior
-	m_bVsync						=	false;
+	m_bVsync					=	false;
 	m_pD3DObject				=	0;
-	m_pD3DDevice			=	0;
+	m_pD3DDevice				=	0;
 	m_currTime					=	0;
 	m_prevTime					=	0;
-	m_FPS							=	0;
+	m_FPS						=	0;
 	m_deltaTime					=	0;
-	m_gameState				=	0;
+	m_gameState					=	0;
 	m_lightningActive			=	false;
-	m_combatMessageActive	=	false;
+	m_combatMessageActive		=	false;
 	m_lightningRect.top			=	0;
-	m_lightningRect.left			=	0;
+	m_lightningRect.left		=	0;
 	m_lightningRect.right		=	0;
-	m_lightningRect.bottom	=	0;
-	m_lightningTimer				=	0.0f;
-	m_randomNumber			=	0;
-	selectedUnit						=	99;
-	textCount						=	0;
-	textCount1						= 0;
-	textCount2						= 0;
-	m_characterSelectTimer	=	0.0f;
+	m_lightningRect.bottom		=	0;
+	m_lightningTimer			=	0.0f;
+	m_randomNumber				=	0;
+	selectedUnit				=	99;
+	textCount					=	0;
+	textCount1					= 0;
+	textCount2					= 0;
+	m_characterSelectTimer		=	0.0f;
 	m_assassinTimer				=	0.0f;
-	noGold								=	false;
-	dontPlaceUnit					=	false;
-	firstTurn							=  true;
-	hoveredUnit						=	false;
-	selectedHover					=	0;
-	m_tester							=	0;
-	unitsAttacked					=	0;
+	noGold						=	false;
+	dontPlaceUnit				=	false;
+	firstTurn					=  true;
+	hoveredUnit					=	false;
+	selectedHover				=	0;
+	m_tester					=	0;
+	unitsAttacked				=	0;
 	player1selected				= false;
 	player2selected				= false;
-	number							= 0;
+	number						= 0;
 	m_displayingHelpMenu		=	false;
-	m_walkingSFXPlaying		=	false;
-	m_SFXPlaying					=	true;
+	m_walkingSFXPlaying			=	false;
+	m_SFXPlaying				=	true;
 	cantUseHere					=	false;
-	noSpecial							=	false;
+	noSpecial					=	false;
 }
 
 GameEngine::~GameEngine()
@@ -483,6 +483,76 @@ void GameEngine::Init(HWND& hWnd, HINSTANCE& hInst, bool bWindowed)
 
 void GameEngine::InitGameBoard()
 {
+	m_lightningActive			=	false;
+	m_combatMessageActive		=	false;
+	m_lightningRect.top			=	0;
+	m_lightningRect.left		=	0;
+	m_lightningRect.right		=	0;
+	m_lightningRect.bottom		=	0;
+	m_lightningTimer			=	0.0f;
+	m_randomNumber				=	0;
+	selectedUnit				=	99;
+	textCount					=	0;
+	textCount1					= 0;
+	textCount2					= 0;
+	m_characterSelectTimer		=	0.0f;
+	m_assassinTimer				=	0.0f;
+	noGold						=	false;
+	dontPlaceUnit				=	false;
+	firstTurn					=  true;
+	hoveredUnit					=	false;
+	selectedHover				=	0;
+	m_tester					=	0;
+	unitsAttacked				=	0;
+	player1selected				= false;
+	player2selected				= false;
+	number						= 0;
+	m_displayingHelpMenu		=	false;
+	m_walkingSFXPlaying			=	false;
+	m_SFXPlaying				=	true;
+	cantUseHere					=	false;
+	noSpecial					=	false;
+
+	//////////////////////////////////////////////////////////
+	//  Reset m_gamePhase
+	m_gamePhase								=		PLAYERONE_PLAYPHASE;
+	m_fireBallActive						=		false;
+	m_arrowActive							=		false;
+	m_floatingTextActive					=		false;
+	m_unitCurrentlyMoving					=		false;
+	m_projectilePosX						=		0.0f;
+	m_projectilePosY						=		0.0f;
+	m_arrowForAttackingUnitPosX				=		0.0f;
+	m_arrowForAttackingUnitPosY				=		0.0f;
+	m_temporaryTimer						=		0.0f;
+	m_attackingSpaceX						=		0;
+	m_attackingSpaceY						=		0;
+	m_attackTargetSpaceX					=		0;
+	m_attackTargetSpaceY					=		0;
+	m_moveToTarget							=		0;
+	m_floatingTextRect.top					=		long(0.1);
+	m_floatingTextRect.left					=		long(0.0);
+	m_floatingTextRect.right				=		long(0.0);
+	m_floatingTextRect.bottom				=		long(0.0);
+	m_healthRect.top						=		0;
+	m_healthRect.left						=		6;
+	m_healthRect.right						=		90;
+	m_healthRect.bottom						=		11;
+	m_floatingRectTopMax					=		0.0f;
+	m_floatingRectTimer						=		0.0f;
+	m_damageType							=		-1;
+	m_attackWillHitPlayer					=		false;
+	m_unitCurrentlyAttacking				=		false;
+
+	for(int i = 0; i < MAXBOARDHEIGHT; ++i)
+	{
+		for(int j = 0; j < MAXBOARDWIDTH; ++j)
+		{
+			m_unit[i][j].removeUnit();
+		}
+	}
+
+
 	for(int i = 0; i < MAXBOARDHEIGHT; ++i)
 	{
 		for(int j = 0; j < MAXBOARDWIDTH; ++j)
@@ -730,36 +800,6 @@ void GameEngine::InitGameBoard()
 	temp.setRect(rect);
 
 	endTurnButton.push_back(temp);
-
-	//////////////////////////////////////////////////////////
-	//  Reset m_gamePhase
-	m_gamePhase								=		PLAYERONE_PLAYPHASE;
-	m_fireBallActive						=		false;
-	m_arrowActive							=		false;
-	m_floatingTextActive					=		false;
-	m_unitCurrentlyMoving					=		false;
-	m_projectilePosX						=		0.0f;
-	m_projectilePosY						=		0.0f;
-	m_arrowForAttackingUnitPosX				=		0.0f;
-	m_arrowForAttackingUnitPosY				=		0.0f;
-	m_temporaryTimer						=		0.0f;
-	m_attackingSpaceX						=		0;
-	m_attackingSpaceY						=		0;
-	m_attackTargetSpaceX					=		0;
-	m_attackTargetSpaceY					=		0;
-	m_moveToTarget							=		0;
-	m_floatingTextRect.top					=		long(0.1);
-	m_floatingTextRect.left					=		long(0.0);
-	m_floatingTextRect.right				=		long(0.0);
-	m_floatingTextRect.bottom				=		long(0.0);
-	m_healthRect.top						=		0;
-	m_healthRect.left						=		6;
-	m_healthRect.right						=		90;
-	m_healthRect.bottom						=		11;
-	m_floatingRectTopMax					=		0.0f;
-	m_floatingRectTimer						=		0.0f;
-	m_damageType							=		-1;
-	m_attackWillHitPlayer					=		false;
 };
 
 void GameEngine::InitMenu()
@@ -1545,8 +1585,6 @@ void GameEngine::Update(float dt)
 
 										blackHoleAbility(row, col, 0);
 									}
-									else
-										cantUseHere = true;
 
 									if(m_player[0].getCharacterType() == WARRIOR) // Cleave
 									{
@@ -1934,6 +1972,10 @@ void GameEngine::Update(float dt)
 			if(!keyIsDown[DIK_RETURN])
 			{
 				keyIsDown[DIK_RETURN] = true;
+				m_player[0].setCharacterType(-1);
+				m_player[1].setCharacterType(-1);
+				InitGameBoard();
+				InitMenu();
 				m_gameState = MENUMAIN;
 			}
 		}
@@ -1946,6 +1988,10 @@ void GameEngine::Update(float dt)
 			if(!keyIsDown[DIK_RETURN])
 			{
 				keyIsDown[DIK_RETURN] = true;
+				m_player[0].setCharacterType(-1);
+				m_player[1].setCharacterType(-1);
+				InitGameBoard();
+				InitMenu();
 				m_gameState = MENUMAIN;
 			}
 		}
@@ -3913,6 +3959,7 @@ void GameEngine::Render(float dt)
 				drawPlayerChoice(m_player[0].getCharacterType());
 				break;
 			case MENUCREDITS:
+				drawUIText(dt);
 				break;
 			case OPTIONS:
 				drawHelpMenuText();
@@ -5190,7 +5237,7 @@ void GameEngine::drawUIText(float dt)
 	rect.left = 170;
 	wchar_t buffer[128];
 
-	if ( !m_displayingHelpMenu ) 
+	if ( !m_displayingHelpMenu && m_gameState != MENUCREDITS) 
 	{
 		for(int i = 0; i < 2; ++i)
 		{
@@ -5274,6 +5321,17 @@ void GameEngine::drawUIText(float dt)
 	}
 	else
 		textCount2 = 0;
+
+	if(m_gameState == MENUCREDITS)
+	{
+		RECT credits;
+		wchar_t specialBuffer[64];
+		GetClientRect(m_hWnd, &credits);
+		credits.top = 200;
+		credits.left = 200;
+		swprintf_s(specialBuffer, 64, L"See SeniorProjectsCredits.txt");
+		m_pD3DFont->DrawText(0, specialBuffer, -1, &credits, DT_TOP|DT_LEFT|DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 0, 0));
+	}
 
 };
 
